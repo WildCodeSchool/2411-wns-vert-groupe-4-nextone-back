@@ -5,10 +5,23 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "@apollo/server": "^4.11.3",
+    "@graphql-codegen/typescript": "^4.1.2",
+    "@graphql-codegen/typescript-resolvers": "^4.4.1",
     "@types/express": "^5.0.0",
-    "express": "^4.21.2"
+    "@types/graphql-depth-limit": "^1.1.6",
+    "express": "^4.21.2",
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "^0.3.21"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "^5.0.5",
+    "@graphql-tools/load-files": "^7.0.0",
+    "@graphql-tools/merge": "^9.0.14",
+    "@parcel/watcher": "^2.5.0",
+    "@types/node": "^22.13.10",
+    "graphql": "^16.10.0",
+    "graphql-scalars": "^1.24.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.8.2"
   }
