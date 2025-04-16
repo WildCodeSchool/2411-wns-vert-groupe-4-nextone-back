@@ -4,6 +4,12 @@ import { ApolloServer } from "@apollo/server";
 import http from "http";
 import datasource from "./lib/datasource";
 import 'dotenv/config';
+import depthLimit from "graphql-depth-limit";
+import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
+import cors from "cors";
+import { expressMiddleware } from "@apollo/server/express4";
+
+export interface MyContext {}
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -20,24 +26,28 @@ const resolvers = {
   },
 };
 
-const server = new ApolloServer({
+const server = new ApolloServer<MyContext>({
   typeDefs,
   resolvers,
-})
+  validationRules: [depthLimit(5)], //n+1
+  plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+});
 
 async function main() {
+
   await server.start();
   console.log("Apollo Server démarré");
 
   await datasource.initialize();
 
+  app.use(
+    '/graphql',
+    cors<cors.CorsRequest>(),
+    express.json(),
+    expressMiddleware(server),
+  )
 
-  app.listen(4000, () => {
-    console.log("Le serveur est lancé sur le port 4000");
-  });
-
-  app.use(express.json());
+  await new Promise<void>(resolve => httpServer.listen({ port: 4005 }, resolve));
 }
 
 main();
-

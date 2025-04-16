@@ -1,17 +1,23 @@
 {
   "main": "index.ts",
   "scripts": {
+    "start-with-front": "bash scripts/start-with-front.sh",
     "start": "ts-node-dev --watch ./src ./src/index.ts",
+    "codegen": "graphql-codegen --config codegen.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "@apollo/server": "^4.11.3",
     "@graphql-codegen/typescript": "^4.1.2",
     "@graphql-codegen/typescript-resolvers": "^4.4.1",
-    "@types/express": "^5.0.0",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
     "@types/graphql-depth-limit": "^1.1.6",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "graphql-depth-limit": "^1.1.0",
+    "pg": "^8.14.1",
     "reflect-metadata": "^0.2.2",
     "typeorm": "^0.3.21"
   },

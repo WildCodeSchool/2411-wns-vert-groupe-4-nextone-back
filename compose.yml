@@ -1,0 +1,88 @@
+services:
+  backend:
+    build: ./
+    ports:
+      - "4005:4005"
+    volumes:
+      - "./src:/app/src"
+      - "./the-good-corner-orm.sqlite:/app/the-good-corner-orm.sqlite"
+    env_file:
+      - ./db.env
+      - ./.env
+      #- ./sendgrid.env
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "curl -f http://localhost:4005/graphql?query=%7B__typename%7D -H 'Apollo-Require-Preflight: true' || exit 1"
+      interval: 10s
+      timeout: 30s
+      retries: 5
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["sh", "-c", "wait-for-healthcheck.sh"]
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./
+          target: /src
+          ignore:
+            - node_modules/
+
+  # frontend:
+  #   build: ./frontend
+  #   ports:
+  #     - "5173:5173"
+  #   volumes:
+  #     - "./frontend/src:/app/src"
+  #   depends_on:
+  #     backend:
+  #       condition: service_healthy
+  #   env_file:
+  #     - ./frontend/.env
+  #   develop:
+  #     watch:
+  #       - action: sync
+  #         path: ./frontend
+  #         target: /src
+  #         ignore:
+  #           - node_modules/
+ 
+  db:
+    image: postgres
+    restart: always
+    env_file:
+      - ./db.env
+    ports:
+      - 5435:5432
+    # expose:
+    #   - 5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d thegoodcorner -U utilisateur"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - gcdatabase:/var/lib/postgresql/data
+  # environment:
+  #   POSTGRES_PASSWORD: password
+  #   POSTGRES_USER: utilisateur
+  #   POSTGRES_DB: thegoodcorner
+
+  # adminer:
+  #   image: adminer
+  #   restart: always
+  #   ports:
+  #     - 8080:8080
+
+  #images:
+    #build: ./images
+    #volumes:
+    #  - ./images/uploads:/app/uploads
+    #  - ./images/src:/app/src
+    #ports:
+    #  - 3002:3002
+  #   env_file:
+  #     - ./.env
+volumes:
+  gcdatabase:
