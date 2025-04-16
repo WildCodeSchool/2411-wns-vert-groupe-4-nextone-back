@@ -8,23 +8,13 @@ import depthLimit from "graphql-depth-limit";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import cors from "cors";
 import { expressMiddleware } from "@apollo/server/express4";
+import resolvers from "./resolvers";
+import typeDefs from "./typeDefs";
 
 export interface MyContext {}
 
 const app = express();
 const httpServer = http.createServer(app);
-
-const typeDefs = `
-  type Query {
-    hello: String
-  }
-`;
-
-const resolvers = {
-  Query: {
-    hello: () => "Hello, world!",
-  },
-};
 
 const server = new ApolloServer<MyContext>({
   typeDefs,
