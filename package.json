@@ -2,14 +2,15 @@
   "main": "index.ts",
   "scripts": {
     "start-with-front": "bash scripts/start-with-front.sh",
-    "start": "ts-node-dev --watch ./src ./src/index.ts",
+    "start": "ts-node-dev --exit-child --watch src --poll src/index.ts",
     "codegen": "graphql-codegen --config codegen.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --watch"
   },
   "dependencies": {
     "@apollo/server": "^4.11.3",
     "@graphql-codegen/typescript": "^4.1.2",
     "@graphql-codegen/typescript-resolvers": "^4.4.1",
+    "@graphql-tools/mock": "^9.0.22",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/graphql-depth-limit": "^1.1.6",
@@ -19,6 +20,7 @@
     "graphql-depth-limit": "^1.1.0",
     "pg": "^8.14.1",
     "reflect-metadata": "^0.2.2",
+    "type-graphql": "^2.0.0-rc.2",
     "typeorm": "^0.3.21"
   },
   "devDependencies": {
@@ -26,10 +28,13 @@
     "@graphql-tools/load-files": "^7.0.0",
     "@graphql-tools/merge": "^9.0.14",
     "@parcel/watcher": "^2.5.0",
+    "@types/jest": "^29.5.14",
     "@types/node": "^22.13.10",
     "graphql": "^16.10.0",
     "graphql-scalars": "^1.24.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.3.2",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.3"
   }
 }
