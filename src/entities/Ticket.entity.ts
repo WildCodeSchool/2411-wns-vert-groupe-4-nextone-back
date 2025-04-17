@@ -7,6 +7,7 @@ import {
     ManyToOne,
     ManyToMany,
     JoinTable,
+    Timestamp,
   } from "typeorm";
     
   @Entity({ name: "tickets" })
@@ -15,5 +16,20 @@ import {
     id: string;
 
     @Column()
-    title: string;
+    code: string;
+
+    @Column()
+    firstName: string;
+
+    @Column()
+    lastName: string;
+
+    @Column()
+    email: string;
+
+    @Column()
+    phone: string;
+
+    @Column()
+    status: string; //à remplacer par un enum
   }

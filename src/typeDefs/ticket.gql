@@ -1,8 +1,28 @@
 type Ticket {
   id: ID
-  title: String
+  code: String
+  firstName: String
+  lastName: String
+  email: String
+  phone: String
+  status: String
 }
 
 type Query {
-  tickets(): [Ticket!]
+  tickets: [Ticket!]
+  findTicket(id: ID!): Ticket
+}
+
+type Mutation {
+  createTicket(data: CreateTicketInput!): Ticket!
+  deleteTicket(id: ID!): Boolean!
+}
+
+input CreateTicketInput {
+  code: String
+  firstName: String
+  lastName: String
+  email: String
+  phone: String
+  status: String
 }

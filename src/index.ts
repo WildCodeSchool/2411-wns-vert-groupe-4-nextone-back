@@ -1,6 +1,5 @@
 import express from "express"
 import "reflect-metadata";
-import { ApolloServer } from "@apollo/server";
 import http from "http";
 import datasource from "./lib/datasource";
 import 'dotenv/config';
@@ -10,6 +9,7 @@ import cors from "cors";
 import { expressMiddleware } from "@apollo/server/express4";
 import resolvers from "./resolvers";
 import typeDefs from "./typeDefs";
+import { ApolloServer } from "@apollo/server";
 
 export interface MyContext {}
 
