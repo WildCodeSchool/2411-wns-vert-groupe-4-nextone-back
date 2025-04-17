@@ -97,7 +97,8 @@ export type CreateTicketInput = {
 export type Mutation = {
   __typename?: 'Mutation';
   createTicket: Ticket;
-  deleteTicket: Scalars['Boolean']['output'];
+  deleteTicket: Scalars['String']['output'];
+  updateTicket: Ticket;
 };
 
 
@@ -107,6 +108,12 @@ export type MutationCreateTicketArgs = {
 
 
 export type MutationDeleteTicketArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationUpdateTicketArgs = {
+  data: UpdateTicketInput;
   id: Scalars['ID']['input'];
 };
 
@@ -123,8 +130,22 @@ export type QueryFindTicketArgs = {
 
 export type Ticket = {
   __typename?: 'Ticket';
+  code?: Maybe<Scalars['String']['output']>;
+  email?: Maybe<Scalars['String']['output']>;
+  firstName?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['ID']['output']>;
-  title?: Maybe<Scalars['String']['output']>;
+  lastName?: Maybe<Scalars['String']['output']>;
+  phone?: Maybe<Scalars['String']['output']>;
+  status?: Maybe<Scalars['String']['output']>;
+};
+
+export type UpdateTicketInput = {
+  code?: InputMaybe<Scalars['String']['input']>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  firstName?: InputMaybe<Scalars['String']['input']>;
+  lastName?: InputMaybe<Scalars['String']['input']>;
+  phone?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -272,6 +293,7 @@ export type ResolversTypes = {
   UUID: ResolverTypeWrapper<Scalars['UUID']['output']>;
   UnsignedFloat: ResolverTypeWrapper<Scalars['UnsignedFloat']['output']>;
   UnsignedInt: ResolverTypeWrapper<Scalars['UnsignedInt']['output']>;
+  UpdateTicketInput: UpdateTicketInput;
   UtcOffset: ResolverTypeWrapper<Scalars['UtcOffset']['output']>;
   Void: ResolverTypeWrapper<Scalars['Void']['output']>;
 };
@@ -352,6 +374,7 @@ export type ResolversParentTypes = {
   UUID: Scalars['UUID']['output'];
   UnsignedFloat: Scalars['UnsignedFloat']['output'];
   UnsignedInt: Scalars['UnsignedInt']['output'];
+  UpdateTicketInput: UpdateTicketInput;
   UtcOffset: Scalars['UtcOffset']['output'];
   Void: Scalars['Void']['output'];
 };
@@ -518,7 +541,8 @@ export interface MacScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes[
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   createTicket?: Resolver<ResolversTypes['Ticket'], ParentType, ContextType, RequireFields<MutationCreateTicketArgs, 'data'>>;
-  deleteTicket?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteTicketArgs, 'id'>>;
+  deleteTicket?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationDeleteTicketArgs, 'id'>>;
+  updateTicket?: Resolver<ResolversTypes['Ticket'], ParentType, ContextType, RequireFields<MutationUpdateTicketArgs, 'data' | 'id'>>;
 };
 
 export interface NegativeFloatScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['NegativeFloat'], any> {
@@ -603,8 +627,13 @@ export interface SemVerScalarConfig extends GraphQLScalarTypeConfig<ResolversTyp
 }
 
 export type TicketResolvers<ContextType = any, ParentType extends ResolversParentTypes['Ticket'] = ResolversParentTypes['Ticket']> = {
+  code?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  email?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  firstName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
-  title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  lastName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  phone?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

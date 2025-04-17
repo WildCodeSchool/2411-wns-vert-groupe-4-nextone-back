@@ -30,6 +30,6 @@ import {
     @Column()
     phone: string;
 
-    @Column()
+    @Column({ default: "VALIDATED" })
     status: string; //à remplacer par un enum
   }

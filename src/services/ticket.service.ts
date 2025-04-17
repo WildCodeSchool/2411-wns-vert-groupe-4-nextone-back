@@ -1,4 +1,4 @@
-import { MutationCreateTicketArgs } from "@/generated/graphql";
+import { MutationCreateTicketArgs, MutationUpdateTicketArgs } from "@/generated/graphql";
 import TicketRepository from "@/repositories/ticket.repository";
 
 export default class TicketService {
@@ -23,9 +23,22 @@ export default class TicketService {
   }
 
   async create({ ...ticket }: MutationCreateTicketArgs["data"]) {
-    console.log("data", ticket);
     const newTicket = this.db.create(ticket);
     const savedTicket = await this.db.save(newTicket);
     return savedTicket;
+  }
+
+  async delete(id: string) {
+    const deletedTicket = await this.db.delete(id);
+    if (deletedTicket.affected === 0) {
+      throw new Error("Ticket to delete not found");
+    }
+    return id;
+  }
+
+  async update(id: string, { ...ticket }: MutationUpdateTicketArgs["data"]) {
+    const ticketFound = await this.findById(id);
+    const ticketUpdated = this.db.merge(ticketFound, { ...ticket });
+    return await this.db.save(ticketUpdated);
   }
 }

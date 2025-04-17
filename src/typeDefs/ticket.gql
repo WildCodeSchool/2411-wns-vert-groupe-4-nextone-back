@@ -15,10 +15,20 @@ type Query {
 
 type Mutation {
   createTicket(data: CreateTicketInput!): Ticket!
-  deleteTicket(id: ID!): Boolean!
+  deleteTicket(id: ID!): String!
+  updateTicket(id: ID!, data: UpdateTicketInput!): Ticket!
 }
 
 input CreateTicketInput {
+  code: String
+  firstName: String
+  lastName: String
+  email: String
+  phone: String
+  status: String
+}
+
+input UpdateTicketInput {
   code: String
   firstName: String
   lastName: String
