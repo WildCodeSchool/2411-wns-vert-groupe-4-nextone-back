@@ -5,7 +5,6 @@ services:
       - "4005:4005"
     volumes:
       - "./src:/app/src"
-      - "./the-good-corner-orm.sqlite:/app/the-good-corner-orm.sqlite"
     env_file:
       - ./db.env
       - ./.env
@@ -29,24 +28,24 @@ services:
           ignore:
             - node_modules/
 
-  # frontend:
-  #   build: ./frontend
-  #   ports:
-  #     - "5173:5173"
-  #   volumes:
-  #     - "./frontend/src:/app/src"
-  #   depends_on:
-  #     backend:
-  #       condition: service_healthy
-  #   env_file:
-  #     - ./frontend/.env
-  #   develop:
-  #     watch:
-  #       - action: sync
-  #         path: ./frontend
-  #         target: /src
-  #         ignore:
-  #           - node_modules/
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - "./frontend/src:/app/src"
+    depends_on:
+      backend:
+        condition: service_healthy
+    env_file:
+      - ./frontend/.env
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /src
+          ignore:
+            - node_modules/
  
   db:
     image: postgres

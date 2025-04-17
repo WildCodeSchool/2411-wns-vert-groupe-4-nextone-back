@@ -11,4 +11,4 @@ fi
 
 # Lancer docker-compose
 echo "Lancement de docker-compose..."
-cd .. && docker-compose up --build
+docker-compose up --build
