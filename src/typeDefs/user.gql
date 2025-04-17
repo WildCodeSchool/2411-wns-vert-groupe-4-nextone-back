@@ -1,0 +1,13 @@
+type UserWithoutPassword {
+  id: ID!
+  email: String!
+}
+
+type Mutation {
+  register(infos: InputRegister!): UserWithoutPassword
+}
+
+input InputRegister {
+  email: String!
+  password: String!
+}
