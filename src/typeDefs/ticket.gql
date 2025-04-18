@@ -5,7 +5,7 @@ type Ticket {
   lastName: String
   email: String
   phone: String
-  status: String
+  status: TicketStatus
 }
 
 type Query {
@@ -25,7 +25,7 @@ input CreateTicketInput {
   lastName: String
   email: String
   phone: String
-  status: String
+  status: TicketStatus
 }
 
 input UpdateTicketInput {
@@ -35,10 +35,17 @@ input UpdateTicketInput {
   lastName: String
   email: String
   phone: String
-  status: String
+  status: TicketStatus
 }
 
 type DeletedTicketResponse {
   success: Boolean!
   message: String
+}
+
+enum TicketStatus {
+  PENDING
+  CANCELED
+  DONE
+  ARCHIVED
 }

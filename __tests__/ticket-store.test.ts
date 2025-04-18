@@ -9,6 +9,7 @@ import {
 import { ApolloServer } from "@apollo/server";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import TicketResolver from "../src/resolvers/ticket.resolver";
+import { CreateTicketInput } from "../src/generated/graphql";
 import { loadFilesSync } from "@graphql-tools/load-files";
 import path from "path";
 
@@ -21,6 +22,28 @@ export const LIST_TICKETS = `#graphql
         tickets {
             id
             code
+        }
+    }
+`;
+
+export const CREATE_TICKET = `#graphql
+    mutation Mutation($data: CreateTicketInput!) {
+      createTicket(data: $data) {
+        code
+        id
+        firstName
+        lastName
+        email
+        phone
+        status
+      }
+    }
+`;
+
+export const FIND_TICKET_BY_ID = `#graphql
+    query FindTicket($findTicketId: ID!) {
+        findTicket(id: $findTicketId) {
+          code
         }
     }
 `;
@@ -38,6 +61,10 @@ const ticketsData: Ticket[] = [
   { id: "2", code: "002", firstName: "Marc", lastName: "Rogers", email: "marc.rogers@gmail.com", phone: "0706060606", status: "VALIDATED" },
 ];
 
+const createTicketExample: Omit<Ticket, "id"> = {
+  code: "003", firstName: "Ticket", lastName: "Test", email: "ticket.test@gmail.com", phone: "0606060607", status: "VALIDATED"
+}
+
 let server: ApolloServer;
 
 const schema = makeExecutableSchema({ typeDefs: ticketTypeDefs, resolvers: TicketResolver });
@@ -48,6 +75,15 @@ beforeAll(async () => {
     Query: {
       tickets: () => {
         return store.get("Query", "ROOT", "tickets");
+      },
+      findTicket: (_: any, { id }: { id: string }) => {
+        return store.get("Ticket", id);
+      }
+    },
+    Mutation: {
+      createTicket: (_: null, { data }: { data: CreateTicketInput }) => {
+        store.set("Ticket", "3", data);
+        return store.get("Ticket", "3");
       },
     },
   });
@@ -74,4 +110,34 @@ describe("Test sur les tickets", () => {
       tickets: [{ id: "1", code: "001" }, { id: "2", code: "002" }],
     });
   });
+
+  it("Création d'un ticket", async () => {
+    const response = await server.executeOperation<ResponseDataCreate>({
+      query: CREATE_TICKET,
+      variables: {
+        data: {
+          ...createTicketExample,
+        },
+      },
+    });
+    assert(response.body.kind === "single");
+    expect(response.body.singleResult.data).toEqual({
+      createTicket: {
+        id: "3",
+        ...createTicketExample,
+      },
+    });
+  })
+
+  it("Récupération d'un ticket par son id après l'ajout", async () => {
+    const response = await server.executeOperation<ResponseData>({
+      query: FIND_TICKET_BY_ID,
+      variables: { findTicketId: "3" },
+    });
+    
+    assert(response.body.kind === "single");
+    expect(response.body.singleResult.data).toEqual({
+      findTicket: { code: createTicketExample.code },
+    });
+  })
 });

@@ -91,13 +91,19 @@ export type CreateTicketInput = {
   firstName?: InputMaybe<Scalars['String']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
   phone?: InputMaybe<Scalars['String']['input']>;
-  status?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<TicketStatus>;
+};
+
+export type DeletedTicketResponse = {
+  __typename?: 'DeletedTicketResponse';
+  message?: Maybe<Scalars['String']['output']>;
+  success: Scalars['Boolean']['output'];
 };
 
 export type Mutation = {
   __typename?: 'Mutation';
   createTicket: Ticket;
-  deleteTicket: Scalars['String']['output'];
+  deleteTicket: DeletedTicketResponse;
   updateTicket: Ticket;
 };
 
@@ -136,8 +142,15 @@ export type Ticket = {
   id?: Maybe<Scalars['ID']['output']>;
   lastName?: Maybe<Scalars['String']['output']>;
   phone?: Maybe<Scalars['String']['output']>;
-  status?: Maybe<Scalars['String']['output']>;
+  status?: Maybe<TicketStatus>;
 };
+
+export enum TicketStatus {
+  Archived = 'ARCHIVED',
+  Canceled = 'CANCELED',
+  Done = 'DONE',
+  Pending = 'PENDING'
+}
 
 export type UpdateTicketInput = {
   code?: InputMaybe<Scalars['String']['input']>;
@@ -146,7 +159,7 @@ export type UpdateTicketInput = {
   id: Scalars['ID']['input'];
   lastName?: InputMaybe<Scalars['String']['input']>;
   phone?: InputMaybe<Scalars['String']['input']>;
-  status?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<TicketStatus>;
 };
 
 
@@ -233,6 +246,7 @@ export type ResolversTypes = {
   Date: ResolverTypeWrapper<Scalars['Date']['output']>;
   DateTime: ResolverTypeWrapper<Scalars['DateTime']['output']>;
   DateTimeISO: ResolverTypeWrapper<Scalars['DateTimeISO']['output']>;
+  DeletedTicketResponse: ResolverTypeWrapper<DeletedTicketResponse>;
   DeweyDecimal: ResolverTypeWrapper<Scalars['DeweyDecimal']['output']>;
   Duration: ResolverTypeWrapper<Scalars['Duration']['output']>;
   EmailAddress: ResolverTypeWrapper<Scalars['EmailAddress']['output']>;
@@ -286,6 +300,7 @@ export type ResolversTypes = {
   SemVer: ResolverTypeWrapper<Scalars['SemVer']['output']>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   Ticket: ResolverTypeWrapper<Ticket>;
+  TicketStatus: TicketStatus;
   Time: ResolverTypeWrapper<Scalars['Time']['output']>;
   TimeZone: ResolverTypeWrapper<Scalars['TimeZone']['output']>;
   Timestamp: ResolverTypeWrapper<Scalars['Timestamp']['output']>;
@@ -314,6 +329,7 @@ export type ResolversParentTypes = {
   Date: Scalars['Date']['output'];
   DateTime: Scalars['DateTime']['output'];
   DateTimeISO: Scalars['DateTimeISO']['output'];
+  DeletedTicketResponse: DeletedTicketResponse;
   DeweyDecimal: Scalars['DeweyDecimal']['output'];
   Duration: Scalars['Duration']['output'];
   EmailAddress: Scalars['EmailAddress']['output'];
@@ -423,6 +439,12 @@ export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversT
 export interface DateTimeIsoScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['DateTimeISO'], any> {
   name: 'DateTimeISO';
 }
+
+export type DeletedTicketResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeletedTicketResponse'] = ResolversParentTypes['DeletedTicketResponse']> = {
+  message?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
 
 export interface DeweyDecimalScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['DeweyDecimal'], any> {
   name: 'DeweyDecimal';
@@ -542,7 +564,7 @@ export interface MacScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes[
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   createTicket?: Resolver<ResolversTypes['Ticket'], ParentType, ContextType, RequireFields<MutationCreateTicketArgs, 'data'>>;
-  deleteTicket?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationDeleteTicketArgs, 'id'>>;
+  deleteTicket?: Resolver<ResolversTypes['DeletedTicketResponse'], ParentType, ContextType, RequireFields<MutationDeleteTicketArgs, 'id'>>;
   updateTicket?: Resolver<ResolversTypes['Ticket'], ParentType, ContextType, RequireFields<MutationUpdateTicketArgs, 'data' | 'id'>>;
 };
 
@@ -634,7 +656,7 @@ export type TicketResolvers<ContextType = any, ParentType extends ResolversParen
   id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   lastName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   phone?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  status?: Resolver<Maybe<ResolversTypes['TicketStatus']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -690,6 +712,7 @@ export type Resolvers<ContextType = any> = {
   Date?: GraphQLScalarType;
   DateTime?: GraphQLScalarType;
   DateTimeISO?: GraphQLScalarType;
+  DeletedTicketResponse?: DeletedTicketResponseResolvers<ContextType>;
   DeweyDecimal?: GraphQLScalarType;
   Duration?: GraphQLScalarType;
   EmailAddress?: GraphQLScalarType;
