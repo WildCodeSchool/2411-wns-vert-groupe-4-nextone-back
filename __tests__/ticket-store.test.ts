@@ -77,13 +77,13 @@ beforeAll(async () => {
         return store.get("Query", "ROOT", "getTickets");
       },
       getTicket: (_: any, { id }: { id: string }) => {
-        return store.get("Ticket", id);
+        return store.get("getTicket", id);
       }
     },
     Mutation: {
       generateTicket: (_: null, { data }: { data: GenerateTicketInput }) => {
-        store.set("Ticket", "3", data);
-        return store.get("Ticket", "3");
+        store.set("generateTicket", "3", data);
+        return store.get("getTicket", "3");
       },
     },
   });

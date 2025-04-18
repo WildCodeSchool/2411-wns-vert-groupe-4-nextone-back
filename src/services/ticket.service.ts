@@ -22,7 +22,7 @@ export default class TicketService {
     return ticket;
   }
 
-  // async getTicketByServiceId(serviceId: string) {
+  // async getTicketsByServiceId(serviceId: string) {
   //   const tickets = await this.db.findBy({
   //     where: { serviceId },
   //   });
