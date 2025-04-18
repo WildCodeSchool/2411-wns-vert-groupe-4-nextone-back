@@ -11,12 +11,14 @@ import {
   CreateCompanyInput,
   MutationCreateOneArgs,
   MutationDeleteOneArgs,
+  MutationUpdateCompanyArgs,
   QueryFindByIdArgs,
 >>>>>>> e7b1fda (Company entity, resolver et service, + baseService)
 } from "@/generated/graphql";
 import { MyContext } from "..";
 import CompanyService from "@/services/company.service";
 import CompanyEntity from "@/entities/Company.entity";
+import { DeepPartial } from "typeorm";
 
 const companyService = CompanyService.getService();
 
@@ -104,6 +106,15 @@ export default {
     ): Promise<boolean> => {
       const isDeleted = await companyService.deleteOne(args.id)
       return isDeleted
+    },
+    updateCompany: async(
+      _: any,
+      args : MutationUpdateCompanyArgs,
+      ctx: MyContext
+    ): Promise<CompanyEntity | null> => {
+      const partialCompany: Partial<CompanyEntity> = { ...args.data }
+      const updatedCompany = await companyService.updateOne(args.data.id, partialCompany);
+      return updatedCompany
     }
 >>>>>>> e7b1fda (Company entity, resolver et service, + baseService)
   },
