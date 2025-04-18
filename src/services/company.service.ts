@@ -1,5 +1,4 @@
 import CompanyEntity from "@/entities/Company.entity";
-import UserEntity from "../entities/user.entity";
 import BaseService from "./base.service";
 
 

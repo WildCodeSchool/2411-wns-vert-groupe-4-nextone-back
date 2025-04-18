@@ -50,7 +50,8 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     if (!updated) {
       throw new Error('Nothing affected.');
     }
-    return updated;
+    const updatedEntity = await this.findById(id);
+    return updatedEntity;
   }
 
 }
