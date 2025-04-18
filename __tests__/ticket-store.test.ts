@@ -16,7 +16,6 @@ export const LIST_TICKETS = `#graphql
     query Tickets {
         tickets {
             id
-            title
         }
     }
 `;
@@ -30,15 +29,14 @@ type ResponseDataCreate = {
 };
 
 const ticketsData: Ticket[] = [
-  { id: "1", code: "001", firstName: "Corentin", lastName: "Tournier", email: "corentin.tournier@gmail.com", phone: "0606060606", status: "VALIDATED", serviceId: "1" },
-  { id: "2", code: "002", firstName: "Marc", lastName: "Rogers", email: "marc.rogers@gmail.com", phone: "0706060606", status: "VALIDATED", serviceId: "1" },
+  { id: "1", code: "001", firstName: "Corentin", lastName: "Tournier", email: "corentin.tournier@gmail.com", phone: "0606060606", status: "VALIDATED" },
+  { id: "2", code: "002", firstName: "Marc", lastName: "Rogers", email: "marc.rogers@gmail.com", phone: "0706060606", status: "VALIDATED" },
 ];
 
 let server: ApolloServer;
 
 const baseSchema = buildSchemaSync({
   resolvers: [TicketResolver],
-  authChecker: () => true,
 });
 
 const schemaString = printSchema(baseSchema);
@@ -48,8 +46,8 @@ beforeAll(async () => {
   const store = createMockStore({ schema });
   const resolvers = (store: IMockStore) => ({
     Query: {
-      books() {
-        return store.get("Query", "ROOT", "books");
+      tickets: () => {
+        return store.get("Query", "ROOT", "tickets");
       },
     },
   });
@@ -65,15 +63,15 @@ beforeAll(async () => {
   store.set("Query", "ROOT", "tickets", ticketsData);
 });
 
-describe("Test sur les livres", () => {
-  it("Récupération des livres depuis le store", async () => {
+describe("Test sur les tickets", () => {
+  it("Récupération des tickets depuis le store", async () => {
     const response = await server.executeOperation<ResponseData>({
-      query: LIST_BOOKS,
+      query: LIST_TICKETS,
     });
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.data).toEqual({
-      books: [{ id: "1" }, { id: "2" }],
+      tickets: [{ id: "1" }, { id: "2" }],
     });
   });
 });

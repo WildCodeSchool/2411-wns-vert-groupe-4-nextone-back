@@ -31,9 +31,9 @@ export default class TicketService {
   async delete(id: string) {
     const deletedTicket = await this.db.delete(id);
     if (deletedTicket.affected === 0) {
-      throw new Error("Ticket to delete not found");
+      return false
     }
-    return id;
+    return true;
   }
 
   async update(id: string, { ...ticket }: MutationUpdateTicketArgs["data"]) {
