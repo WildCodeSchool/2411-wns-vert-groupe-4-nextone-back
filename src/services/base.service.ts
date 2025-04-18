@@ -1,8 +1,10 @@
 import { DeepPartial, EntityTarget, ObjectLiteral, Repository } from "typeorm";
-import AppDataSource from "../lib/datasource";
+import  AppDataSource  from "../lib/datasource";
 import { CreateCompanyInput } from "@/generated/graphql";
 
+
 export default abstract class BaseService<T extends ObjectLiteral> {
+
   protected repo: Repository<T>;
 
   constructor(entity: EntityTarget<T>) {
@@ -11,6 +13,7 @@ export default abstract class BaseService<T extends ObjectLiteral> {
 
   //CREER UNE INSTANCE DE T
   public async createOne(entity: DeepPartial<T>) {
+    console.log('ENTITY : ', entity)
     const created = await this.repo.save(this.repo.create(entity));
     return created;
   }
@@ -33,10 +36,11 @@ export default abstract class BaseService<T extends ObjectLiteral> {
 
   //DELETE
   public async deleteOne(id: string): Promise<boolean> {
-    const deleted = await this.repo.delete({ id: id as any });
+    console.log("ID DANS SERVICE : ", id)
+    const deleted = await this.repo.delete({ id: id as any});
 
     if (!deleted.affected || deleted.affected === 0) {
-      return false;
+      return false
     }
     return true;
   }
