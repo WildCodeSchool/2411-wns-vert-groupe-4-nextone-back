@@ -1,0 +1,29 @@
+# service.gql
+
+####### Types
+type Service {
+  id: UUID!
+  name: String!
+  createdAt: DateTime!
+  updatedAt: String!
+}
+
+type Query {
+  services: [Service!]!
+  service(id: UUID!): Service
+}
+type Mutation {
+  createService(data: CreateServiceInput!): Service!
+  updateService(id: UUID!, data: UpdateServiceInput!): Service!
+  deleteService(id: UUID!): Boolean!
+  
+}
+
+### Input
+input CreateServiceInput {
+  name: String!
+}
+
+input UpdateServiceInput {
+  name: String
+}

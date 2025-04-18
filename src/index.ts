@@ -1,6 +1,5 @@
 import express from "express"
 import "reflect-metadata";
-import { ApolloServer } from "@apollo/server";
 import http from "http";
 import datasource from "./lib/datasource";
 import 'dotenv/config';
@@ -8,23 +7,14 @@ import depthLimit from "graphql-depth-limit";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import cors from "cors";
 import { expressMiddleware } from "@apollo/server/express4";
+import resolvers from "./resolvers";
+import typeDefs from "./typeDefs";
+import { ApolloServer } from "@apollo/server";
 
 export interface MyContext {}
 
 const app = express();
 const httpServer = http.createServer(app);
-
-const typeDefs = `
-  type Query {
-    hello: String
-  }
-`;
-
-const resolvers = {
-  Query: {
-    hello: () => "Hello, world!",
-  },
-};
 
 const server = new ApolloServer<MyContext>({
   typeDefs,
