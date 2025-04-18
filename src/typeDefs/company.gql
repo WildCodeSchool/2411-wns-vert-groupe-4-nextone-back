@@ -1,0 +1,30 @@
+type Company {
+  id: ID
+  name: String
+  address: String
+  siret: String
+  email: String
+  phone: String
+  createdAt: Date
+  updatedAT: Date
+}
+
+type Query {
+  findAll: [Company!]!
+  findById(id: ID!): Company
+}
+
+type Mutation {
+  createOne(data: CreateCompanyInput): Company!
+  deleteOne(id: ID!): Boolean!
+}
+
+input CreateCompanyInput {
+  name: String!
+  address: String!
+  siret: String!
+  email: String!
+  phone: String!
+}
+
+
