@@ -1,14 +1,22 @@
-import UserService from "@/services/manager.service";
+import ManagerService from "@/services/manager.service";
+import { MutationRegisterArgs } from "@/generated/graphql";
+import { MyContext } from "..";
+import ManagerEntity from "@/entities/Manager.entity";
   
 export default {
+    Query: {
+        managers: async () => {
+            return await new ManagerService().listManagers();
+        },
+    },
     Mutation: {
-        register: async (_: any, { infos }: any) => { //?
-        const user = await new UserService().findUserByEmail(infos.email);
-        if (user) {
-            throw new Error("Cet email est déjà pris!");
-        }
-        const newUser = await new UserService().createUser(infos);
-        return newUser;
+        register: async (_: any, { infos }: MutationRegisterArgs, ctx: MyContext): Promise<ManagerEntity> => {
+            const manager = await new ManagerService().findManagerByEmail(infos.email);
+            if (manager) {
+                throw new Error("Cet email est déjà pris!");
+            }
+            const newManager = await new ManagerService().create({...infos});
+            return newManager;
         },
     },
 };

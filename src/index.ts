@@ -19,7 +19,7 @@ const httpServer = http.createServer(app);
 const server = new ApolloServer<MyContext>({
   typeDefs,
   resolvers,
-  validationRules: [depthLimit(5)], //n+1
+  validationRules: [depthLimit(5)], 
   plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
 });
 
