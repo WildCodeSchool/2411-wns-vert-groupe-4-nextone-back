@@ -1,6 +1,5 @@
 import assert from "assert";
 import Ticket from "../src/entities/Ticket.entity";
-import TicketResolver from "../src/resolvers/ticket.resolver";
 import {
   IMockStore,
   Ref,
@@ -8,14 +7,20 @@ import {
   createMockStore,
 } from "@graphql-tools/mock";
 import { ApolloServer } from "@apollo/server";
-import { buildSchemaSync } from "type-graphql";
-import { printSchema } from "graphql";
 import { makeExecutableSchema } from "@graphql-tools/schema";
+import TicketResolver from "../src/resolvers/ticket.resolver";
+import { loadFilesSync } from "@graphql-tools/load-files";
+import path from "path";
+
+const ticketTypeDefs = loadFilesSync(path.join(__dirname, "../src/typeDefs/ticket.gql"), {
+  extensions: ["gql"],
+});
 
 export const LIST_TICKETS = `#graphql
     query Tickets {
         tickets {
             id
+            code
         }
     }
 `;
@@ -35,12 +40,7 @@ const ticketsData: Ticket[] = [
 
 let server: ApolloServer;
 
-const baseSchema = buildSchemaSync({
-  resolvers: [TicketResolver],
-});
-
-const schemaString = printSchema(baseSchema);
-const schema = makeExecutableSchema({ typeDefs: schemaString });
+const schema = makeExecutableSchema({ typeDefs: ticketTypeDefs, resolvers: TicketResolver });
 
 beforeAll(async () => {
   const store = createMockStore({ schema });
@@ -53,7 +53,7 @@ beforeAll(async () => {
   });
   server = new ApolloServer({
     schema: addMocksToSchema({
-      schema: baseSchema,
+      schema,
       store,
       resolvers,
     }),
@@ -71,7 +71,7 @@ describe("Test sur les tickets", () => {
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.data).toEqual({
-      tickets: [{ id: "1" }, { id: "2" }],
+      tickets: [{ id: "1", code: "001" }, { id: "2", code: "002" }],
     });
   });
 });
