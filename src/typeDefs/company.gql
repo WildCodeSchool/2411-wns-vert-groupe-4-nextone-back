@@ -15,8 +15,9 @@ type Query {
 }
 
 type Mutation {
-  createOne(data: CreateCompanyInput): Company!
+  createOne(data: CreateCompanyInput!): Company!
   deleteOne(id: ID!): Boolean!
+  updateCompany(data: UpdateCompanyInput!): Company!
 }
 
 input CreateCompanyInput {
@@ -25,6 +26,15 @@ input CreateCompanyInput {
   siret: String!
   email: String!
   phone: String!
+}
+
+input UpdateCompanyInput {
+  id: ID!
+  name: String
+  address: String
+  siret: String
+  email: String
+  phone: String
 }
 
 
