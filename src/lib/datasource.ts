@@ -1,5 +1,6 @@
 import { ServiceEntity } from "../entities/Service.entity";
 import TicketEntity from "@/entities/Ticket.entity";
+import CompanyEntity from "@/entities/Company.entity";
 import { DataSource } from "typeorm";
 
 export default new DataSource({
