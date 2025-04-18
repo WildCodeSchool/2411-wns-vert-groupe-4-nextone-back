@@ -1,3 +1,5 @@
+scalar DateTime
+
 type Ticket {
   id: ID
   code: String
@@ -6,26 +8,30 @@ type Ticket {
   email: String
   phone: String
   status: TicketStatus
+  #service: Service
+  createdAt: DateTime
+  updatedAt: DateTime
 }
 
 type Query {
-  tickets: [Ticket!]
-  findTicket(id: ID!): Ticket
+  getTickets: [Ticket!]
+  getTicket(id: ID!): Ticket
 }
 
 type Mutation {
-  createTicket(data: CreateTicketInput!): Ticket!
+  generateTicket(data: GenerateTicketInput!): Ticket!
   deleteTicket(id: ID!): DeletedTicketResponse!
   updateTicket(id: ID!, data: UpdateTicketInput!): Ticket!
 }
 
-input CreateTicketInput {
+input GenerateTicketInput {
   code: String
   firstName: String
   lastName: String
   email: String
   phone: String
   status: TicketStatus
+  #serviceId: ID!
 }
 
 input UpdateTicketInput {
@@ -36,6 +42,7 @@ input UpdateTicketInput {
   email: String
   phone: String
   status: TicketStatus
+  #serviceId: ID
 }
 
 type DeletedTicketResponse {
@@ -47,5 +54,4 @@ enum TicketStatus {
   PENDING
   CANCELED
   DONE
-  ARCHIVED
 }

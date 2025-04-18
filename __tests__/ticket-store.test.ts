@@ -9,7 +9,7 @@ import {
 import { ApolloServer } from "@apollo/server";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import TicketResolver from "../src/resolvers/ticket.resolver";
-import { CreateTicketInput } from "../src/generated/graphql";
+import { GenerateTicketInput } from "../src/generated/graphql";
 import { loadFilesSync } from "@graphql-tools/load-files";
 import path from "path";
 
@@ -18,17 +18,17 @@ const ticketTypeDefs = loadFilesSync(path.join(__dirname, "../src/typeDefs/ticke
 });
 
 export const LIST_TICKETS = `#graphql
-    query Tickets {
-        tickets {
-            id
-            code
-        }
+    query getTickets {
+      getTickets {
+        id
+        code
+      }
     }
 `;
 
-export const CREATE_TICKET = `#graphql
-    mutation Mutation($data: CreateTicketInput!) {
-      createTicket(data: $data) {
+export const GENERATE_TICKET = `#graphql
+    mutation generateTicket($data: GenerateTicketInput!) {
+      generateTicket(data: $data) {
         code
         id
         firstName
@@ -41,10 +41,10 @@ export const CREATE_TICKET = `#graphql
 `;
 
 export const FIND_TICKET_BY_ID = `#graphql
-    query FindTicket($findTicketId: ID!) {
-        findTicket(id: $findTicketId) {
-          code
-        }
+    query getTicket($getTicketId: ID!) {
+      getTicket(id: $getTicketId) {
+        code
+      }
     }
 `;
 
@@ -53,7 +53,7 @@ type ResponseData = {
 };
 
 type ResponseDataCreate = {
-  createTicket: Ticket;
+  generateTicket: Ticket;
 };
 
 const ticketsData: Ticket[] = [
@@ -61,7 +61,7 @@ const ticketsData: Ticket[] = [
   { id: "2", code: "002", firstName: "Marc", lastName: "Rogers", email: "marc.rogers@gmail.com", phone: "0706060606", status: "VALIDATED" },
 ];
 
-const createTicketExample: Omit<Ticket, "id"> = {
+const generateTicketExample: Omit<Ticket, "id"> = {
   code: "003", firstName: "Ticket", lastName: "Test", email: "ticket.test@gmail.com", phone: "0606060607", status: "VALIDATED"
 }
 
@@ -73,15 +73,15 @@ beforeAll(async () => {
   const store = createMockStore({ schema });
   const resolvers = (store: IMockStore) => ({
     Query: {
-      tickets: () => {
-        return store.get("Query", "ROOT", "tickets");
+      getTickets: () => {
+        return store.get("Query", "ROOT", "getTickets");
       },
-      findTicket: (_: any, { id }: { id: string }) => {
+      getTicket: (_: any, { id }: { id: string }) => {
         return store.get("Ticket", id);
       }
     },
     Mutation: {
-      createTicket: (_: null, { data }: { data: CreateTicketInput }) => {
+      generateTicket: (_: null, { data }: { data: GenerateTicketInput }) => {
         store.set("Ticket", "3", data);
         return store.get("Ticket", "3");
       },
@@ -96,7 +96,7 @@ beforeAll(async () => {
   });
 
   //remplissage du store
-  store.set("Query", "ROOT", "tickets", ticketsData);
+  store.set("Query", "ROOT", "getTickets", ticketsData);
 });
 
 describe("Test sur les tickets", () => {
@@ -113,10 +113,10 @@ describe("Test sur les tickets", () => {
 
   it("Création d'un ticket", async () => {
     const response = await server.executeOperation<ResponseDataCreate>({
-      query: CREATE_TICKET,
+      query: GENERATE_TICKET,
       variables: {
         data: {
-          ...createTicketExample,
+          ...generateTicketExample,
         },
       },
     });
@@ -124,7 +124,7 @@ describe("Test sur les tickets", () => {
     expect(response.body.singleResult.data).toEqual({
       createTicket: {
         id: "3",
-        ...createTicketExample,
+        ...generateTicketExample,
       },
     });
   })
@@ -132,12 +132,12 @@ describe("Test sur les tickets", () => {
   it("Récupération d'un ticket par son id après l'ajout", async () => {
     const response = await server.executeOperation<ResponseData>({
       query: FIND_TICKET_BY_ID,
-      variables: { findTicketId: "3" },
+      variables: { getTicketId: "3" },
     });
     
     assert(response.body.kind === "single");
     expect(response.body.singleResult.data).toEqual({
-      findTicket: { code: createTicketExample.code },
+      getTicket: { code: generateTicketExample.code },
     });
   })
 });

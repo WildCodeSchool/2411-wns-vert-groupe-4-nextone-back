@@ -1,4 +1,4 @@
-import { MutationCreateTicketArgs, MutationUpdateTicketArgs } from "@/generated/graphql";
+import { MutationGenerateTicketArgs, MutationUpdateTicketArgs } from "@/generated/graphql";
 import TicketRepository from "@/repositories/ticket.repository";
 
 export default class TicketService {
@@ -8,11 +8,11 @@ export default class TicketService {
     this.db = new TicketRepository();
   }
 
-  async list() {
+  async getAllTickets() {
     return await this.db.find();
   }
 
-  async findById(id: string) {
+  async getTicketById(id: string) {
     const ticket = await this.db.findOne({
       where: { id },
     });
@@ -22,13 +22,23 @@ export default class TicketService {
     return ticket;
   }
 
-  async create({ ...ticket }: MutationCreateTicketArgs["data"]) {
+  // async getTicketByServiceId(serviceId: string) {
+  //   const tickets = await this.db.findBy({
+  //     where: { serviceId },
+  //   });
+  //   if (!tickets) {
+  //     throw new Error("No tickets found for this service");
+  //   }
+  //   return tickets;
+  // }
+
+  async generateTicket({ ...ticket }: MutationGenerateTicketArgs["data"]) {
     const newTicket = this.db.create(ticket);
     const savedTicket = await this.db.save(newTicket);
     return savedTicket;
   }
 
-  async delete(id: string) {
+  async deleteTicket(id: string) {
     const deletedTicket = await this.db.delete(id);
     if (deletedTicket.affected === 0) {
       return false
@@ -36,8 +46,8 @@ export default class TicketService {
     return true;
   }
 
-  async update(id: string, { ...ticket }: MutationUpdateTicketArgs["data"]) {
-    const ticketFound = await this.findById(id);
+  async updateTicket(id: string, { ...ticket }: MutationUpdateTicketArgs["data"]) {
+    const ticketFound = await this.getTicketById(id);
     const ticketUpdated = this.db.merge(ticketFound, { ...ticket });
     return await this.db.save(ticketUpdated);
   }
