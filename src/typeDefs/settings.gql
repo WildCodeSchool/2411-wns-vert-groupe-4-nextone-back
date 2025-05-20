@@ -1,0 +1,30 @@
+type Setting {
+  id: ID!
+  name: String!
+  createdAt: Date
+  updatedAt: Date
+}
+
+type Query {
+  findAllSettings: [Setting!]!
+  findSettingsById(id: ID!): Setting
+}
+
+type Mutation {
+  createOneSettings(data: CreateSettingInput!): Setting!
+  deleteOneSetting(id: ID!): Boolean!
+  updateSetting(data: UpdateSettingInput!): Setting
+}
+
+input CreateSettingInput {
+  name: String!
+
+}
+
+input UpdateSettingInput {
+  id: ID!
+  name: String
+
+}
+
+
