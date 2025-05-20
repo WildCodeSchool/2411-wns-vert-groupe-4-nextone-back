@@ -1,0 +1,57 @@
+scalar DateTime
+
+type Ticket {
+  id: ID
+  code: String
+  firstName: String
+  lastName: String
+  email: String
+  phone: String
+  status: TicketStatus
+  #service: Service
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type Query {
+  getTickets: [Ticket!]
+  getTicket(id: ID!): Ticket
+}
+
+type Mutation {
+  generateTicket(data: GenerateTicketInput!): Ticket!
+  deleteTicket(id: ID!): DeletedTicketResponse!
+  updateTicket(id: ID!, data: UpdateTicketInput!): Ticket!
+}
+
+input GenerateTicketInput {
+  code: String
+  firstName: String
+  lastName: String
+  email: String
+  phone: String
+  status: TicketStatus
+  #serviceId: ID!
+}
+
+input UpdateTicketInput {
+  id: ID!
+  code: String
+  firstName: String
+  lastName: String
+  email: String
+  phone: String
+  status: TicketStatus
+  #serviceId: ID
+}
+
+type DeletedTicketResponse {
+  success: Boolean!
+  message: String
+}
+
+enum TicketStatus {
+  PENDING
+  CANCELED
+  DONE
+}
