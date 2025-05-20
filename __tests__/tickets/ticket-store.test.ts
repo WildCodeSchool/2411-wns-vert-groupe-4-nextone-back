@@ -1,19 +1,18 @@
 import assert from "assert";
-import Ticket from "../src/entities/Ticket.entity";
+import Ticket from "../../src/entities/Ticket.entity";
 import {
   IMockStore,
-  Ref,
   addMocksToSchema,
   createMockStore,
 } from "@graphql-tools/mock";
 import { ApolloServer } from "@apollo/server";
 import { makeExecutableSchema } from "@graphql-tools/schema";
-import TicketResolver from "../src/resolvers/ticket.resolver";
-import { GenerateTicketInput } from "../src/generated/graphql";
+import TicketResolver from "../../src/resolvers/ticket.resolver";
+import { GenerateTicketInput } from "../../src/generated/graphql";
 import { loadFilesSync } from "@graphql-tools/load-files";
 import path from "path";
 
-const ticketTypeDefs = loadFilesSync(path.join(__dirname, "../src/typeDefs/ticket.gql"), {
+const ticketTypeDefs = loadFilesSync(path.join(__dirname, "../../src/typeDefs/ticket.gql"), {
   extensions: ["gql"],
 });
 
@@ -57,12 +56,12 @@ type ResponseDataCreate = {
 };
 
 const ticketsData: Ticket[] = [
-  { id: "1", code: "001", firstName: "Corentin", lastName: "Tournier", email: "corentin.tournier@gmail.com", phone: "0606060606", status: "VALIDATED" },
-  { id: "2", code: "002", firstName: "Marc", lastName: "Rogers", email: "marc.rogers@gmail.com", phone: "0706060606", status: "VALIDATED" },
+  { id: "1", code: "001", firstName: "Corentin", lastName: "Tournier", email: "corentin.tournier@gmail.com", phone: "0606060606", status: "PENDING" },
+  { id: "2", code: "002", firstName: "Marc", lastName: "Rogers", email: "marc.rogers@gmail.com", phone: "0706060606", status: "PENDING" },
 ];
 
 const generateTicketExample: Omit<Ticket, "id"> = {
-  code: "003", firstName: "Ticket", lastName: "Test", email: "ticket.test@gmail.com", phone: "0606060607", status: "VALIDATED"
+  code: "003", firstName: "Ticket", lastName: "Test", email: "ticket.test@gmail.com", phone: "0606060607", status: "PENDING"
 }
 
 let server: ApolloServer;
@@ -77,13 +76,13 @@ beforeAll(async () => {
         return store.get("Query", "ROOT", "getTickets");
       },
       getTicket: (_: any, { id }: { id: string }) => {
-        return store.get("getTicket", id);
+        return store.get("Ticket", id);
       }
     },
     Mutation: {
       generateTicket: (_: null, { data }: { data: GenerateTicketInput }) => {
-        store.set("generateTicket", "3", data);
-        return store.get("getTicket", "3");
+        store.set("Ticket", "3", data);
+        return store.get("Ticket", "3");
       },
     },
   });
@@ -107,7 +106,7 @@ describe("Test sur les tickets", () => {
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.data).toEqual({
-      tickets: [{ id: "1", code: "001" }, { id: "2", code: "002" }],
+      getTickets: [{ id: "1", code: "001" }, { id: "2", code: "002" }],
     });
   });
 
@@ -120,9 +119,10 @@ describe("Test sur les tickets", () => {
         },
       },
     });
+    
     assert(response.body.kind === "single");
     expect(response.body.singleResult.data).toEqual({
-      createTicket: {
+      generateTicket: {
         id: "3",
         ...generateTicketExample,
       },
