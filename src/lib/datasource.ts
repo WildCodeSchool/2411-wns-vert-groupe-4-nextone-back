@@ -15,4 +15,3 @@ export default new DataSource({
   entities: [TicketEntity, ServiceEntity, CompanyEntity, ManagerEntity],
   logging: ["error", "query"],
 });
-

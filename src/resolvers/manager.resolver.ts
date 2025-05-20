@@ -2,7 +2,7 @@ import ManagerService from "@/services/manager.service";
 import { MutationRegisterArgs } from "@/generated/graphql";
 import { MyContext } from "..";
 import ManagerEntity from "@/entities/Manager.entity";
-  
+
 export default {
     Query: {
         managers: async () => {
