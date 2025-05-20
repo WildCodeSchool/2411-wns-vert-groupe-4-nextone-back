@@ -8,10 +8,14 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
-      - name: Go to backend and run tests
-        run: npm i && npm run ci-test
+      - name: Go to backend and install dependencies
+        run: npm i
+      - name: Run codegen
+        run: npm run ci-codegen
+      - name: Run tests
+        run: npm run ci-test
   docker:
-    needs: test-front
+    needs: test-backend
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
