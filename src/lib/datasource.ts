@@ -9,7 +9,5 @@ export default new DataSource({
   password: process.env.POSTGRES_PASSWORD,
   database: process.env.POSTGRES_DB,
   entities: [TicketEntity],
-  synchronize: true, // pas à utiliser en prod (faire des migrations pour la prod);
-  logging: ["error", "query"], // nous permettra de voir les requêtes SQL qui sont jouées dans le terminal
-  // logging: ["error", "query"], // nous permettra de voir les requêtes SQL qui sont jouées dans le terminal
+  logging: ["error", "query"],
 });
