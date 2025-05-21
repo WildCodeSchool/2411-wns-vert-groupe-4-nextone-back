@@ -3,6 +3,5 @@ db.env
 .env
 .qodo
 .vscode
-src/generated/
-
-
+frontend
+src/generated

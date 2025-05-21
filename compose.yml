@@ -30,24 +30,24 @@ services:
           ignore:
             - node_modules/
 
-  # frontend:
-  #   build: ./frontend
-  #   ports:
-  #     - "5173:5173"
-  #   volumes:
-  #     - "./frontend/src:/app/src"
-  #   depends_on:
-  #     backend:
-  #       condition: service_healthy
-  #   env_file:
-  #     - ./frontend/.env
-  #   develop:
-  #     watch:
-  #       - action: sync
-  #         path: ./frontend
-  #         target: /src
-  #         ignore:
-  #           - node_modules/
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - "./frontend/src:/app/src"
+    depends_on:
+      backend:
+        condition: service_healthy
+    env_file:
+      - ./frontend/.env
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /src
+          ignore:
+            - node_modules/
  
   db:
     image: postgres
@@ -68,7 +68,7 @@ services:
   # environment:
   #   POSTGRES_PASSWORD: password
   #   POSTGRES_USER: utilisateur
-  #   POSTGRES_DB: thegoodcorner
+  #   POSTGRES_DB: nextone-db
 
   # adminer:
   #   image: adminer
