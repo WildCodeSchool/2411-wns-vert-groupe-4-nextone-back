@@ -6,7 +6,7 @@ import {
 } from 'typeorm';
 
 @Entity('authorizations')
-export default class Authorization {
+export default class AuthorizationEntity {
   @PrimaryColumn('uuid')
   serviceId: string; // composite key
 
