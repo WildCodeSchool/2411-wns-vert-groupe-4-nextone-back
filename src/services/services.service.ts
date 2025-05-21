@@ -1,34 +1,33 @@
 // service.service.ts
-
-import DataSource from "../lib/datasource";
-import { ServiceEntity } from "../entities/Service.entity";
-import { Repository } from "typeorm";
+import { MutationCreateServiceArgs, MutationUpdateServiceArgs } from '@/generated/graphql';
+import ServiceRepository from '@/repositories/Service.repository';
+import { ServiceEntity } from '@/entities/Service.entity';
 
 export default class ServicesService {
-  private db: Repository<ServiceEntity>;
+  db: ServiceRepository;
 
   constructor() {
-    this.db = DataSource.getRepository(ServiceEntity);
+    this.db = new ServiceRepository();
   }
 
   async getAllServices(): Promise<ServiceEntity[]> {
-    return await this.db.find();
+    return this.db.find();
   }
 
   async getServiceById(id: string): Promise<ServiceEntity | null> {
-    return await this.db.findOneBy({ id });
+    return this.db.findOneBy({ id });
   }
 
-  async createService(data: { name: string }): Promise<ServiceEntity> {
+  async createService(data: MutationCreateServiceArgs["data"]): Promise<ServiceEntity> {
     const service = this.db.create(data);
-    return await this.db.save(service);
+    return this.db.save(service);
   }
 
-  async updateService(id: string, data: Partial<ServiceEntity>): Promise<ServiceEntity | null> {
-    const service = await this.db.findOneBy({ id });
-    if (!service) return null;
-    Object.assign(service, data);
-    return await this.db.save(service);
+  async updateService(id: string, data: MutationUpdateServiceArgs["data"]): Promise<ServiceEntity | null> {
+    const existing = await this.getServiceById(id);
+    if (!existing) return null;
+    const updated = this.db.merge(existing, data);
+    return this.db.save(updated);
   }
 
   async deleteService(id: string): Promise<boolean> {
