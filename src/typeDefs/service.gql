@@ -1,5 +1,8 @@
 # service.gql
 
+scalar UUID
+scalar DateTime
+
 ####### Types
 type Service {
   id: UUID!
