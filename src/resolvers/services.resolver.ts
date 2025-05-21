@@ -1,33 +1,71 @@
 // service.resolver.ts
 
-import ServicesService from "../services/services.service";
+import ServicesService from "@/services/services.service";
 import {
   MutationCreateServiceArgs,
   MutationUpdateServiceArgs,
-  QueryServiceArgs,
   MutationDeleteServiceArgs,
-} from "../generated/graphql";
+  QueryServiceArgs,
+} from "@/generated/graphql";
+import { MyContext } from ".."; // adapte si besoin
+
+type ServiceResponse = {
+  message: string;
+  success: boolean;
+};
 
 export default {
   Query: {
-    services: async () => {
+    services: async (_: any, __: any, ctx: MyContext) => {
       return await new ServicesService().getAllServices();
     },
-    service: async (_: any, { id }: QueryServiceArgs) => {
+
+    service: async (_: any, { id }: QueryServiceArgs, ctx: MyContext) => {
       return await new ServicesService().getServiceById(id);
     },
   },
+
   Mutation: {
-    createService: async (_: any, { data }: MutationCreateServiceArgs) => {
-      return await new ServicesService().createService(data);
+    createService: async (
+      _: any,
+      { data }: MutationCreateServiceArgs,
+      ctx: MyContext
+    ) => {
+      const newService = await new ServicesService().createService(data);
+      return newService;
     },
-    updateService: async (_: any, { id, data }: MutationUpdateServiceArgs) => {
-      return await new ServicesService().updateService(id, data);
+
+    updateService: async (
+      _: any,
+      { id, data }: MutationUpdateServiceArgs,
+      ctx: MyContext
+    ): Promise<ServiceResponse> => {
+      const updated = await new ServicesService().updateService(id, data);
+
+      return {
+        message: updated
+          ? "Service updated successfully."
+          : "Service not found.",
+        success: !!updated,
+      };
     },
-    deleteService: async (_: any, { id }: MutationDeleteServiceArgs) => {
-      return await new ServicesService().deleteService(id);
+
+    deleteService: async (
+      _: any,
+      { id }: MutationDeleteServiceArgs,
+      ctx: MyContext
+    ): Promise<ServiceResponse> => {
+      const deleted = await new ServicesService().deleteService(id);
+
+      return {
+        message: deleted
+          ? "Service deleted successfully."
+          : "Service not found or already deleted.",
+        success: deleted,
+      };
     },
   },
 };
+
 
 
