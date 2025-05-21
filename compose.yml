@@ -20,6 +20,8 @@ services:
       db:
         condition: service_healthy
     command: ["sh", "-c", "wait-for-healthcheck.sh"]
+   #command: ["sh", "-c", "tail -f /dev/null"]
+
     develop:
       watch:
         - action: sync+restart
