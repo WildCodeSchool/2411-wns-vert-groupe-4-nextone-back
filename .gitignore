@@ -3,4 +3,6 @@ db.env
 .env
 .qodo
 .vscode
+src/generated/
+
 
