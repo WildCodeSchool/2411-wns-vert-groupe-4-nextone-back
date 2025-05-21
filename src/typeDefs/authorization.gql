@@ -1,3 +1,5 @@
+#authorization
+
 scalar DateTime
 
 ####### Types
@@ -18,6 +20,12 @@ type Mutation {
   updateAuthorization(input: UpdateAuthInput!): Boolean!
   deleteAuthorization(serviceId: UUID!, managerId: UUID!): Boolean!
 }
+
+type AuthorizationResponse {
+  message: String!
+  success: Boolean!
+}
+
 
 ### Input
 input NewAuthInput {
