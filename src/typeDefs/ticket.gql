@@ -21,7 +21,7 @@ type Query {
 type Mutation {
   generateTicket(data: GenerateTicketInput!): Ticket!
   deleteTicket(id: ID!): DeletedTicketResponse!
-  updateTicket(id: ID!, data: UpdateTicketInput!): Ticket!
+  updateTicket(data: UpdateTicketInput!): Ticket!
 }
 
 input GenerateTicketInput {
