@@ -1,0 +1,17 @@
+name: Backend PR Checks
+
+on:
+  [workflow_call, pull_request]
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Go to backend and install dependencies
+        run: npm i
+      - name: Run codegen
+        run: npm run ci-codegen
+      - name: Run tests
+        run: npm run ci-test
