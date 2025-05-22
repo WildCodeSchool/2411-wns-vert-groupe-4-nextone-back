@@ -1,58 +1,68 @@
-
 import {
-  CreateCompanyInput,
-  MutationCreateOneArgs,
-  MutationDeleteOneArgs,
+  DeleteResponseCompany,
+  MutationCreateCompanyArgs,
+  MutationDeleteCompanyArgs,
   MutationUpdateCompanyArgs,
-  QueryFindByIdArgs,
+  QueryCompanyArgs,
 } from "@/generated/graphql";
 import { MyContext } from "..";
 import CompanyService from "@/services/company.service";
 import CompanyEntity from "@/entities/Company.entity";
-import { DeepPartial } from "typeorm";
 
 const companyService = CompanyService.getService();
 
 export default {
   Query: {
-    findAll: async (_: any): Promise<CompanyEntity[]> => {
+    companies: async (_: any): Promise<CompanyEntity[]> => {
       const companies = await companyService.findAll();
       return companies;
     },
-    findById: async (
+    company: async (
       _: any,
-      { id }: QueryFindByIdArgs
+      { id }: QueryCompanyArgs
     ): Promise<CompanyEntity | null> => {
       const company = await companyService.findById(id);
       return company;
     },
   },
   Mutation: {
-    createOne: async (
+    createCompany: async (
       _: any,
-      args : MutationCreateOneArgs,
+      args: MutationCreateCompanyArgs,
       ctx: MyContext
     ): Promise<CompanyEntity> => {
-      const test: Partial<CompanyEntity> = {...args.data}
+      const test: Partial<CompanyEntity> = { ...args.data };
       const newCompany = await companyService.createOne(test);
       return newCompany;
     },
-    deleteOne: async (
+    deleteCompany: async (
       _: any,
-      args : MutationDeleteOneArgs,
+      args: MutationDeleteCompanyArgs,
       ctx: MyContext
-    ): Promise<boolean> => {
-      const isDeleted = await companyService.deleteOne(args.id)
-      return isDeleted
+    ): Promise<DeleteResponseCompany> => {
+      const isDeleted = await companyService.deleteOne(args.id);
+      if (isDeleted) {
+        return {
+          content: "Company deleted",
+          success: true,
+        };
+      }
+      return {
+        content: "Company no deleted 😢",
+        success: false,
+      };
     },
-    updateCompany: async(
+    updateCompany: async (
       _: any,
-      args : MutationUpdateCompanyArgs,
+      args: MutationUpdateCompanyArgs,
       ctx: MyContext
     ): Promise<CompanyEntity | null> => {
-      const partialCompany: Partial<CompanyEntity> = { ...args.data }
-      const updatedCompany = await companyService.updateOne(args.data.id, partialCompany);
-      return updatedCompany
-    }
+      const partialCompany: Partial<CompanyEntity> = { ...args.data };
+      const updatedCompany = await companyService.updateOne(
+        args.data.id,
+        partialCompany
+      );
+      return updatedCompany;
+    },
   },
 };

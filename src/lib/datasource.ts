@@ -2,6 +2,7 @@ import { ServiceEntity } from "../entities/Service.entity";
 import TicketEntity from "@/entities/Ticket.entity";
 import CompanyEntity from "@/entities/Company.entity";
 import { DataSource } from "typeorm";
+// import SettingEntity from "@/entities/setting.entity";
 
 export default new DataSource({
   type: "postgres",
@@ -10,6 +11,7 @@ export default new DataSource({
   username: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
   database: process.env.POSTGRES_DB,
-  entities: [TicketEntity, ServiceEntity],
+  entities: [TicketEntity, ServiceEntity, CompanyEntity],
   logging: ["error", "query"],
 });
+
