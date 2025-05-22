@@ -1,6 +1,7 @@
 #authorization
 
 scalar DateTime
+scalar  UUID
 
 ####### Types
 type Authorization {
