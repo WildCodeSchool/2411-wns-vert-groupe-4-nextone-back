@@ -32,4 +32,6 @@ import {
 
     @Column({ default: "VALIDATED" })
     status: string; //à remplacer par un enum
+
+
   }
