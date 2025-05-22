@@ -9,7 +9,7 @@ const config: CodegenConfig = {
       config: {
         inputMaybeValue: "T | undefined",
         
-      },
+      },  
     },
   },
 };

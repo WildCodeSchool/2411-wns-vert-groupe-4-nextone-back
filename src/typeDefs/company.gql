@@ -1,0 +1,48 @@
+scalar DateTime
+
+type Company {
+  id: ID!
+  name: String
+  address: String
+  siret: String
+  email: String
+  phone: String
+  createdAt: DateTime
+  updatedAT: DateTime
+}
+
+
+type Query {
+  companies: [Company!]!
+  company(id: ID!): Company
+}
+
+type Mutation {
+  createCompany(data: CreateCompanyInput!): Company!
+  deleteCompany(id: ID!): DeleteResponseCompany!
+  updateCompany(data: UpdateCompanyInput!): Company!
+}
+
+type DeleteResponseCompany {
+  content: String!
+  success: Boolean!
+}
+
+input CreateCompanyInput {
+  name: String!
+  address: String!
+  siret: String!
+  email: String!
+  phone: String!
+}
+
+input UpdateCompanyInput {
+  id: ID!
+  name: String
+  address: String
+  siret: String
+  email: String
+  phone: String
+}
+
+

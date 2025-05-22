@@ -6,7 +6,7 @@ services:
     volumes:
       - "./src:/app/src"
     env_file:
-      - ./db.env
+      # - ./db.env
       - ./.env
       #- ./sendgrid.env
     healthcheck:
@@ -20,7 +20,7 @@ services:
       db:
         condition: service_healthy
     command: ["sh", "-c", "wait-for-healthcheck.sh"]
-   #command: ["sh", "-c", "tail -f /dev/null"]
+    #command: ["sh", "-c", "tail -f /dev/null"]
 
     develop:
       watch:
@@ -48,7 +48,7 @@ services:
   #         target: /src
   #         ignore:
   #           - node_modules/
- 
+
   db:
     image: postgres
     restart: always
@@ -93,12 +93,12 @@ services:
   #     - 8080:8080
 
   #images:
-    #build: ./images
-    #volumes:
-    #  - ./images/uploads:/app/uploads
-    #  - ./images/src:/app/src
-    #ports:
-    #  - 3002:3002
+  #build: ./images
+  #volumes:
+  #  - ./images/uploads:/app/uploads
+  #  - ./images/src:/app/src
+  #ports:
+  #  - 3002:3002
   #   env_file:
   #     - ./.env
 volumes:
