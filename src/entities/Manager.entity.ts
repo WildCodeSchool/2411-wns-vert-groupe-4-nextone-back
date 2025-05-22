@@ -8,6 +8,13 @@ import {
 } from "typeorm";
 import * as argon2 from "argon2";
 import { ManagerRole } from "@/generated/graphql";
+import {
+  IsEmail,
+  Length,
+  IsEnum,
+  IsBoolean,
+  IsString,
+} from "class-validator";
 
 @Entity("managers")
 export default class ManagerEntity {
@@ -20,15 +27,21 @@ export default class ManagerEntity {
   id: string;
 
   @Column()
+  @IsString()
+  @Length(1, 50, { message: "Le prénom est requis." })
   first_name: string;
 
   @Column()
+  @IsString()
+  @Length(1, 50, { message: "Le nom est requis." })
   last_name: string;
 
   @Column({ unique: true })
+  @IsEmail({}, { message: "L'adresse email n'est pas valide." })
   email: string;
 
   @Column()
+  @Length(6, 50, { message: "Le mot de passe doit faire au moins 6 caractères." })
   password: string;
 
   @Column({
@@ -51,4 +64,12 @@ export default class ManagerEntity {
 
   @UpdateDateColumn()
   updated_at: Date;
+}
+
+export class LoginInput {
+  @IsEmail({}, { message: "L'adresse email n'est pas valide." })
+  email: string;
+
+  @Length(6, 50, { message: "Le mot de passe doit faire au moins 6 caractères." })
+  password: string;
 }

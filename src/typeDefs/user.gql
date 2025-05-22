@@ -17,12 +17,30 @@ type Manager {
 }
 
 type ManagerWithoutPassword {
-  id: ID!
-  email: String!
+ id: ID!
+  first_name: String!
+  last_name: String!
+  email: String!  
+  role: ManagerRole!
+  is_globally_active: Boolean
+  created_at: String
+  updated_at: String
 }
 
 type Query {
   managers: [ManagerWithoutPassword!]
+  login(infos: InputLogin!): Auth
+  logout: Message!
+}
+
+type Auth {
+  manager: ManagerWithoutPassword
+  token: String
+}
+
+type Message {
+  content: String
+  status: Boolean
 }
 
 type Mutation {
@@ -36,4 +54,9 @@ input InputRegister {
   password: String!
   role: ManagerRole = OPERATOR
   is_globally_active: Boolean = FALSE
+}
+
+input InputLogin {
+  email: String!
+  password: String!
 }

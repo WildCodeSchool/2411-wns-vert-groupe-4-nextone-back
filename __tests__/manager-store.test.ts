@@ -5,8 +5,7 @@ import { addMocksToSchema, createMockStore, IMockStore } from "@graphql-tools/mo
 import { loadFilesSync } from "@graphql-tools/load-files";
 import path from "path";
 import Manager from "../src/entities/Manager.entity";
-import { InputRegister, ManagerRole } from "../src/generated/graphql";
-import ManagerEntity from "../src/entities/Manager.entity";
+import { InputRegister, ManagerRole, InputLogin } from "../src/generated/graphql";
 
 const managerTypeDefs = loadFilesSync(path.join(__dirname, "../src/typeDefs/user.gql"), {
   extensions: ["gql"],
@@ -21,7 +20,6 @@ export const LIST_MANAGERS = `#graphql
   }
 `;
 
-// la requete me retourne ces infos
 export const REGISTER_MANAGER = `#graphql
   mutation register($infos: InputRegister!) {
     register(infos: $infos) {
@@ -35,15 +33,42 @@ export const REGISTER_MANAGER = `#graphql
   }
 `;
 
-type ResponseData = {
+export const LOGIN_MANAGER = `#graphql
+  query login($infos: InputLogin!) {
+    login(infos: $infos) {
+      manager {
+        id
+        first_name
+        last_name
+        email
+        role
+        is_globally_active
+        created_at
+        updated_at
+      }
+      token
+    }
+  }
+`
+
+export const LOGOUT_MANAGER = `#graphql
+  query Logout {
+    logout {
+      content
+      status
+    }
+  }
+`
+
+type ResponseListManager = {
   managers: Manager[];
 };
 
-type ResponseDataCreate = {
+type ResponseCreateManager = {
   register: Manager;
 };
 
-const managersData = [
+const listManagers = [
   {
     id: "1",
     email: "jean@example.com",
@@ -63,6 +88,17 @@ const createManagerExample = {
   is_globally_active: true,
 };
 
+const mockManager = {
+  id: "1",
+  first_name: "Jean",
+  last_name: "Dupont",
+  email: "jean@example.com",
+  role: ManagerRole.Admin,
+  is_globally_active: true,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+};
+
 let server: ApolloServer;
 
 const schema = makeExecutableSchema({
@@ -76,6 +112,18 @@ beforeAll(async () => {
     Query: {
       managers: () => {
         return store.get("Query", "ROOT", "managers")
+      },
+
+      login: (_: any, { infos }: { infos: InputLogin }) => {
+        if (infos.email === "jean@example.com" && infos.password === "motdepasse") {
+          return {
+            manager: mockManager,
+            token: "mocked-token-123",
+          };
+        }
+      },
+      logout: (_: any, __: any, ctx: any) => {
+        return { content: "Vous êtes déconnecté", status: true };
       },
     },
     Mutation: {
@@ -94,22 +142,22 @@ beforeAll(async () => {
       store
     }),
   });
-  store.set("Query", "ROOT", "managers", managersData);
+  store.set("Query", "ROOT", "managers", listManagers);
 });
 
 describe("Test sur les managers", () => {
   it("Récupération des managers depuis le store", async () => {
-    const response = await server.executeOperation<ResponseData>({
+    const response = await server.executeOperation<ResponseListManager>({
       query: LIST_MANAGERS,
     });
     assert(response.body.kind === "single");
     expect(response.body.singleResult.data).toEqual({
-      managers: managersData,
+      managers: listManagers,
     });
   });
 
   it("Inscription d'un manager", async () => {
-    const response = await server.executeOperation<ResponseDataCreate>({
+    const response = await server.executeOperation<ResponseCreateManager>({
       query: REGISTER_MANAGER,
       variables: {
         infos: createManagerExample,
@@ -119,6 +167,43 @@ describe("Test sur les managers", () => {
     const {password, ...managerWithoutPassword} = createManagerExample;
     expect(response.body.singleResult.data).toEqual({
       register: {id: "3", ...managerWithoutPassword}
+    });
+  });
+
+  it("Connexion avec un email et mot de passe valides", async () => {
+    const response = await server.executeOperation({
+      query: LOGIN_MANAGER,
+      variables: {
+        infos: {
+          email: "jean@example.com",
+          password: "motdepasse",
+        },
+      },
+    });
+    assert(response.body.kind === "single");
+    expect(response.body.singleResult.data).toEqual({
+      login: {
+        manager: mockManager,
+        token: "mocked-token-123",
+      },
+    });
+  });
+
+  it("Déconnexion du manager connecté", async () => {
+    const response = await server.executeOperation(
+    { query: LOGOUT_MANAGER },
+    {
+      contextValue: {
+        manager: mockManager,
+      },
+    }
+    );
+    assert(response.body.kind === "single");
+    expect(response.body.singleResult.data).toEqual({
+      logout: {
+        content: "Vous êtes déconnecté",
+        status: true,
+      },
     });
   });
 });
