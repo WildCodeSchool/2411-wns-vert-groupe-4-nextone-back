@@ -6,6 +6,22 @@ on:
 jobs:
   test-backend:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: utilisateur
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: nextone-db-test
+        ports:
+          - 5436:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Check out code
         uses: actions/checkout@v4
