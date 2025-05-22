@@ -6,13 +6,13 @@ type Setting {
 }
 
 type Query {
-  findAllSettings: [Setting!]!
-  findSettingsById(id: ID!): Setting
+  settings: [Setting!]!
+  setting(id: ID!): Setting
 }
 
 type Mutation {
-  createOneSettings(data: CreateSettingInput!): Setting!
-  deleteOneSetting(id: ID!): Boolean!
+  createSetting(data: CreateSettingInput!): Setting!
+  deleteSetting(id: ID!): Boolean!
   updateSetting(data: UpdateSettingInput!): Setting
 }
 
