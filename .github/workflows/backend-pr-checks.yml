@@ -1,6 +1,7 @@
 name: Backend PR Checks
 
-on: pull_request
+on:
+  [workflow_call, pull_request]
 
 jobs:
   test-backend:
@@ -14,4 +15,3 @@ jobs:
         run: npm run ci-codegen
       - name: Run tests
         run: npm run ci-test
-        

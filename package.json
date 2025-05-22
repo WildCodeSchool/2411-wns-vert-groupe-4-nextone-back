@@ -6,7 +6,8 @@
     "codegen": "graphql-codegen --config codegen.ts --watch",
     "ci-codegen": "graphql-codegen --config codegen.ts",
     "test": "jest --watchAll",
-    "ci-test": "jest --ci"
+    "ci-test": "jest --ci",
+    "start:docker": "docker-compose pull && docker-compose up"
   },
   "dependencies": {
     "@apollo/server": "^4.11.3",

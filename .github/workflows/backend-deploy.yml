@@ -4,16 +4,7 @@ on: push
 
 jobs:
   test-backend:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-      - name: Go to backend and install dependencies
-        run: npm i
-      - name: Run codegen
-        run: npm run ci-codegen
-      - name: Run tests
-        run: npm run ci-test
+    uses: ./.github/workflows/backend-pr-checks.yml
   docker:
     needs: test-backend
     if: github.ref == 'refs/heads/main'
@@ -32,5 +23,5 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          context: "{{defaultContext}}"
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/nextone-back:latest
+          platforms: linux/amd64,linux/arm64,linux/x86_64
