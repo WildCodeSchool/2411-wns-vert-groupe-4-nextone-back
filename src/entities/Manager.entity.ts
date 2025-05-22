@@ -1,20 +1,7 @@
-import {
-  BeforeInsert,
-  Column,
-  CreateDateColumn,
-  Entity,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from "typeorm";
+import { BeforeInsert, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn,} from "typeorm";
 import * as argon2 from "argon2";
 import { ManagerRole } from "@/generated/graphql";
-import {
-  IsEmail,
-  Length,
-  IsEnum,
-  IsBoolean,
-  IsString,
-} from "class-validator";
+import { IsEmail, Length, IsString } from "class-validator";
 
 @Entity("managers")
 export default class ManagerEntity {

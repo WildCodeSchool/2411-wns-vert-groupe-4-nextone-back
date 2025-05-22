@@ -4,10 +4,10 @@ import { makeExecutableSchema } from "@graphql-tools/schema";
 import { addMocksToSchema, createMockStore, IMockStore } from "@graphql-tools/mock";
 import { loadFilesSync } from "@graphql-tools/load-files";
 import path from "path";
-import Manager from "../src/entities/Manager.entity";
-import { InputRegister, ManagerRole, InputLogin } from "../src/generated/graphql";
+import Manager from "../../src/entities/Manager.entity";
+import { InputRegister, ManagerRole, InputLogin } from "../../src/generated/graphql";
 
-const managerTypeDefs = loadFilesSync(path.join(__dirname, "../src/typeDefs/user.gql"), {
+const managerTypeDefs = loadFilesSync(path.join(__dirname, "../../src/typeDefs/manager.gql"), {
   extensions: ["gql"],
 });
 
