@@ -1,22 +1,19 @@
-/** @type {import('ts-jest').JestConfigWithTsJest} */
+/** @type {import('ts-jest').JestConfigWithTsJest} **/
 module.exports = {
   testEnvironment: "node",
-  preset: "ts-jest",
   transform: {
-    "^.+\\.tsx?$": ["ts-jest", {}],
-  },
-  transformIgnorePatterns: [
-    "/node_modules/(?!(jose)/)"
-  ],
-  extensionsToTreatAsEsm: [".ts"],
-  globals: {
-    "ts-jest": {
-      diagnostics: true,
-      useESM: true,
-    },
+    "^.+.tsx?$": ["ts-jest", {}],
   },
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
-    "^(\\.{1,2}/.*)\\.js$": "$1"
   },
+  preset: "ts-jest",
+  globals: {
+    "ts-jest": {
+      diagnostics: true,
+    },
+  },
+  transformIgnorePatterns: [
+  "/node_modules/(?!jose)"  // ← autorise la transformation de jose
+],
 };

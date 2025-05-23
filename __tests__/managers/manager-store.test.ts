@@ -1,3 +1,5 @@
+jest.mock("jose");
+
 import assert from "assert";
 import { ApolloServer } from "@apollo/server";
 import { makeExecutableSchema } from "@graphql-tools/schema";
