@@ -1,5 +1,6 @@
 services:
   backend:
+    # build: ./
     image: nextone4/nextone-back:latest
     ports:
       - "4005:4005"
