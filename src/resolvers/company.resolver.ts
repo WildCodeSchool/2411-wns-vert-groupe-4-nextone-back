@@ -8,6 +8,7 @@ import {
 import { MyContext } from "..";
 import CompanyService from "@/services/company.service";
 import CompanyEntity from "@/entities/Company.entity";
+import { DeepPartial } from "typeorm";
 
 const companyService = CompanyService.getService();
 
