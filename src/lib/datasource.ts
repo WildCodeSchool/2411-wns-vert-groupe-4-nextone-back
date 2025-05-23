@@ -5,6 +5,7 @@ import AuthorizationEntity from "@/entities/Authorization.entity";
 import { DataSource } from "typeorm";
 import ManagerEntity from "@/entities/Manager.entity";
 // import SettingEntity from "@/entities/setting.entity";
+import SettingEntity from "@/entities/setting.entity";
 
 export default new DataSource({
   type: "postgres",
