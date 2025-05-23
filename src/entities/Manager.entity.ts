@@ -15,12 +15,12 @@ export default class ManagerEntity {
 
   @Column()
   @IsString()
-  @Length(1, 50, { message: "Le prénom est requis." })
+  @Length(2, 50, { message: "Le prénom est requis." })
   first_name: string;
 
   @Column()
   @IsString()
-  @Length(1, 50, { message: "Le nom est requis." })
+  @Length(2, 50, { message: "Le nom est requis." })
   last_name: string;
 
   @Column({ unique: true })
@@ -59,4 +59,12 @@ export class LoginInput {
 
   @Length(6, 50, { message: "Le mot de passe doit faire au moins 6 caractères." })
   password: string;
+}
+
+export class UpdateInput {
+  @Length(2, 50, { message: "Le prénom est requis." })
+  first_name: string;
+
+  @Length(2, 50, { message: "Le nom est requis." })
+  last_name: string;
 }

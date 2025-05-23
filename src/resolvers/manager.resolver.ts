@@ -4,7 +4,7 @@ import { MyContext } from "..";
 import Cookies from "cookies";
 import { validate } from "class-validator";
 import { plainToInstance } from "class-transformer";
-import ManagerEntity, { LoginInput } from "@/entities/Manager.entity";
+import ManagerEntity, { LoginInput, UpdateInput } from "@/entities/Manager.entity";
 
 export default {
     Query: {
@@ -68,8 +68,14 @@ export default {
         if (!ctx.manager) {
             throw new Error("Non autorisé");
         }
-        if(!data || Object.keys(data).length === 0) {
+        if (!data || Object.keys(data).length === 0) {
             throw new Error("Vous modifiez aucune donnée");
+        }
+        const updatedManager = plainToInstance(UpdateInput, { ...ctx.manager, ...data }, { exposeDefaultValues: true });
+        const errors = await validate(updatedManager, { skipMissingProperties: true });
+        if (errors.length > 0) {
+            const messages = errors.flatMap(err => Object.values(err.constraints || {}));
+            throw new Error(messages.join(" | "));
         }
         return await new ManagerService().updateManager(ctx.manager.id, data);
         }
