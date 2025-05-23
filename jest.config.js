@@ -11,7 +11,7 @@ module.exports = {
     },
   },
   transformIgnorePatterns: [
-  "/node_modules/(?!jose)"  // ← autorise la transformation de jose
+  "/node_modules/(?!jose)/"  // ← autorise la transformation de jose
 ],
 transform: {
     "^.+\.tsx?$": ["ts-jest", {}],
