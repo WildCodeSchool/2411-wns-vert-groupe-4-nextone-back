@@ -17,10 +17,16 @@ type Query {
 }
 type Mutation {
   createService(data: CreateServiceInput!): Service!
-  updateService(id: UUID!, data: UpdateServiceInput!): Service!
-  deleteService(id: UUID!): Boolean!
+  updateService(id: UUID!, data: UpdateServiceInput!): ServiceResponse!
+  deleteService(id: UUID!): ServiceResponse!
   
 }
+
+type ServiceResponse {
+  message: String!
+  success: Boolean!
+}
+
 
 ### Input
 input CreateServiceInput {

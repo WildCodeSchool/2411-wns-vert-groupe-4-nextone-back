@@ -2,7 +2,6 @@
 
 import assert from 'assert';
 import { ApolloServer } from '@apollo/server';
-import { addMocksToSchema } from '@graphql-tools/mock';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import fs from 'fs';
 import path from 'path';
@@ -12,6 +11,7 @@ const serviceTypeDefs = fs.readFileSync(
   { encoding: 'utf-8' }
 );
 
+// --- GraphQL Queries ---
 export const LIST_SERVICES = `#graphql
   query Services {
     services {
@@ -40,20 +40,24 @@ export const CREATE_SERVICE = `#graphql
 `;
 
 export const UPDATE_SERVICE = `#graphql
-  mutation UpdateService($updateServiceId: UUID!, $data: UpdateServiceInput!) {
-    updateService(id: $updateServiceId, data: $data) {
-      id
-      name
+  mutation UpdateService($id: UUID!, $data: UpdateServiceInput!) {
+    updateService(id: $id, data: $data) {
+      success
+      message
     }
   }
 `;
 
 export const DELETE_SERVICE = `#graphql
-  mutation DeleteService($deleteServiceId: UUID!) {
-    deleteService(id: $deleteServiceId)
+  mutation DeleteService($id: UUID!) {
+    deleteService(id: $id) {
+      success
+      message
+    }
   }
 `;
 
+// --- Types ---
 type Service = {
   id: string;
   name: string;
@@ -71,12 +75,17 @@ type ResponseCreateServiceData = {
   createService: Service;
 };
 
+type ServiceResponse = {
+  success: boolean;
+  message: string;
+};
+
 type ResponseUpdateServiceData = {
-  updateService: Service | null;
+  updateService: ServiceResponse;
 };
 
 type ResponseDeleteServiceData = {
-  deleteService: boolean;
+  deleteService: ServiceResponse;
 };
 
 let servicesData: Service[];
@@ -106,15 +115,15 @@ beforeAll(async () => {
       },
       updateService: (_: any, args: { id: string; data: { name: string } }) => {
         const index = servicesData.findIndex((s) => s.id === args.id);
-        if (index === -1) return null;
+        if (index === -1) return { success: false, message: "Service not found." };
         servicesData[index] = { ...servicesData[index], ...args.data };
-        return servicesData[index];
+        return { success: true, message: "Service updated successfully." };
       },
       deleteService: (_: any, args: { id: string }) => {
         const index = servicesData.findIndex((s) => s.id === args.id);
-        if (index === -1) return false;
+        if (index === -1) return { success: false, message: "Service not found." };
         servicesData.splice(index, 1);
-        return true;
+        return { success: true, message: "Service deleted successfully." };
       },
     },
   };
@@ -124,30 +133,16 @@ beforeAll(async () => {
     resolvers: serviceResolvers,
   });
 
-  server = new ApolloServer({
-    schema: addMocksToSchema({
-      schema,
-      mocks: {
-        UUID: () => 'uuid-1',
-        String: () => 'mocked-string',
-      },
-      preserveResolvers: true,
-    }),
-  });
-
+  server = new ApolloServer({ schema });
   await server.start();
 });
 
+// --- Tests ---
 describe('ServicesResolver (mocked)', () => {
   it('récupère tous les services', async () => {
-    const response = await server.executeOperation<ResponseData>({
-      query: LIST_SERVICES,
-    });
-
+    const response = await server.executeOperation<ResponseData>({ query: LIST_SERVICES });
     assert(response.body.kind === 'single');
-    expect(response.body.singleResult.data).toEqual({
-      services: servicesData,
-    });
+    expect(response.body.singleResult.data).toEqual({ services: servicesData });
   });
 
   it('récupère un service par ID', async () => {
@@ -155,11 +150,8 @@ describe('ServicesResolver (mocked)', () => {
       query: FIND_SERVICE_BY_ID,
       variables: { serviceId: 'uuid-1' },
     });
-
     assert(response.body.kind === 'single');
-    expect(response.body.singleResult.data).toEqual({
-      service: servicesData[0],
-    });
+    expect(response.body.singleResult.data).toEqual({ service: servicesData[0] });
   });
 
   it('crée un nouveau service', async () => {
@@ -167,7 +159,6 @@ describe('ServicesResolver (mocked)', () => {
       query: CREATE_SERVICE,
       variables: { data: { name: 'Dermatologie' } },
     });
-
     assert(response.body.kind === 'single');
     const created = response.body.singleResult.data?.createService;
     expect(created).toBeDefined();
@@ -175,26 +166,25 @@ describe('ServicesResolver (mocked)', () => {
     expect(created?.id).toBeDefined();
   });
 
-  it("met à jour un service", async () => {
+  it('met à jour un service', async () => {
     const response = await server.executeOperation<ResponseUpdateServiceData>({
       query: UPDATE_SERVICE,
-      variables: { updateServiceId: 'uuid-1', data: { name: 'Radiologie Avancée' } },
+      variables: { id: 'uuid-1', data: { name: 'Radiologie Avancée' } },
     });
-
     assert(response.body.kind === 'single');
     const updated = response.body.singleResult.data?.updateService;
-    expect(updated?.name).toBe('Radiologie Avancée');
-    expect(updated?.id).toBe('uuid-1');
+    expect(updated?.success).toBe(true);
+    expect(updated?.message).toBe('Service updated successfully.');
   });
 
   it('supprime un service', async () => {
     const response = await server.executeOperation<ResponseDeleteServiceData>({
       query: DELETE_SERVICE,
-      variables: { deleteServiceId: 'uuid-2' },
+      variables: { id: 'uuid-2' },
     });
-
     assert(response.body.kind === 'single');
     const deleted = response.body.singleResult.data?.deleteService;
-    expect(deleted).toBe(true);
+    expect(deleted?.success).toBe(true);
+    expect(deleted?.message).toBe('Service deleted successfully.');
   });
 });

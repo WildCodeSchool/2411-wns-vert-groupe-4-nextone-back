@@ -6,7 +6,11 @@ import {
     Column,
     CreateDateColumn,
     UpdateDateColumn,
+    OneToMany,
   } from 'typeorm';
+  import AuthorizationEntity  from './Authorization.entity';
+  // import TicketEntity from './Ticket.entity';
+  // import CompanyEntity from './Company.entity'; // commenté car pas encore créé
 
  
   @Entity()
@@ -22,7 +26,18 @@ import {
   
     @UpdateDateColumn()
     updatedAt!: Date;
+  
+  // Relations
+
+    // Un service peut avoir plusieurs autorisations
+  @OneToMany(() => AuthorizationEntity, (auth) => auth.service)
+  authorizations: AuthorizationEntity[];
+
+  // Un service peut avoir plusieurs tickets - en attente
+  // @OneToMany(() => TicketEntity, (ticket) => ticket.service)
+  // tickets: TicketEntity[];
+
+  // Un service appartient à une entreprise - en attente
+  // @ManyToOne(() => CompanyEntity, (company) => company.services)
+  // company: CompanyEntity;
   }
-  
-  
-  // Relations after

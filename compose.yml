@@ -49,7 +49,6 @@ services:
   #         target: /src
   #         ignore:
   #           - node_modules/
-
   db:
     image: postgres
     restart: always

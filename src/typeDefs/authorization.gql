@@ -1,0 +1,41 @@
+#authorization
+
+scalar DateTime
+scalar  UUID
+
+####### Types
+type Authorization {
+  serviceId: UUID!
+  managerId: UUID!
+  isActive: Boolean!
+  createdAt: DateTime
+}
+
+type Query {
+  getServiceAuthorizations(serviceId: UUID!): [Authorization!]!
+  getEmployeeAuthorizations(managerId: UUID!): [Authorization!]!
+}
+
+type Mutation {
+  addAuthorization(input: NewAuthInput!): Boolean!
+  updateAuthorization(input: UpdateAuthInput!): Boolean!
+  deleteAuthorization(serviceId: UUID!, managerId: UUID!): Boolean!
+}
+
+type AuthorizationResponse {
+  message: String!
+  success: Boolean!
+}
+
+
+### Input
+input NewAuthInput {
+  serviceId: UUID!
+  managerId: UUID!
+}
+
+input UpdateAuthInput {
+  serviceId: UUID!
+  managerId: UUID!
+  isActive: Boolean
+}
