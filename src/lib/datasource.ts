@@ -1,5 +1,6 @@
 import { ServiceEntity } from "../entities/Service.entity";
 import TicketEntity from "@/entities/Ticket.entity";
+import AuthorizationEntity from "@/entities/Authorization.entity";
 import { DataSource } from "typeorm";
 
 export default new DataSource({
@@ -9,6 +10,6 @@ export default new DataSource({
   username: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
   database: process.env.POSTGRES_DB,
-  entities: [TicketEntity, ServiceEntity],
+  entities: [TicketEntity, ServiceEntity, AuthorizationEntity],
   logging: ["error", "query"],
 });
