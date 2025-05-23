@@ -2,8 +2,7 @@
 
 HEALTHCHECK_URL="http://localhost:4005/graphql?query=%7B__typename%7D"
 
-echo "Démarrage du codegen & du serveur backend..."
-npm run codegen &  # Démarre le codegen en arrière-plan
+echo "Démarrage du serveur backend..."
 npm run start &  # Démarre le serveur en arrière-plan
 
 echo "Attente que le conteneur devienne healthy..."
