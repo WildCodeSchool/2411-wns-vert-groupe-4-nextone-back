@@ -1,29 +1,31 @@
 import SettingEntity from "@/entities/setting.entity";
-import { MutationCreateOneSettingsArgs, MutationUpdateSettingArgs } from "@/generated/graphql";
+import { DeleteResponse, MutationCreateServiceArgs, MutationUpdateSettingArgs } from "@/generated/graphql";
 import SettingsSystemService from "@/services/setting.service";
 
 const SettingService = SettingsSystemService.getService()
 
 export default {
   Query: {
-    findAllSettings: async (): Promise<SettingEntity[]> => {
-      console.log("ON EST DANS LE RESOLVER")
+    settings: async (): Promise<SettingEntity[]> => {
       const settings = await SettingService.findAll()
       return settings
     },
-    findSettingsById: async (_: any, args : { id: string}): Promise<SettingEntity | null> => {
+    setting: async (_: any, args : { id: string}): Promise<SettingEntity | null> => {
       const setting = await SettingService.findById(args.id)
       return setting
     }
   },
   Mutation: {
-    createOneSettings: async (_:any, args: MutationCreateOneSettingsArgs): Promise<SettingEntity> => {
+    createSetting: async (_:any, args: MutationCreateServiceArgs): Promise<SettingEntity> => {
       const created = await SettingService.createOne(args.data)
       return created
     },
-    deleteOneSetting: async (_: any, args: { id: string }): Promise<boolean> => {
+    deleteSetting: async (_: any, args: { id: string }): Promise<DeleteResponse> => {
       const isDeleted = await SettingService.deleteOne(args.id)
-      return isDeleted
+      return {
+        content:  `Setting ${isDeleted ? "" : "not "}deleted.`,
+        success: isDeleted
+      }
     },
     updateSetting: async (_: any, args: MutationUpdateSettingArgs): Promise<SettingEntity | null> => {
       const { id } = args.data;
@@ -31,4 +33,4 @@ export default {
       return updated
     }
   }
-}
+} 

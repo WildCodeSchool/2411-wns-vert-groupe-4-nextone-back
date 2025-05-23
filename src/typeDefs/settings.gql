@@ -10,21 +10,24 @@ type Query {
   setting(id: ID!): Setting
 }
 
+type DeleteResponse {
+  content: String!
+  success: Boolean!
+}
+
 type Mutation {
   createSetting(data: CreateSettingInput!): Setting!
-  deleteSetting(id: ID!): Boolean!
+  deleteSetting(id: ID!): DeleteResponse!
   updateSetting(data: UpdateSettingInput!): Setting
 }
 
 input CreateSettingInput {
   name: String!
-
 }
 
 input UpdateSettingInput {
   id: ID!
   name: String
-
 }
 
 
