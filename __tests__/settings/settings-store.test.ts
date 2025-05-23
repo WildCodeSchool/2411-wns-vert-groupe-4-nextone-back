@@ -13,26 +13,22 @@ import {
   MutationCreateSettingArgs,
   MutationDeleteSettingArgs,
   MutationUpdateSettingArgs,
-  MutationUpdateTicketArgs,
   QueryGetTicketArgs,
   Setting,
 } from "../../src/generated/graphql";
-import { CREATE_SETTING, DELETE_SETTING, SETTING, SETTINGS, UPDATE_SETTING } from "../../src/queries/setting.query"
+import {
+  CREATE_SETTING,
+  DELETE_SETTING,
+  SETTING,
+  SETTINGS,
+  UPDATE_SETTING,
+} from "../../src/queries/setting.query";
 import assert from "assert";
 
 let server: ApolloServer;
 const schema = makeExecutableSchema({ typeDefs, resolvers });
 const store = createMockStore({ schema });
 
-type TresponseALL = {
-  settings: Setting[]
-}
-type TResponse = {
-  setting: Setting
-}
-type TresponseDelete = {
-  message: DeleteResponse
-}
 const fakeSettings: Setting[] = [
   {
     id: "1",
@@ -43,6 +39,17 @@ const fakeSettings: Setting[] = [
     name: "setting 2",
   },
 ];
+
+ type TresponseALL = {
+  settings: Setting[]
+}
+ type TResponse = {
+  setting: Setting
+}
+ type TresponseDelete = {
+  message: DeleteResponse
+}
+
 
 store.set("Query", "ROOT", "settings", fakeSettings);
 
@@ -57,7 +64,7 @@ const mockedResolver = (store: IMockStore) => ({
   },
   Mutation: {
     createSetting: async (_: any, args: MutationCreateServiceArgs) => {
-      store.set("Setting", "3", { name: args.data.name});
+      store.set("Setting", "3", { name: args.data.name });
       return store.get("Setting", "3");
     },
     deleteSetting: async (
@@ -90,90 +97,101 @@ beforeAll(async () => {
 });
 
 describe("TESTS SETTINGS DANS UN STORE", () => {
-
   it("RECUPERATION DES SETTINGS", async () => {
     const response = await server.executeOperation<TresponseALL>({
       query: SETTINGS,
     });
 
-    assert(response.body.kind === "single")
-    expect(response.body.singleResult.errors).toBeUndefined()
+    assert(response.body.kind === "single");
+    expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data).toEqual<TresponseALL>({
-      settings: fakeSettings
-    })
+      settings: fakeSettings,
+    });
   });
 
   it("RECUPERATION D'UN SETTING", async () => {
-    const response = await server.executeOperation<TResponse,QueryGetTicketArgs>({
+    const response = await server.executeOperation<
+      TResponse,
+      QueryGetTicketArgs
+    >({
       query: SETTING,
       variables: {
-        id: "1"
-      }
-    })
+        id: "1",
+      },
+    });
 
-    assert(response.body.kind === 'single')
-    expect(response.body.singleResult.errors).toBeUndefined()
+    assert(response.body.kind === "single");
+    expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data).toEqual<TResponse>({
-      setting: fakeSettings[0]
-    })
-  })
+      setting: fakeSettings[0],
+    });
+  });
 
   it("CREATION D'UN SETTING", async () => {
-    const response = await server.executeOperation<TResponse, MutationCreateSettingArgs>({
+    const response = await server.executeOperation<
+      TResponse,
+      MutationCreateSettingArgs
+    >({
       query: CREATE_SETTING,
       variables: {
         data: {
-          name: "Nouveau setting"
-        }
-      }
-    })
+          name: "Nouveau setting",
+        },
+      },
+    });
 
-    assert(response.body.kind === "single")
-    expect(response.body.singleResult.errors).toBeUndefined()
+    assert(response.body.kind === "single");
+    expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data).toEqual<TResponse>({
       setting: {
         id: "3",
-        name: "Nouveau setting"
-      }
-    })
-  })
+        name: "Nouveau setting",
+      },
+    });
+  });
 
   it("UPDATE DU SETTING CREE", async () => {
-    const response = await server.executeOperation<TResponse, MutationUpdateSettingArgs>({
+    const response = await server.executeOperation<
+      TResponse,
+      MutationUpdateSettingArgs
+    >({
       query: UPDATE_SETTING,
       variables: {
         data: {
           id: "3",
-          name: "Nouveau nom."
-        }
-      }
-    })
+          name: "Nouveau nom.",
+        },
+      },
+    });
 
-    assert(response.body.kind === "single")
-    expect(response.body.singleResult.errors).toBeUndefined()
+    assert(response.body.kind === "single");
+    expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data).toEqual<TResponse>({
       setting: {
         id: "3",
-        name: "Nouveau nom."
-      }
-    })
-  })
+        name: "Nouveau nom.",
+      },
+    });
+  });
 
   it("DELETE DU SETTING", async () => {
-    const response = await server.executeOperation<TresponseDelete, MutationDeleteSettingArgs>({
+    const response = await server.executeOperation<
+      TresponseDelete,
+      MutationDeleteSettingArgs
+    >({
       query: DELETE_SETTING,
       variables: {
-        id : "3"
-      }
-    })
+        id: "3",
+      },
+    });
 
-    assert(response.body.kind === 'single')
-    expect(response.body.singleResult.errors).toBeUndefined()
+    assert(response.body.kind === "single");
+    expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data).toEqual<TresponseDelete>({
       message: {
         content: "Setting deleted",
-        success: true
-      }
-    })
-  })
+        success: true,
+      },
+    });
+  });
 });
