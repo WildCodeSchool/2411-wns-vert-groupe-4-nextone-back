@@ -8,6 +8,7 @@ module.exports = {
   globals: {
     "ts-jest": {
       diagnostics: true,
+      useESM: true
     },
   },
   transformIgnorePatterns: [
@@ -17,4 +18,5 @@ transform: {
     "^.+\.tsx?$": ["ts-jest", {}],
     "^.+\.js$": "babel-jest",
   },
+  extensionsToTreatAsEsm: ['.ts'],
 };
