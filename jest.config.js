@@ -1,9 +1,6 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} **/
 module.exports = {
   testEnvironment: "node",
-  transform: {
-    "^.+.tsx?$": ["ts-jest", {}],
-  },
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
@@ -16,4 +13,8 @@ module.exports = {
   transformIgnorePatterns: [
   "/node_modules/(?!jose)"  // ← autorise la transformation de jose
 ],
+transform: {
+    "^.+\.tsx?$": ["ts-jest", {}],
+    "^.+\.js$": "babel-jest",
+  },
 };
