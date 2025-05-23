@@ -58,6 +58,7 @@ beforeAll(async () => {
   try {
     if (!testDataSource.isInitialized) {
       await testDataSource.initialize();
+      await testDataSource.query("TRUNCATE TABLE company CASCADE");
     }
   } catch (error) {
     console.error("Error initializing test database:", error);
@@ -68,10 +69,12 @@ beforeAll(async () => {
 afterAll(async () => {
   //ON VIDE LA DB DE TEST
   if (testDataSource.isInitialized) {
-    await testDataSource.dropDatabase();
+
     await testDataSource.destroy();
   }
+  jest.clearAllMocks();
 });
+
 
 type TResponse = {
   company: Company;
