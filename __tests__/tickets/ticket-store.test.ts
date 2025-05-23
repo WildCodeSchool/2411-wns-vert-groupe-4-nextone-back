@@ -8,7 +8,7 @@ import {
 import { ApolloServer } from "@apollo/server";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import TicketResolver from "../../src/resolvers/ticket.resolver";
-import { GenerateTicketInput } from "../../src/generated/graphql";
+import { DeletedTicketResponse, GenerateTicketInput, MutationUpdateTicketArgs, UpdateTicketInput } from "../../src/generated/graphql";
 import { loadFilesSync } from "@graphql-tools/load-files";
 import path from "path";
 
@@ -45,6 +45,29 @@ export const FIND_TICKET_BY_ID = `#graphql
         code
       }
     }
+`;
+
+export const DELETE_TICKET = `#graphql
+    mutation deleteTicket($deleteTicketId: ID!) {
+      deleteTicket(id: $deleteTicketId) {
+        message
+        success
+      }
+}
+`;
+
+export const UPDATE_TICKET = `#graphql
+    mutation updateTicket($data: UpdateTicketInput!) {
+      updateTicket(data: $data) {
+        code
+        id
+        firstName
+        lastName
+        email
+        phone
+        status
+      }
+}
 `;
 
 type ResponseData = {
@@ -84,6 +107,25 @@ beforeAll(async () => {
         store.set("Ticket", "3", data);
         return store.get("Ticket", "3");
       },
+      deleteTicket: (_: null, { id }: { id: string }) => {
+        const ticketId = id;
+        const ticket = store.get("Ticket", ticketId);
+        if (!ticket) {
+          return { message: "Ticket not found", success: false };
+        }
+        store.reset()
+        store.set("Query", "ROOT", "getTickets", ticketsData);
+        return { message: "Ticket deleted", success: true };
+      },
+      updateTicket: (_: null, args: MutationUpdateTicketArgs) => {
+        const ticketId = args.data.id;
+        const ticket = store.get("Ticket", ticketId);
+        if (!ticket) {
+          return { message: "Ticket not found", success: false };
+        }
+        store.set("Ticket", ticketId, { ...args.data });
+        return store.get("Ticket", ticketId);
+      }
     },
   });
   server = new ApolloServer({
@@ -129,7 +171,7 @@ describe("Test sur les tickets", () => {
     });
   })
 
-  it("Récupération d'un ticket par son id après l'ajout", async () => {
+  it("Récupération d'un ticket après son ajout", async () => {
     const response = await server.executeOperation<ResponseData>({
       query: FIND_TICKET_BY_ID,
       variables: { getTicketId: "3" },
@@ -138,6 +180,34 @@ describe("Test sur les tickets", () => {
     assert(response.body.kind === "single");
     expect(response.body.singleResult.data).toEqual({
       getTicket: { code: generateTicketExample.code },
+    });
+  })
+
+  it("Suppression d'un ticket", async () => {
+    const response = await server.executeOperation<ResponseData>({
+      query: DELETE_TICKET,
+      variables: { deleteTicketId: "3" },
+    });
+    
+    assert(response.body.kind === "single");
+    expect(response.body.singleResult.data).toEqual({
+      deleteTicket: { message: "Ticket deleted", success: true },
+    });
+  })
+
+  it("Mise à jour d'un ticket", async () => {
+    const { id, code, ...ticketWithoutId } = ticketsData[0]
+
+    const newTicketCode = "008"
+
+    const response = await server.executeOperation<Ticket>({
+      query: UPDATE_TICKET,
+      variables: { data: { id: id, code: newTicketCode } },
+    });
+    
+    assert(response.body.kind === "single");
+    expect(response.body.singleResult.data).toEqual({
+      updateTicket: { id: id, code: newTicketCode, ...ticketWithoutId },
     });
   })
 });
