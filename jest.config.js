@@ -13,4 +13,7 @@ module.exports = {
       diagnostics: true,
     },
   },
+  transformIgnorePatterns: [
+  "/node_modules/(?!jose)"  // ← autorise la transformation de jose
+],
 };
