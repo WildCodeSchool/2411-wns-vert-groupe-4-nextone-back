@@ -25,6 +25,5 @@ export const authContext = async ({ req, res }: { req: Request; res: Response })
       console.error("Erreur lors de la vérification du token :", err);
     }
   }
-  console.log(manager)
   return { req, res, manager };
 };

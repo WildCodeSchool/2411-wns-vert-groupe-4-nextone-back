@@ -1,16 +1,20 @@
 import ManagerService from "@/services/manager.service";
-import { MutationRegisterArgs, QueryLoginArgs } from "@/generated/graphql";
+import { MutationRegisterArgs, QueryLoginArgs, Message, QueryManagerArgs, MutationUpdateManagerArgs } from "@/generated/graphql";
 import { MyContext } from "..";
 import Cookies from "cookies";
 import { validate } from "class-validator";
 import { plainToInstance } from "class-transformer";
 import ManagerEntity, { LoginInput } from "@/entities/Manager.entity";
-import { Message } from "@/generated/graphql";
 
 export default {
     Query: {
-        managers: async () => {
+        managers: async ( _: any,): Promise<ManagerEntity[]> => {
             return await new ManagerService().listManagers();
+        },
+
+        manager: async (_: any, { id }: QueryManagerArgs): Promise<ManagerEntity> => {
+          const manager = await new ManagerService().getManagerById(id);
+          return manager;
         },
 
         login: async (_: any, { infos }: QueryLoginArgs, ctx: MyContext) => {
@@ -50,6 +54,24 @@ export default {
                 throw new Error(messages.join(" | "));
             }
             return await new ManagerService().create({ ...infos });
+        },
+
+        deleteManager: async (_: any, { id }: QueryManagerArgs, ctx: MyContext): Promise<Message> => {
+            const isManagerDeleted = await new ManagerService().deleteManager(id);
+            if(!isManagerDeleted) {
+            return { content: "Manager not found", status: isManagerDeleted };
+            }
+            return { content: "Manager deleted", status: isManagerDeleted };
+        },
+
+        updateManager: async (_: any, { data }: MutationUpdateManagerArgs, ctx: MyContext): Promise<ManagerEntity> => {
+        if (!ctx.manager) {
+            throw new Error("Non autorisé");
+        }
+        if(!data || Object.keys(data).length === 0) {
+            throw new Error("Vous modifiez aucune donnée");
+        }
+        return await new ManagerService().updateManager(ctx.manager.id, data);
         }
     },
 };

@@ -5,7 +5,8 @@ import { addMocksToSchema, createMockStore, IMockStore } from "@graphql-tools/mo
 import { loadFilesSync } from "@graphql-tools/load-files";
 import path from "path";
 import Manager from "../../src/entities/Manager.entity";
-import { InputRegister, ManagerRole, InputLogin } from "../../src/generated/graphql";
+import { InputRegister, ManagerRole, InputLogin, MutationUpdateManagerArgs } from "../../src/generated/graphql";
+import { ListCollectionsCursor } from "typeorm";
 
 const managerTypeDefs = loadFilesSync(path.join(__dirname, "../../src/typeDefs/manager.gql"), {
   extensions: ["gql"],
@@ -56,6 +57,45 @@ export const LOGOUT_MANAGER = `#graphql
     logout {
       content
       status
+    }
+  }
+`
+
+export const FIND_MANAGER_BY_ID = `#graphql
+  query manager($managerId: ID!) {
+    manager(id: $managerId) {
+      id
+      first_name
+      last_name
+      email
+      role
+      is_globally_active
+      created_at
+      updated_at
+    }
+  }
+`
+
+export const DELETE_MANAGER = `#graphql
+  mutation DeleteManager($deleteManagerId: ID!) {
+    deleteManager(id: $deleteManagerId) {
+      content
+      status
+    }
+  }
+` 
+
+export const UPDATE_MANAGER = `#graphql
+  mutation updateManager($data: UpdateManagerInput!) {
+    updateManager(data: $data) {
+      id
+      first_name
+      last_name
+      email
+      role
+      is_globally_active
+      created_at
+      updated_at
     }
   }
 `
@@ -114,6 +154,10 @@ beforeAll(async () => {
         return store.get("Query", "ROOT", "managers")
       },
 
+      manager: (_: any, { id }: { id: string }) => {
+        return store.get("Manager", id);
+      },
+
       login: (_: any, { infos }: { infos: InputLogin }) => {
         if (infos.email === "jean@example.com" && infos.password === "motdepasse") {
           return {
@@ -132,6 +176,18 @@ beforeAll(async () => {
         const {password, ...result} = store.get("Manager", "3") as Manager;
         return result
       },
+
+      deleteManager: (_: null, { id }: { id: string }) => {
+        store.get("Manager", id);
+        store.reset()
+        store.set("Query", "ROOT", "managers", listManagers);
+        return { content: "Manager deleted", status: true };
+      },
+
+      updateManager: (_: null, { data }: MutationUpdateManagerArgs) => {
+        store.set("Manager", "1", { ...mockManager, ...data });
+        return store.get("Manager", "1");
+      }
     },
   });
 
@@ -143,6 +199,7 @@ beforeAll(async () => {
     }),
   });
   store.set("Query", "ROOT", "managers", listManagers);
+  store.set("Manager", "1", mockManager);
 });
 
 describe("Test sur les managers", () => {
@@ -206,4 +263,58 @@ describe("Test sur les managers", () => {
       },
     });
   });
+
+  it("Récupération d'un ticket par son id après l'ajout", async () => {
+    const response = await server.executeOperation<ResponseListManager>({
+      query: FIND_MANAGER_BY_ID,
+      variables: { managerId: "1" },
+    });
+    
+    assert(response.body.kind === "single");
+    expect(response.body.singleResult.data).toEqual({
+      manager: mockManager
+    });
+  })
+
+   it("Suppression d'un ticket", async () => {
+    const response = await server.executeOperation<ResponseListManager>({
+      query: DELETE_MANAGER,
+      variables: { deleteManagerId: "1" },
+    });
+    
+    assert(response.body.kind === "single");
+    expect(response.body.singleResult.data).toEqual({
+      deleteManager: { content: "Manager deleted", status: true },
+    });
+  })
+
+   it("Mise à jour d'un manager", async () => {
+    const updatedFirstName = "Jean-Michel";
+    const updatedLastName = "Durand";
+
+    const response = await server.executeOperation({
+      query: UPDATE_MANAGER,
+      variables: {
+        data: {
+          first_name: updatedFirstName,
+          last_name: updatedLastName,
+        },
+      },
+    });
+
+    assert(response.body.kind === "single");
+    const result = response.body.singleResult.data?.updateManager;
+
+    expect(result).toEqual({
+      id: "1",
+      first_name: updatedFirstName,
+      last_name: updatedLastName,
+      email: mockManager.email,
+      role: mockManager.role,
+      is_globally_active: mockManager.is_globally_active,
+      created_at: mockManager.created_at,
+      updated_at: mockManager.updated_at,
+    });
+  });
+
 });

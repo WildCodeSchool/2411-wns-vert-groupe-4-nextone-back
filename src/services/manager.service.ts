@@ -1,7 +1,8 @@
 import ManagerRepository from "@/repositories/Manager.repository";
-import { MutationRegisterArgs, QueryLoginArgs } from "@/generated/graphql";
+import { MutationRegisterArgs, QueryLoginArgs, MutationUpdateManagerArgs } from "@/generated/graphql";
 import * as argon2 from "argon2";
 import { SignJWT } from "jose";
+import ManagerEntity from "@/entities/Manager.entity";
 
 export default class ManagerService {
     db: ManagerRepository;
@@ -16,6 +17,14 @@ export default class ManagerService {
 
     async findManagerByEmail(email: string) {
         return await this.db.findOneBy({ email });
+    }
+
+    async getManagerById(id: string) {
+        const manager = await this.db.findOne({ where: { id } });
+        if (!manager) {
+        throw new Error("No manager found");
+        }
+        return manager;
     }
 
     async create(manager : MutationRegisterArgs["infos"]) {
@@ -40,5 +49,19 @@ export default class ManagerService {
         .setExpirationTime('7d')
         .sign(secret);
         return { manager, token };
+    }
+
+    async deleteManager(id: string) {
+        const deletedManager = await this.db.delete(id);
+        if (deletedManager.affected === 0) {
+        return false
+        }
+        return true;
+    }
+
+    async updateManager(id: string, data: Partial<Pick<ManagerEntity, 'first_name' | 'last_name'>>) {
+        const managerFound = await this.getManagerById(id);
+        const updatedManager = this.db.merge(managerFound, data);
+        return await this.db.save(updatedManager);
     }
 }
