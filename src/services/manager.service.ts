@@ -1,5 +1,5 @@
 import ManagerRepository from "@/repositories/Manager.repository";
-import { MutationRegisterArgs, QueryLoginArgs, MutationUpdateManagerArgs } from "@/generated/graphql";
+import { MutationRegisterArgs, QueryLoginArgs } from "@/generated/graphql";
 import * as argon2 from "argon2";
 import { SignJWT } from "jose";
 import ManagerEntity from "@/entities/Manager.entity";

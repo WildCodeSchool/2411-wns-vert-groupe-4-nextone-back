@@ -12,11 +12,17 @@ module.exports = {
     },
   },
   transformIgnorePatterns: [
-  "/node_modules/(?!jose)/"  // ← autorise la transformation de jose
-],
-transform: {
+    "/node_modules/(?!jose)/" 
+  ],
+  transform: {
     "^.+\.tsx?$": ["ts-jest", {}],
     "^.+\.js$": "babel-jest",
   },
+
   extensionsToTreatAsEsm: ['.ts'],
+  globals: {
+    'ts-jest': {
+      useESM: true,
+    },
+  },
 };

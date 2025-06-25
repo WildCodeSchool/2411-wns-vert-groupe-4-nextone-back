@@ -1,5 +1,3 @@
-jest.mock("jose");
-
 import assert from "assert";
 import { ApolloServer } from "@apollo/server";
 import { makeExecutableSchema } from "@graphql-tools/schema";
@@ -8,7 +6,6 @@ import { loadFilesSync } from "@graphql-tools/load-files";
 import path from "path";
 import Manager from "../../src/entities/Manager.entity";
 import { InputRegister, ManagerRole, InputLogin, MutationUpdateManagerArgs } from "../../src/generated/graphql";
-import { ListCollectionsCursor } from "typeorm";
 
 const managerTypeDefs = loadFilesSync(path.join(__dirname, "../../src/typeDefs/manager.gql"), {
   extensions: ["gql"],
