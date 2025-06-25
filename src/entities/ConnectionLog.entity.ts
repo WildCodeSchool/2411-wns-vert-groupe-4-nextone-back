@@ -6,22 +6,34 @@ import {
     Timestamp,
     ManyToOne,
 } from "typeorm";
+import { ConnectionEnum } from "@/generated/graphql";
+// import ManagerEntity from "@/entities/Manager.entity";
 
 @Entity({ name: "connection_log" })
 export default class ConnectionLogEntity {
-    @PrimaryGeneratedColumn("uuid")
-    id: string;
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
 
-    @Column({ default: "VALIDATED" })
-    connectionLog: string; //à remplacer par un enum
+  @Column({
+    type: "enum",
+    enum: ConnectionEnum,
+  })
+  type: ConnectionEnum; 
 
-    @Column()
-    managerId: string;
+  @Column()
+  managerId: string;
 
-    @CreateDateColumn()
-    createdAt: Date;
+  @CreateDateColumn()
+  createdAt: Date;
+}
 
     // Relations
     // @ManyToOne(() => CompanyEntity, (company) => company.connectionLogs)
     // company: CompanyEntity;
-}
+
+    // @ManyToOne(() => ManagerEntity, (manager) => manager.connectionLogs, {
+    //onDelete: "CASCADE",
+// })
+// manager: ManagerEntity;
+
+//}

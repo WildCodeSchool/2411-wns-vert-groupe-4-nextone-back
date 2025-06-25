@@ -5,3 +5,5 @@ db.env
 .vscode
 frontend
 src/generated
+db-test.env
+*.env

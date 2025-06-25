@@ -1,0 +1,22 @@
+enum ConnectionEnum {
+  Login
+  Logout
+}
+
+type ConnectionLog {
+  id: ID!
+  type: ConnectionEnum!
+  managerId: String!
+  createdAt: String!
+}
+
+ type Query {
+  getConnectionLogs: [ConnectionLog!]!
+  getLoginLogs: [ConnectionLog!]!
+  getLogoutLogs: [ConnectionLog!]!
+  getEmployeeConnectionLogs(managerId: String!): [ConnectionLog!]!
+}
+
+ type Mutation {
+  createConnectionLog(type: ConnectionEnum!, managerId: String!): ConnectionLog!
+}
