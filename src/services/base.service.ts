@@ -1,10 +1,8 @@
 import { DeepPartial, EntityTarget, ObjectLiteral, Repository } from "typeorm";
-import  AppDataSource  from "../lib/datasource";
+import AppDataSource from "../lib/datasource";
 import { CreateCompanyInput } from "@/generated/graphql";
 
-
 export default abstract class BaseService<T extends ObjectLiteral> {
-
   protected repo: Repository<T>;
 
   constructor(entity: EntityTarget<T>) {
@@ -13,12 +11,11 @@ export default abstract class BaseService<T extends ObjectLiteral> {
 
   //CREER UNE INSTANCE DE T
   public async createOne(entity: DeepPartial<T>) {
-    console.log('ENTITY : ', entity)
     const created = await this.repo.save(this.repo.create(entity));
     return created;
   }
 
-  //RECUPERER TOUTES LES INSTANCE
+  //RECUPERER TOUTES LES INSTANCES
   public async findAll() {
     const list = await this.repo.find();
     return list;
@@ -34,13 +31,24 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     return ad;
   }
 
+  public async findByProperty<K extends keyof T>(
+    fields: K,
+    value: T[K]
+  ): Promise<T[]> {
+    const entities = await this.repo.find({
+      where: {
+        [fields]: value,
+      } as any,
+    });
+    
+    return entities;
+  }
+
   //DELETE
   public async deleteOne(id: string): Promise<boolean> {
-    console.log("ID DANS SERVICE : ", id)
-    const deleted = await this.repo.delete({ id: id as any});
-
+    const deleted = await this.repo.delete({ id: id as any });
     if (!deleted.affected || deleted.affected === 0) {
-      return false
+      return false;
     }
     return true;
   }
