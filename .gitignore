@@ -1,7 +1,7 @@
 node_modules
 db.env
 db_test.env
-.env
+*.env
 .qodo
 .vscode
 frontend
