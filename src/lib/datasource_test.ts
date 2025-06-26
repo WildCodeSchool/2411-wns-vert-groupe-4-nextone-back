@@ -6,6 +6,7 @@ import AuthorizationEntity from "@/entities/Authorization.entity";
 import SettingEntity from "@/entities/setting.entity";
 import ManagerEntity from "@/entities/Manager.entity";
 import TicketLogEntity from "@/entities/TicketLog.entity";
+// import SettingEntity from "@/entities/setting.entity";
 
 export default new DataSource({
   type: "postgres",
