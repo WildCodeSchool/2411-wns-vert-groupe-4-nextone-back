@@ -45,9 +45,9 @@ type Message {
 }
 
 type Mutation {
-  register(infos: InputRegister!): Manager
+  createManager(infos: InputRegister!): Manager
   deleteManager(id: ID!): Message!
-  updateManager(data: UpdateManagerInput!): ManagerWithoutPassword!
+  updateManager(id: ID!, data: UpdateManagerInput!): ManagerWithoutPassword!
 }
 
 input InputRegister {
@@ -67,4 +67,5 @@ input InputLogin {
 input UpdateManagerInput {
   first_name: String
   last_name: String
+  role: ManagerRole
 }

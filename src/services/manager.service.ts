@@ -1,5 +1,5 @@
 import ManagerRepository from "@/repositories/Manager.repository";
-import { MutationRegisterArgs, QueryLoginArgs } from "@/generated/graphql";
+import { MutationCreateManagerArgs, QueryLoginArgs } from "@/generated/graphql";
 import * as argon2 from "argon2";
 import { SignJWT } from "jose";
 import ManagerEntity from "@/entities/Manager.entity";
@@ -27,7 +27,7 @@ export default class ManagerService {
         return manager;
     }
 
-    async create(manager : MutationRegisterArgs["infos"]) {
+    async create(manager : MutationCreateManagerArgs["infos"]) {
         const newManager = this.db.create({...manager});
         const savedManager = await this.db.save(newManager);
         return savedManager;
@@ -48,6 +48,7 @@ export default class ManagerService {
         .setIssuedAt()
         .setExpirationTime('7d')
         .sign(secret);
+        manager.is_globally_active = true
         return { manager, token };
     }
 
@@ -59,7 +60,7 @@ export default class ManagerService {
         return true;
     }
 
-    async updateManager(id: string, data: Partial<Pick<ManagerEntity, 'first_name' | 'last_name'>>) {
+    async updateManager(id: string, data: Partial<Pick<ManagerEntity, 'first_name' | 'last_name' | 'role'>>) {
         const managerFound = await this.getManagerById(id);
         const updatedManager = this.db.merge(managerFound, data);
         return await this.db.save(updatedManager);

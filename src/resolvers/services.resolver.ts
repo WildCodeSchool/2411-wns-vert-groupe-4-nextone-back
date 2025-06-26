@@ -26,14 +26,17 @@ export default {
   },
 
   Mutation: {
-    createService: async (
+     createService: async (
       _: any,
       { data }: MutationCreateServiceArgs,
-      ctx: MyContext
+      { manager }: MyContext
     ) => {
-      const newService = await new ServicesService().createService(data);
-      return newService;
-    },
+    if (!manager || (manager.role !== 'SUPER_ADMIN')) {
+      throw new Error("Unauthorized: insufficient permissions");
+    }
+    const newService = await new ServicesService().createService(data);
+    return newService;
+  },
 
     updateService: async (
       _: any,

@@ -55,8 +55,11 @@ export default {
     updateCompany: async (
       _: any,
       args: MutationUpdateCompanyArgs,
-      ctx: MyContext
+      {manager}: MyContext
     ): Promise<CompanyEntity | null> => {
+      if (!manager || (manager.role !== 'SUPER_ADMIN')) {
+        throw new Error("Unauthorized: insufficient permissions");
+      }
       const partialCompany: Partial<CompanyEntity> = { ...args.data };
       const updatedCompany = await companyService.updateOne(
         args.data.id,

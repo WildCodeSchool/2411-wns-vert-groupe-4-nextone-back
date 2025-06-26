@@ -1,10 +1,29 @@
 import ManagerService from "@/services/manager.service";
-import { MutationRegisterArgs, QueryLoginArgs, Message, QueryManagerArgs, MutationUpdateManagerArgs } from "@/generated/graphql";
+import { MutationCreateManagerArgs, QueryLoginArgs, Message, QueryManagerArgs, MutationUpdateManagerArgs } from "@/generated/graphql";
 import { MyContext } from "..";
 import Cookies from "cookies";
 import { validate } from "class-validator";
 import { plainToInstance } from "class-transformer";
 import ManagerEntity, { LoginInput, UpdateInput } from "@/entities/Manager.entity";
+
+//Le super_admin gère admin et operator, et admin gère un operator
+function checkAuthorization(currentRole: string, targetRole?: string) {
+  const allowedCreators = ["SUPER_ADMIN", "ADMIN"];
+  if (!allowedCreators.includes(currentRole)) {
+    throw new Error("Non autorisé : seuls les superAdmin ou admin ont des droits sur les operators.");
+  }
+  if (!targetRole) {
+    throw new Error("Le rôle est requis.");
+  }
+  const roleHierarchy = {
+    SUPER_ADMIN: ["ADMIN", "OPERATOR"],
+    ADMIN: ["OPERATOR"]
+  };
+  const allowedRoles = roleHierarchy[currentRole as keyof typeof roleHierarchy];
+  if (!allowedRoles.includes(targetRole)) {
+    throw new Error("Non autorisé : vous ne pouvez pas gérer un utilisateur avec ce rôle.");
+  }
+}
 
 export default {
     Query: {
@@ -19,6 +38,9 @@ export default {
 
         login: async (_: any, { infos }: QueryLoginArgs, ctx: MyContext) => {
             const { res } = ctx;
+            if(ctx.manager !== null && ctx.manager.email !== infos.email) {
+                throw new Error("Veuillez vous déconnecter");
+            }
             const loginInfos = plainToInstance(LoginInput, infos);
             const errors = await validate(loginInfos);
             if (errors.length > 0) {
@@ -38,14 +60,19 @@ export default {
                 return { content: "Vous avez déjà été déconnecté", status: false };
             }
             cookies.set("token");
+            ctx.manager.is_globally_active = false
             return { content: "Vous êtes déconnecté", status: true };
         },
     },
     Mutation: {  
-        register: async (_: any, { infos }: MutationRegisterArgs, ctx: MyContext): Promise<ManagerEntity> => {
+        createManager: async (_: any, { infos }: MutationCreateManagerArgs, { manager }: MyContext): Promise<ManagerEntity> => {
+            if (!manager) {
+                throw new Error("Non autorisé : veuillez vous connecter.");
+            }
+            checkAuthorization(manager.role, infos.role);
             const managerExists = await new ManagerService().findManagerByEmail(infos.email);
             if (managerExists) {
-                throw new Error("Cet email est déjà pris!");
+                throw new Error("Cet email est déjà pris !");
             }
             const newManager = plainToInstance(ManagerEntity, infos);
             const errors = await validate(newManager);
@@ -56,28 +83,44 @@ export default {
             return await new ManagerService().create({ ...infos });
         },
 
-        deleteManager: async (_: any, { id }: QueryManagerArgs, ctx: MyContext): Promise<Message> => {
-            const isManagerDeleted = await new ManagerService().deleteManager(id);
-            if(!isManagerDeleted) {
-            return { content: "Manager not found", status: isManagerDeleted };
+        deleteManager: async (_: any, { id }: QueryManagerArgs, { manager }: MyContext): Promise<Message> => {
+            if (!manager) {
+                throw new Error("Non autorisé : veuillez vous connecter.");
             }
-            return { content: "Manager deleted", status: isManagerDeleted };
+            const targetManager = await new ManagerService().getManagerById(id);
+            if (!targetManager) {
+                return { content: "Manager introuvable", status: false };
+            }
+            checkAuthorization(manager.role, targetManager.role);
+            const isManagerDeleted = await new ManagerService().deleteManager(id);
+            if (!isManagerDeleted) {
+                return { content: "Manager not found", status: false };
+            }
+            return { content: "Manager deleted", status: true };
         },
 
-        updateManager: async (_: any, { data }: MutationUpdateManagerArgs, ctx: MyContext): Promise<ManagerEntity> => {
-        if (!ctx.manager) {
-            throw new Error("Non autorisé");
-        }
-        if (!data || Object.keys(data).length === 0) {
-            throw new Error("Vous modifiez aucune donnée");
-        }
-        const updatedManager = plainToInstance(UpdateInput, { ...ctx.manager, ...data }, { exposeDefaultValues: true });
-        const errors = await validate(updatedManager, { skipMissingProperties: true });
-        if (errors.length > 0) {
-            const messages = errors.flatMap(err => Object.values(err.constraints || {}));
-            throw new Error(messages.join(" | "));
-        }
-        return await new ManagerService().updateManager(ctx.manager.id, data);
+        updateManager: async (_: any, { id, data }: MutationUpdateManagerArgs, { manager }: MyContext): Promise<ManagerEntity> => {
+            if (!manager) {
+                throw new Error("Non autorisé : veuillez vous connecter.");
+            }
+            if (!id) {
+                throw new Error("L'ID du manager à modifier est requis.");
+            }
+            if (!data || Object.keys(data).length === 0) {
+                throw new Error("Aucune donnée à modifier.");
+            }
+            const targetManager = await new ManagerService().getManagerById(id);
+            if (!targetManager) {
+                throw new Error("Manager à modifier introuvable.");
+            }
+            checkAuthorization(manager.role, targetManager.role);
+            const updatedManager = plainToInstance(UpdateInput, { ...targetManager, ...data }, { exposeDefaultValues: true });
+            const errors = await validate(updatedManager, { skipMissingProperties: true });
+            if (errors.length > 0) {
+                const messages = errors.flatMap(err => Object.values(err.constraints || {}));
+                throw new Error(messages.join(" | "));
+            }
+            return await new ManagerService().updateManager(id, data);
         }
     },
 };
