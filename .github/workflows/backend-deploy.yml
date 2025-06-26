@@ -5,8 +5,28 @@ on: push
 jobs:
   test-backend:
     uses: ./.github/workflows/backend-pr-checks.yml
-  docker:
+  build-backend:
     needs: test-backend
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+      - name: Build the backend
+        run: npm run build
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-dist
+          path: dist/
+  docker:
+    needs: [test-backend, build-backend]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
@@ -19,9 +39,18 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-dist
+          path: dist/
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
+          context: .
+          file: ./Dockerfile.prod
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/nextone-back:latest
           platforms: linux/amd64,linux/arm64,linux/x86_64

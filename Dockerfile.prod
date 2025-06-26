@@ -1,0 +1,11 @@
+FROM node:lts-alpine
+
+WORKDIR /app
+
+COPY package.json .
+RUN npm install --only=production
+
+COPY dist/ ./dist
+
+COPY scripts/wait-for-healthcheck.sh /usr/local/bin/wait-for-healthcheck.sh
+RUN chmod +x /usr/local/bin/wait-for-healthcheck.sh

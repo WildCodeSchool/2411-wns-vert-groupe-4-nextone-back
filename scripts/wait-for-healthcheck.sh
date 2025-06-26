@@ -3,7 +3,7 @@
 HEALTHCHECK_URL="http://localhost:4005/graphql?query=%7B__typename%7D"
 
 echo "Démarrage du serveur backend..."
-npm run start:prod &  # Démarre le serveur en arrière-plan
+npm run start:prod 
 
 echo "Attente que le conteneur devienne healthy..."
 
@@ -16,6 +16,5 @@ while ! curl -fs $HEALTHCHECK_URL -H 'Apollo-Require-Preflight: true'; do
         exit 1
     fi
 done
-# npm run codegen
 
 wait
