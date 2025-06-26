@@ -21,8 +21,8 @@ export const LIST_MANAGERS = `#graphql
 `;
 
 export const REGISTER_MANAGER = `#graphql
-  mutation register($infos: InputRegister!) {
-    register(infos: $infos) {
+  mutation createManager($infos: InputRegister!) {
+    createManager(infos: $infos) {
       email
       first_name
       id
@@ -85,8 +85,8 @@ export const DELETE_MANAGER = `#graphql
 ` 
 
 export const UPDATE_MANAGER = `#graphql
-  mutation updateManager($data: UpdateManagerInput!) {
-    updateManager(data: $data) {
+  mutation updateManager($updateManagerId: ID!, $data: UpdateManagerInput!) {
+    updateManager(id: $updateManagerId, data: $data) {
       id
       first_name
       last_name
@@ -104,7 +104,7 @@ type ResponseListManager = {
 };
 
 type ResponseCreateManager = {
-  register: Manager;
+  createManager: Manager;
 };
 
 const listManagers = [
@@ -170,7 +170,7 @@ beforeAll(async () => {
       },
     },
     Mutation: {
-      register: (_: any, { infos }: { infos: InputRegister }) => {
+      createManager: (_: any, { infos }: { infos: InputRegister }) => {
         store.set("Manager", "3", infos);
         const {password, ...result} = store.get("Manager", "3") as Manager;
         return result
@@ -222,7 +222,7 @@ describe("Test sur les managers", () => {
     assert(response.body.kind === "single");
     const {password, ...managerWithoutPassword} = createManagerExample;
     expect(response.body.singleResult.data).toEqual({
-      register: {id: "3", ...managerWithoutPassword}
+      createManager: {id: "3", ...managerWithoutPassword}
     });
   });
 
@@ -263,7 +263,7 @@ describe("Test sur les managers", () => {
     });
   });
 
-  it("Récupération d'un ticket par son id après l'ajout", async () => {
+  it("Récupération d'un manager par son id après l'ajout", async () => {
     const response = await server.executeOperation<ResponseListManager>({
       query: FIND_MANAGER_BY_ID,
       variables: { managerId: "1" },
@@ -275,7 +275,7 @@ describe("Test sur les managers", () => {
     });
   })
 
-   it("Suppression d'un ticket", async () => {
+   it("Suppression d'un manager", async () => {
     const response = await server.executeOperation<ResponseListManager>({
       query: DELETE_MANAGER,
       variables: { deleteManagerId: "1" },
@@ -294,6 +294,7 @@ describe("Test sur les managers", () => {
     const response = await server.executeOperation({
       query: UPDATE_MANAGER,
       variables: {
+         updateManagerId: "1",
         data: {
           first_name: updatedFirstName,
           last_name: updatedLastName,

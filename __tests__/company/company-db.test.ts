@@ -119,7 +119,13 @@ describe("TEST COMPANY AVEC DB", () => {
       variables: {
         data: { ...fakeCompanyDataUpdate, id: baseId },
       },
-    });
+    },
+    {
+      contextValue: {
+        manager: { role: "SUPER_ADMIN" },
+      },
+    }
+  );
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.errors).toBeUndefined();
