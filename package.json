@@ -3,6 +3,7 @@
   "scripts": {
     "start-with-front": "bash scripts/start-with-front.sh",
     "start": "ts-node-dev -r tsconfig-paths/register --exit-child --watch src --poll src/index.ts",
+    "start:prod": "ts-node -r tsconfig-paths/register src/index.ts",
     "codegen": "graphql-codegen --config codegen.ts --watch",
     "ci-codegen": "graphql-codegen --config codegen.ts",
     "test": "jest --watchAll",
