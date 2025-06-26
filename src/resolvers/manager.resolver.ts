@@ -1,10 +1,13 @@
 import ManagerService from "@/services/manager.service";
-import { MutationCreateManagerArgs, QueryLoginArgs, Message, QueryManagerArgs, MutationUpdateManagerArgs } from "@/generated/graphql";
+import { MutationCreateManagerArgs, QueryLoginArgs, Message, QueryManagerArgs, MutationUpdateManagerArgs,
+    MutationAssociateManagerAtServiceArgs
+} from "@/generated/graphql";
 import { MyContext } from "..";
 import Cookies from "cookies";
 import { validate } from "class-validator";
 import { plainToInstance } from "class-transformer";
 import ManagerEntity, { LoginInput, UpdateInput } from "@/entities/Manager.entity";
+import ServicesService from "@/services/services.service";
 
 //Le super_admin gère admin et operator, et admin gère un operator
 function checkAuthorization(currentRole: string, targetRole?: string) {
@@ -121,6 +124,23 @@ export default {
                 throw new Error(messages.join(" | "));
             }
             return await new ManagerService().updateManager(id, data);
+        },
+
+        associateManagerAtService: async (_: any, { managerId, serviceId }: MutationAssociateManagerAtServiceArgs, { manager }: MyContext) => {
+            if (!manager) throw new Error("Non authentifié");
+            const targetManager = await new ManagerService().findOne({ where: { id: managerId }, relations: ["service"] });
+            const service = await new ServicesService().findOne({ where: { id: serviceId }, relations: ["managers"],});
+            if (!targetManager || !service) {
+                throw new Error("Manager ou service introuvable");
+            }
+            checkAuthorization(manager.role, targetManager.role);
+            targetManager.service = service;
+            await new ManagerService().save(targetManager);
+            const updatedService = await new ServicesService().findOne({
+                where: { id: service.id },
+                relations: ["managers"],
+            });
+            return updatedService;
         }
     },
 };

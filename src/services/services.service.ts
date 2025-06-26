@@ -34,4 +34,8 @@ export default class ServicesService {
     const result = await this.db.delete(id);
     return result.affected === 1;
   }
+  
+  async findOne(options: any) {
+    return this.db.findOne(options);
+  }
 }
