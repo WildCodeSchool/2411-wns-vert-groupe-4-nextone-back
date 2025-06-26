@@ -6,3 +6,4 @@ db_test.env
 .vscode
 frontend
 src/generated
+dist

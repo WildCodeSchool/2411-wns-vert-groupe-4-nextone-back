@@ -18,6 +18,8 @@ jobs:
           node-version: '18'
       - name: Install dependencies
         run: npm install --legacy-peer-deps
+      - name: Run codegen
+        run: npm run ci-codegen
       - name: Build the backend
         run: npm run build
       - name: Upload build output
