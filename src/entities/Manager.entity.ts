@@ -1,5 +1,5 @@
 import { BeforeInsert, Column, CreateDateColumn,
-   Entity, PrimaryGeneratedColumn, UpdateDateColumn, ManyToOne} from "typeorm";
+   Entity, PrimaryGeneratedColumn, UpdateDateColumn, ManyToMany, JoinTable} from "typeorm";
 import * as argon2 from "argon2";
 import { ManagerRole } from "@/generated/graphql";
 import { IsEmail, Length, IsString } from "class-validator";
@@ -48,8 +48,9 @@ export default class ManagerEntity {
   })
   is_globally_active: boolean;
 
-  @ManyToOne(() => ServiceEntity, (service) => service.managers)
-  service: ServiceEntity;
+  @ManyToMany(() => ServiceEntity, service => service.managers, { cascade: true })
+  @JoinTable()
+  services: ServiceEntity[];
 
   @CreateDateColumn()
   created_at: Date;

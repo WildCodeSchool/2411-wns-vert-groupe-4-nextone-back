@@ -4,13 +4,6 @@ scalar UUID
 scalar DateTime
 
 ####### Types
-type Service {
-  id: UUID!
-  name: String!
-  managers: [Manager!]
-  createdAt: DateTime!
-  updatedAt: String!
-}
 
 type ServiceWithoutManagers {
   id: UUID!
@@ -32,7 +25,6 @@ type Mutation {
   createService(data: CreateServiceInput!): ServiceWithoutManagers!
   updateService(id: UUID!, data: UpdateServiceInput!): ServiceResponse!
   deleteService(id: UUID!): ServiceResponse!
-  associateManagerAtService(managerId: ID!, serviceId: ID!): Service!
 }
 
 type ServiceResponse {
