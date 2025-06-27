@@ -3,7 +3,7 @@
   "scripts": {
     "start-with-front": "bash scripts/start-with-front.sh",
     "start": "ts-node-dev -r tsconfig-paths/register --exit-child --watch src --poll src/index.ts",
-    "build": "tsc && tsc-alias",
+    "build": "tsc && mkdir -p dist/typeDefs && cp src/typeDefs/*.gql dist/typeDefs/ && tsc-alias",
     "start:prod": "node dist/index.js",
     "codegen": "graphql-codegen --config codegen.ts --watch",
     "ci-codegen": "graphql-codegen --config codegen.ts",
