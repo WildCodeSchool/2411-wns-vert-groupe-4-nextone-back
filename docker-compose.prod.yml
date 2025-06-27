@@ -16,6 +16,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    command: ["sh", "-c", "wait-for-healthcheck.sh"]
     develop:
       watch:
         - action: sync+restart
