@@ -15,7 +15,7 @@ import {
 //   archived = "ARCHIVED",
 // }
 
-@Entity({ name: "ticket_log"})
+@Entity({ name: "ticketlog"})
 export default class TicketLogEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;

@@ -49,8 +49,8 @@ mutation UpdateTicketLog($data: UpdateTicketLogInput!) {
 `;
 
 export const DELETE_TICKETLOG = `#graphql
-mutation DeleteTicketLog($deleteTicketLogId: UUID!) {
-  deleteTicketLog(id: $deleteTicketLogId) {
+mutation DeleteTicketLog($id: UUID!) {
+  message: deleteTicketLog(id: $id) {
     content
     success
   }

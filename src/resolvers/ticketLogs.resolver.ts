@@ -24,7 +24,7 @@ export default {
     },
     async ticketLogsByProperty(_: any, args: QueryTicketLogsByPropertyArgs) {
       const key = Object.keys(args.field)[0] as keyof typeof args.field
-      const value = args.field[key ]
+      const value = args.field[key]
     
       return await ticketLogService.findByProperty(key, value);
     }
