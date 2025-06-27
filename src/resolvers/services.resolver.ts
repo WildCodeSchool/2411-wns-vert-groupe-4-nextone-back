@@ -6,6 +6,7 @@ import {
   MutationUpdateServiceArgs,
   MutationDeleteServiceArgs,
   QueryServiceArgs,
+  QueryManagersByServiceArgs,
 } from "@/generated/graphql";
 import { MyContext } from ".."; // adapte si besoin
 
@@ -22,6 +23,14 @@ export default {
 
     service: async (_: any, { id }: QueryServiceArgs, ctx: MyContext) => {
       return await new ServicesService().getServiceById(id);
+    },
+
+    managersByServices: async (_: any, __: any, ctx: MyContext) => {
+      return await new ServicesService().getAllServicesWithManagers();
+    },
+
+    managersByService: async (_: any, { serviceId }: QueryManagersByServiceArgs, ctx: MyContext) => {
+      return await new ServicesService().getManagersByServiceId(serviceId);
     },
   },
 

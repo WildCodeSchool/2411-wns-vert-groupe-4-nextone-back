@@ -57,6 +57,28 @@ export const DELETE_SERVICE = `#graphql
   }
 `;
 
+export const MANAGERS_BY_SERVICES = `#graphql
+  query ManagersByServices {
+    managersByServices {
+      id
+      name
+      managers {
+        email
+        id
+      }
+    }
+  }
+`
+
+export const MANAGERS_BY_SERVICE = `#graphql
+  query ManagersByService($serviceId: ID!) {
+    managersByService(serviceId: $serviceId) {
+      id
+      email
+    }
+  }
+`
+
 // --- Types ---
 type Service = {
   id: string;
@@ -88,7 +110,26 @@ type ResponseDeleteServiceData = {
   deleteService: ServiceResponse;
 };
 
+type Manager = {
+  id: string;
+  email: string;
+};
+
+type ServiceWithManagers = Service & {
+  managers: Manager[];
+};
+
+type ResponseServicesWithManagers = {
+  managersByServices: ServiceWithManagers[];
+};
+
+type ResponseServiceWithManagers = {
+  managersByService: Manager[];
+};
+
+
 let servicesData: Service[];
+let servicesDataWithManagers: ServiceWithManagers[];
 let server: ApolloServer;
 
 beforeAll(async () => {
@@ -98,11 +139,32 @@ beforeAll(async () => {
     { id: 'uuid-3', name: 'Pneumologie' },
   ];
 
+  servicesDataWithManagers = [
+    { id: 'uuid-1', name: 'Radiologie',
+      managers: [
+        { id: 'mgr-1', email: 'Alice@gmail.com' },
+        { id: 'mgr-2', email: 'Bob@gmail.com' },
+      ],
+    },
+    { id: 'uuid-2', name: 'Cardiologie',
+      managers: [{ id: 'mgr-3', email: 'Charlie@gmail.com' }],
+    },
+    { id: 'uuid-3', name: 'Pneumologie',
+      managers: [],
+    },
+  ]
+
   const serviceResolvers = {
     Query: {
       services: () => servicesData,
       service: (_: any, args: { id: string }) =>
         servicesData.find((s) => s.id === args.id) || null,
+      managersByServices: () => servicesDataWithManagers,
+      managersByService: (_: any, args: { serviceId: string }) => {
+        const service = servicesDataWithManagers.find((s) => s.id === args.serviceId);
+        if (!service) throw new Error('Service not found');
+        return service.managers;
+      },
     },
     Mutation: {
       createService: (_: any, args: { data: { name: string } }) => {
@@ -186,5 +248,26 @@ describe('ServicesResolver (mocked)', () => {
     const deleted = response.body.singleResult.data?.deleteService;
     expect(deleted?.success).toBe(true);
     expect(deleted?.message).toBe('Service deleted successfully.');
+  });
+
+  it('récupère tous les services avec leurs managers', async () => {
+    const response = await server.executeOperation<ResponseServicesWithManagers>({
+      query: MANAGERS_BY_SERVICES,
+    });
+    assert(response.body.kind === 'single');
+    expect(response.body.singleResult.data).toEqual({
+      managersByServices: servicesDataWithManagers,
+    });
+  });
+
+  it("récupère les managers d'un service par son ID", async () => {
+    const response = await server.executeOperation<ResponseServiceWithManagers>({
+      query: MANAGERS_BY_SERVICE,
+      variables: { serviceId: 'uuid-1' },
+    });
+    assert(response.body.kind === 'single');
+    expect(response.body.singleResult.data).toEqual({
+      managersByService: servicesDataWithManagers.find((s) => s.id === 'uuid-1')!.managers,
+    });
   });
 });
