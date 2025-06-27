@@ -5,6 +5,14 @@ scalar DateTime
 
 ####### Types
 
+type Service {
+  id: UUID!
+  name: String!
+  managers: [Manager!]!
+  createdAt: DateTime!
+  updatedAt: String!
+}
+
 type ServiceWithoutManagers {
   id: UUID!
   name: String!
@@ -20,6 +28,8 @@ type Manager {
 type Query {
   services: [ServiceWithoutManagers!]!
   service(id: UUID!): ServiceWithoutManagers
+  managersByServices: [Service!]!
+  managersByService(serviceId: ID!): [Manager!]!
 }
 type Mutation {
   createService(data: CreateServiceInput!): ServiceWithoutManagers!

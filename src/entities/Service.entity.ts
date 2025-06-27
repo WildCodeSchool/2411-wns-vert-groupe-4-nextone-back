@@ -13,8 +13,7 @@ import {
   // import TicketEntity from './Ticket.entity';
   // import CompanyEntity from './Company.entity'; // commenté car pas encore créé
 
- 
-  @Entity()
+ @Entity("services")
   export class ServiceEntity {
     @PrimaryGeneratedColumn('uuid')
     id!: string;

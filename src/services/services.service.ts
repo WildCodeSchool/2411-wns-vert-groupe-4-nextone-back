@@ -2,6 +2,7 @@
 import { MutationCreateServiceArgs, MutationUpdateServiceArgs } from '@/generated/graphql';
 import ServiceRepository from '@/repositories/Service.repository';
 import { ServiceEntity } from '@/entities/Service.entity';
+import ManagerEntity from '@/entities/Manager.entity';
 
 export default class ServicesService {
   db: ServiceRepository;
@@ -37,5 +38,22 @@ export default class ServicesService {
   
   async findOne(options: any) {
     return this.db.findOne(options);
+  }
+
+  async getManagersByServiceId(serviceId: string) {
+    const serviceWithManagers = await this.db.findOne({
+      where: { id: serviceId },
+      relations: ['managers'], 
+    });
+    if (!serviceWithManagers) {
+      throw new Error('Service not found');
+    }
+    return serviceWithManagers.managers;
+  }
+
+  async getAllServicesWithManagers() {
+    return await this.db.find({
+      relations: ['managers'],
+    });
   }
 }
