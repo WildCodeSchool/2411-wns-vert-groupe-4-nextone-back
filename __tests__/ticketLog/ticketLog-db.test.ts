@@ -72,13 +72,11 @@ beforeAll(async () => {
     schema,
   });
 
-  //ON INITIALISE LA DB DE TEST
   try {
     if (!testDataSource.isInitialized) {
       await testDataSource.initialize();
-      await testDataSource.synchronize(true)
-
     }
+    await testDataSource.query("TRUNCATE TABLE ticketlog, tickets, managers CASCADE");
   } catch (error) {
     console.error("Error initializing test database:", error);
     throw error;
@@ -133,7 +131,7 @@ describe("TEST TICKETLOG DANS LA DB", () => {
         },
       },
     });
-
+    
     assert(response.body.kind === "single");
     expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data).not.toBeNull();
