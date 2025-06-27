@@ -6,7 +6,7 @@ import {
     Column,
     CreateDateColumn,
     UpdateDateColumn,
-    OneToMany,
+    ManyToMany, OneToMany
   } from 'typeorm';
   import AuthorizationEntity  from './Authorization.entity';
   import ManagerEntity from './Manager.entity';
@@ -34,7 +34,7 @@ import {
   @OneToMany(() => AuthorizationEntity, (auth) => auth.service)
   authorizations: AuthorizationEntity[];
 
-  @OneToMany(() => ManagerEntity, (manager) => manager.service)
+  @ManyToMany(() => ManagerEntity, manager => manager.services)
   managers: ManagerEntity[];
 
   // Un service peut avoir plusieurs tickets - en attente

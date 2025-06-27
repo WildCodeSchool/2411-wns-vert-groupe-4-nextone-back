@@ -117,6 +117,16 @@ export const ASSOCIATE_MANAGER_AT_SERVICE = `#graphql
   }
 `;
 
+export const DISSOCIATE_MANAGER_FROM_SERVICE = `#graphql
+  mutation dissociateManagerFromService($managerId: ID!, $serviceId: ID!) {
+    dissociateManagerFromService(managerId: $managerId, serviceId: $serviceId) {
+      content
+      status
+    }
+  }
+`;
+
+
 type ResponseListManager = {
   managers: Manager[];
 };
@@ -196,18 +206,24 @@ beforeAll(async () => {
         return store.get("Manager", "1");
       },
       associateManagerAtService: (_: any, { managerId, serviceId }: { managerId: string, serviceId: string }) => {
-      return {
-        id: serviceId,
-        name: "Informatique",
-        managers: [
-          {
-            id: managerId,
-            email: "jean@example.com",
-            role: "ADMIN",
-          },
-        ],
-      };
-      }
+        return {
+          id: serviceId,
+          name: "Informatique",
+          managers: [
+            {
+              id: managerId,
+              email: "jean@example.com",
+              role: "ADMIN",
+            },
+          ],
+        };
+      },
+      dissociateManagerFromService: (_: any, { managerId, serviceId }: { managerId: string; serviceId: string }, ctx: any) => {
+        return {
+          content: "Manager dissocié du service spécifié",
+          status: true,
+        };
+      },
     },
   });
 
@@ -363,4 +379,22 @@ describe("Test sur les managers", () => {
   });
 });
 
+  it("Dissocie un manager d un service", async () => {
+    const response = await server.executeOperation(
+      {
+        query: DISSOCIATE_MANAGER_FROM_SERVICE,
+        variables: {
+          managerId: "1",
+          serviceId: "101",
+        },
+      },
+    );
+    assert(response.body.kind === "single");
+    expect(response.body.singleResult.data).toEqual({
+      dissociateManagerFromService: {
+        content: "Manager dissocié du service spécifié",
+        status: true,
+      },
+    });
+  });
 });
