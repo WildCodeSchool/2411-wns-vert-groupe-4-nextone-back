@@ -92,7 +92,7 @@ let servicesData: Service[];
 let server: ApolloServer;
 
 beforeAll(async () => {
-  servicesData = [
+    servicesData = [
     { id: 'uuid-1', name: 'Radiologie' },
     { id: 'uuid-2', name: 'Cardiologie' },
     { id: 'uuid-3', name: 'Pneumologie' },
