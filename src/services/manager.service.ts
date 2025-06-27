@@ -65,4 +65,12 @@ export default class ManagerService {
         const updatedManager = this.db.merge(managerFound, data);
         return await this.db.save(updatedManager);
     }
+
+    async save(manager: ManagerEntity) {
+        return this.db.save(manager);
+    }
+
+    async findOne(options: any) {
+        return this.db.findOne(options);
+    }
 }

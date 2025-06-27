@@ -1,10 +1,13 @@
 import ManagerService from "@/services/manager.service";
-import { MutationCreateManagerArgs, QueryLoginArgs, Message, QueryManagerArgs, MutationUpdateManagerArgs } from "@/generated/graphql";
+import { MutationCreateManagerArgs, QueryLoginArgs, Message, QueryManagerArgs, MutationUpdateManagerArgs,
+    MutationAssociateManagerAtServiceArgs, MutationDissociateManagerFromServiceArgs
+} from "@/generated/graphql";
 import { MyContext } from "..";
 import Cookies from "cookies";
 import { validate } from "class-validator";
 import { plainToInstance } from "class-transformer";
 import ManagerEntity, { LoginInput, UpdateInput } from "@/entities/Manager.entity";
+import ServicesService from "@/services/services.service";
 
 //Le super_admin gère admin et operator, et admin gère un operator
 function checkAuthorization(currentRole: string, targetRole?: string) {
@@ -121,6 +124,52 @@ export default {
                 throw new Error(messages.join(" | "));
             }
             return await new ManagerService().updateManager(id, data);
+        },
+
+       associateManagerAtService: async (_: any, { managerId, serviceId }: MutationAssociateManagerAtServiceArgs, { manager }: MyContext) => {
+            if (!manager) throw new Error("Non authentifié");
+            const targetManager = await new ManagerService().findOne({
+                where: { id: managerId },
+                relations: ["services"],
+            });
+            const service = await new ServicesService().findOne({
+                where: { id: serviceId },
+                relations: ["managers"],
+            });
+            if (!targetManager || !service) {
+                throw new Error("Manager ou service introuvable");
+            }
+            checkAuthorization(manager.role, targetManager.role);
+            if (!targetManager.services.some((s) => s.id === service.id)) {
+                targetManager.services.push(service);
+            }
+            await new ManagerService().save(targetManager);
+            const updatedService = await new ServicesService().findOne({
+                where: { id: service.id },
+                relations: ["managers"],
+            });
+            return updatedService;
+        },
+
+        dissociateManagerFromService: async (_: any,{ managerId, serviceId }: { managerId: number; serviceId: number }, { manager }: MyContext): Promise<Message> => {
+            if (!manager) throw new Error("Non authentifié");
+            const targetManager = await new ManagerService().findOne({
+                where: { id: managerId },
+                relations: ["services"],
+            });
+            const serviceToRemove = await new ServicesService().findOne({
+                where: { id: serviceId },
+                relations: ["managers"],
+            });
+            if (!targetManager || !serviceToRemove) {
+                return { content: "Manager ou service introuvable", status: false };
+            }
+            checkAuthorization(manager.role, targetManager.role);
+            targetManager.services = targetManager.services.filter(
+                (s) => s.id !== serviceToRemove.id
+            );
+            await new ManagerService().save(targetManager);
+            return { content: "Manager dissocié du service spécifié", status: true };
         }
     },
 };

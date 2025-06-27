@@ -39,15 +39,25 @@ type Auth {
   token: String
 }
 
+type Service {
+  id: UUID!
+  name: String!
+  managers: [Manager!]
+  createdAt: DateTime!
+  updatedAt: String!
+}
+
 type Message {
   content: String
-  status: Boolean
+  status: Boolean 
 }
 
 type Mutation {
   createManager(infos: InputRegister!): Manager
   deleteManager(id: ID!): Message!
   updateManager(id: ID!, data: UpdateManagerInput!): ManagerWithoutPassword!
+  associateManagerAtService(managerId: ID!, serviceId: ID!): Service!
+  dissociateManagerFromService(managerId: ID!, serviceId: ID!): Message!
 }
 
 input InputRegister {

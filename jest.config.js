@@ -18,6 +18,9 @@ module.exports = {
   transform: {
     "^.+\.tsx?$": ["ts-jest", {}],
     "^.+\.js$": "babel-jest",
+     '^.+\\.(ts|tsx)$': ['ts-jest', {
+    tsconfig: 'tsconfig.json',
+  }],
   },
 
   extensionsToTreatAsEsm: ['.ts'],
