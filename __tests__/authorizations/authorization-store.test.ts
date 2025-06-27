@@ -9,58 +9,18 @@ import { makeExecutableSchema } from "@graphql-tools/schema";
 import { NewAuthInput, UpdateAuthInput } from "../../src/generated/graphql";
 import { loadFilesSync } from "@graphql-tools/load-files";
 import path from "path";
+import { LIST_BY_SERVICE, 
+  LIST_BY_MANAGER,
+  ADD_AUTHORIZATION,
+  UPDATE_AUTHORIZATION,
+  DELETE_AUTHORIZATION
+} from "../../src/queries/autorization.query"
 
 // Chargement du schéma GQL
 const authorizationTypeDefs = loadFilesSync(
   path.join(__dirname, "../../src/typeDefs/authorization.gql"),
   { extensions: ["gql"] }
 );
-
-// Requêtes GQL
-const LIST_BY_SERVICE = `#graphql
-  query {
-    getServiceAuthorizations(serviceId: "service-1") {
-      serviceId
-      managerId
-      isActive
-    }
-  }
-`;
-
-const LIST_BY_MANAGER = `#graphql
-  query {
-    getEmployeeAuthorizations(managerId: "manager-1") {
-      serviceId
-      managerId
-      isActive
-    }
-  }
-`;
-
-const ADD_AUTHORIZATION = `#graphql
-  mutation {
-    addAuthorization(input: {
-      serviceId: "service-1"
-      managerId: "manager-1"
-    })
-  }
-`;
-
-const UPDATE_AUTHORIZATION = `#graphql
-  mutation {
-    updateAuthorization(input: {
-      serviceId: "service-1"
-      managerId: "manager-1"
-      isActive: false
-    })
-  }
-`;
-
-const DELETE_AUTHORIZATION = `#graphql
-  mutation {
-    deleteAuthorization(serviceId: "service-1", managerId: "manager-1")
-  }
-`;
 
 // Types de réponse
 type ResponseList = {

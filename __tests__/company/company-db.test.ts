@@ -9,7 +9,7 @@ import {
   CREATE_COMPANY_DB,
   DELETE_COMPANY,
   UPDATE_COMPANY_DB,
-} from "../../src/queries/query";
+} from "../../src/queries/company.query";
 import assert from "assert";
 import {
   Company,
@@ -54,12 +54,11 @@ beforeAll(async () => {
     schema,
   });
 
-  //ON INITIALISE LA DB DE TEST
-  try {
+   try {
     if (!testDataSource.isInitialized) {
       await testDataSource.initialize();
-      await testDataSource.query("TRUNCATE TABLE company CASCADE");
     }
+    await testDataSource.query("TRUNCATE TABLE company CASCADE");
   } catch (error) {
     console.error("Error initializing test database:", error);
     throw error;
