@@ -15,7 +15,7 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     return created;
   }
 
-  //RECUPERER TOUTES LES INSTANCE
+  //RECUPERER TOUTES LES INSTANCES
   public async findAll() {
     const list = await this.repo.find();
     return list;
@@ -31,10 +31,22 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     return ad;
   }
 
+  public async findByProperty<K extends keyof T>(
+    fields: K,
+    value: T[K]
+  ): Promise<T[]> {
+    const entities = await this.repo.find({
+      where: {
+        [fields]: value,
+      } as any,
+    });
+    
+    return entities;
+  }
+
   //DELETE
   public async deleteOne(id: string): Promise<boolean> {
     const deleted = await this.repo.delete({ id: id as any });
-
     if (!deleted.affected || deleted.affected === 0) {
       return false;
     }
