@@ -5,79 +5,16 @@ import { ApolloServer } from '@apollo/server';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import fs from 'fs';
 import path from 'path';
+import { LIST_SERVICES, FIND_SERVICE_BY_ID,
+  CREATE_SERVICE, UPDATE_SERVICE,
+  DELETE_SERVICE, MANAGERS_BY_SERVICES,
+  MANAGERS_BY_SERVICE
+} from "../../src/queries/service.query"
 
 const serviceTypeDefs = fs.readFileSync(
   path.join(__dirname, '../../src/typeDefs/service.gql'),
   { encoding: 'utf-8' }
 );
-
-// --- GraphQL Queries ---
-export const LIST_SERVICES = `#graphql
-  query Services {
-    services {
-      id
-      name
-    }
-  }
-`;
-
-export const FIND_SERVICE_BY_ID = `#graphql
-  query Service($serviceId: UUID!) {
-    service(id: $serviceId) {
-      id
-      name
-    }
-  }
-`;
-
-export const CREATE_SERVICE = `#graphql
-  mutation CreateService($data: CreateServiceInput!) {
-    createService(data: $data) {
-      id
-      name
-    }
-  }
-`;
-
-export const UPDATE_SERVICE = `#graphql
-  mutation UpdateService($id: UUID!, $data: UpdateServiceInput!) {
-    updateService(id: $id, data: $data) {
-      success
-      message
-    }
-  }
-`;
-
-export const DELETE_SERVICE = `#graphql
-  mutation DeleteService($id: UUID!) {
-    deleteService(id: $id) {
-      success
-      message
-    }
-  }
-`;
-
-export const MANAGERS_BY_SERVICES = `#graphql
-  query ManagersByServices {
-    managersByServices {
-      id
-      name
-      managers {
-        email
-        id
-      }
-    }
-  }
-`
-
-export const MANAGERS_BY_SERVICE = `#graphql
-  query ManagersByService($serviceId: ID!) {
-    managersByService(serviceId: $serviceId) {
-      id
-      email
-    }
-  }
-`
 
 // --- Types ---
 type Service = {

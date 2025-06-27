@@ -6,6 +6,12 @@ import { loadFilesSync } from "@graphql-tools/load-files";
 import path from "path";
 import Manager from "../../src/entities/Manager.entity";
 import { InputRegister, ManagerRole, InputLogin, MutationUpdateManagerArgs } from "../../src/generated/graphql";
+import { LIST_MANAGERS, REGISTER_MANAGER,
+  LOGIN_MANAGER, LOGOUT_MANAGER,
+  FIND_MANAGER_BY_ID, DELETE_MANAGER,
+  UPDATE_MANAGER, ASSOCIATE_MANAGER_AT_SERVICE,
+  DISSOCIATE_MANAGER_FROM_SERVICE
+ } from "../../src/queries/manager.query"
 
 const managerTypeDefs = loadFilesSync(path.join(__dirname, "../../src/typeDefs/manager.gql"), {
   extensions: ["gql"],
@@ -15,116 +21,6 @@ const serviceTypeDefs = loadFilesSync(path.join(__dirname, "../../src/typeDefs/s
   extensions: ["gql"],
 });
 const combinedTypeDefs = [...managerTypeDefs, ...serviceTypeDefs];
-
-export const LIST_MANAGERS = `#graphql
-  query Managers {
-    managers {
-      email
-      id
-    }
-  }
-`;
-
-export const REGISTER_MANAGER = `#graphql
-  mutation createManager($infos: InputRegister!) {
-    createManager(infos: $infos) {
-      email
-      first_name
-      id
-      is_globally_active
-      last_name
-      role
-    }
-  }
-`;
-
-export const LOGIN_MANAGER = `#graphql
-  query login($infos: InputLogin!) {
-    login(infos: $infos) {
-      manager {
-        id
-        first_name
-        last_name
-        email
-        role
-        is_globally_active
-        created_at
-        updated_at
-      }
-      token
-    }
-  }
-`
-
-export const LOGOUT_MANAGER = `#graphql
-  query Logout {
-    logout {
-      content
-      status
-    }
-  }
-`
-
-export const FIND_MANAGER_BY_ID = `#graphql
-  query manager($managerId: ID!) {
-    manager(id: $managerId) {
-      id
-      first_name
-      last_name
-      email
-      role
-      is_globally_active
-      created_at
-      updated_at
-    }
-  }
-`
-
-export const DELETE_MANAGER = `#graphql
-  mutation DeleteManager($deleteManagerId: ID!) {
-    deleteManager(id: $deleteManagerId) {
-      content
-      status
-    }
-  }
-`
-
-export const UPDATE_MANAGER = `#graphql
-  mutation updateManager($updateManagerId: ID!, $data: UpdateManagerInput!) {
-    updateManager(id: $updateManagerId, data: $data) {
-      id
-      first_name
-      last_name
-      email
-      role
-      is_globally_active
-      created_at
-      updated_at
-    }
-  }
-`
-export const ASSOCIATE_MANAGER_AT_SERVICE = `#graphql
-  mutation associateManagerAtService($managerId: ID!, $serviceId: ID!) {
-    associateManagerAtService(managerId: $managerId, serviceId: $serviceId) {
-      id
-      name
-      managers {
-        id
-        email
-        role
-      }
-    }
-  }
-`;
-
-export const DISSOCIATE_MANAGER_FROM_SERVICE = `#graphql
-  mutation dissociateManagerFromService($managerId: ID!, $serviceId: ID!) {
-    dissociateManagerFromService(managerId: $managerId, serviceId: $serviceId) {
-      content
-      status
-    }
-  }
-`;
 
 
 type ResponseListManager = {

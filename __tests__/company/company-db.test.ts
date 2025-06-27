@@ -9,7 +9,7 @@ import {
   CREATE_COMPANY_DB,
   DELETE_COMPANY,
   UPDATE_COMPANY_DB,
-} from "../../src/queries/query";
+} from "../../src/queries/company.query";
 import assert from "assert";
 import {
   Company,
