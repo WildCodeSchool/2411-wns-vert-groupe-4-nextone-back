@@ -6,6 +6,7 @@ import { DataSource } from "typeorm";
 import SettingEntity from "@/entities/setting.entity";
 import TicketLogEntity from "@/entities/TicketLog.entity";
 import ManagerEntity from "@/entities/Manager.entity";
+import { TicketSubscriber } from "@/subscribers/ticket.subscriber";
 
 export default new DataSource({
   type: "postgres",
@@ -23,6 +24,7 @@ export default new DataSource({
     TicketLogEntity,
     ManagerEntity
   ],
+  subscribers:[TicketSubscriber],
   logging: ["error"],
   synchronize: true,
 });

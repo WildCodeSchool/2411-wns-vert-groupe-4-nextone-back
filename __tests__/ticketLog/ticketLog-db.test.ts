@@ -7,28 +7,24 @@ import {
   DeleteResponse,
   GenerateTicketInput,
   InputRegister,
-
   ManagerRole,
-
   MutationCreateTicketLogArgs,
-
   MutationDeleteTicketLogArgs,
-
   MutationUpdateTicketLogArgs,
-
   QueryTicketLogArgs,
-
   Status,
-
   TicketLog,
-  TicketStatus,
-  UpdateTicketLogInput,
 } from "../../src/generated/graphql";
 import TicketService from "../../src/services/ticket.service";
 import TicketEntity from "../../src/entities/Ticket.entity";
 import ManagerEntity from "../../src/entities/Manager.entity";
 import ManagerService from "../../src/services/manager.service";
-import { CREATE_TICKETLOG, DELETE_TICKETLOG, TICKETLOG, UPDATE_TICKETLOG } from "../../src/queries/ticketlog.query";
+import {
+  CREATE_TICKETLOG,
+  DELETE_TICKETLOG,
+  TICKETLOG,
+  UPDATE_TICKETLOG,
+} from "../../src/queries/ticketlog.query";
 import assert from "assert";
 import { validate } from "uuid";
 
@@ -49,23 +45,22 @@ const fakeTicket: GenerateTicketInput = {
   lastName: "Tournier",
   email: "corentin.tournier@gmail.com",
   phone: "0606060606",
-  status: TicketStatus.Pending,
 };
 
 const fakeManager: InputRegister = {
   password: "test",
   email: "jeanmichel@gmail.com",
-  role: ManagerRole.SuperAdmin,
+  role: ManagerRole.Admin,
   first_name: "jean",
   last_name: "MICHEL",
 };
 
-const fakeTicketLog: Partial<TicketLog> = {
-  id: "",
-  managerId: "",
-  status: Status.Created,
-  ticketId: "",
-}
+// const fakeTicketLog: Partial<TicketLog> = {
+//   id: "",
+//   manager: { ...fakeManager, id: "", role: ManagerRole.Admin },
+//   status: Status.Created,
+//   ticket: { ...fakeTicket, id: "" },
+// };
 
 beforeAll(async () => {
   server = new ApolloServer({
@@ -75,6 +70,7 @@ beforeAll(async () => {
   try {
     if (!testDataSource.isInitialized) {
       await testDataSource.initialize();
+      await testDataSource.synchronize(true);
     }
     await testDataSource.query("TRUNCATE TABLE ticketlog, tickets, managers CASCADE");
   } catch (error) {
@@ -105,7 +101,6 @@ describe("TEST TICKETLOG DANS LA DB", () => {
   let baseManagerId: string;
 
   it("CREATION D'UN TICKETLOG", async () => {
-
     //CREATION D'UN TICKET
     const newTicket: TicketEntity = await new TicketService().generateTicket(
       fakeTicket
@@ -135,67 +130,76 @@ describe("TEST TICKETLOG DANS LA DB", () => {
     assert(response.body.kind === "single");
     expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data).not.toBeNull();
-    const { id, ...rest } = response.body.singleResult.data?.ticketLog!;
+    const { id } = response.body.singleResult.data?.ticketLog!;
     baseId = id;
     expect(validate(id)).toBeTruthy();
-
   });
 
   it("UPDATE DU TICKET CREE", async () => {
-    const response = await server.executeOperation<TResponse, MutationUpdateTicketLogArgs>({
+    const response = await server.executeOperation<
+      TResponse,
+      MutationUpdateTicketLogArgs
+    >({
       query: UPDATE_TICKETLOG,
       variables: {
         data: {
           id: baseId,
-          status: Status.Done
-          
-        }
-      }
-    })
+          status: Status.Done,
+        },
+      },
+    });
+
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data).toEqual<TResponse>({
       ticketLog: {
         id: baseId,
-        managerId: baseManagerId,
-        ticketId: baseTicketId,
-        status: Status.Done
-      }
+        // manager: {
+        //   ...fakeManager,
+        //   id: baseManagerId,
+        // },
+        ticket: {
+          id: baseTicketId,
+        },
+        status: Status.Done,
+      },
     });
+  });
 
-  })
-
-  it('DELETE DU TICKET CREE', async () => {
-    const response = await server.executeOperation<TResponseDelete, MutationDeleteTicketLogArgs>({
+  it("DELETE DU TICKET CREE", async () => {
+    const response = await server.executeOperation<
+      TResponseDelete,
+      MutationDeleteTicketLogArgs
+    >({
       query: DELETE_TICKETLOG,
       variables: {
-        id: baseId
-      }
-    })
+        id: baseId,
+      },
+    });
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data).toEqual<TResponseDelete>({
       message: {
         success: true,
-        content: `Ticket log ${baseId} deleted.`
-      }
+        content: `Ticket log ${baseId} deleted.`,
+      },
     });
-  })
+  });
 
   it("RECUPERATION DU TICKET QUI N'EXISTE PLUS", async () => {
     const response = await server.executeOperation<null, QueryTicketLogArgs>({
       query: TICKETLOG,
       variables: {
-        id: baseId
-      }
-    })
+        id: baseId,
+      },
+    });
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data).toEqual<TResponse>({
-      ticketLog: null
-    })
-  })
+      ticketLog: null,
+    });
+  });
 });

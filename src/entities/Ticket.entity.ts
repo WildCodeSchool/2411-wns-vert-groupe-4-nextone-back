@@ -1,37 +1,45 @@
+import { Status } from "@/generated/graphql";
 import {
-    Entity,
-    Column,
-    PrimaryGeneratedColumn,
-    CreateDateColumn,
-    UpdateDateColumn,
-    ManyToOne,
-    ManyToMany,
-    JoinTable,
-    Timestamp,
-  } from "typeorm";
-    
-  @Entity({ name: "tickets" })
-  export default class TicketEntity {
-    @PrimaryGeneratedColumn("uuid")
-    id: string;
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  AfterInsert,
+} from "typeorm";
 
-    @Column()
-    code: string;
+@Entity({ name: "tickets" })
+export default class TicketEntity {
+  
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
 
-    @Column()
-    firstName: string;
+  @Column()
+  code: string;
 
-    @Column()
-    lastName: string;
+  @Column()
+  firstName: string;
 
-    @Column()
-    email: string;
+  @Column()
+  lastName: string;
 
-    @Column()
-    phone: string;
+  @Column()
+  email: string;
 
-    @Column({ default: "VALIDATED" })
-    status: string; //à remplacer par un enum
+  @Column()
+  phone: string;
 
+  @Column({
+    type: "enum",
+    enum: Status,
+    default: Status.Created,
+  })
+  status: Status;
 
-  }
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+}
