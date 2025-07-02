@@ -1,5 +1,9 @@
-import { MutationGenerateTicketArgs, MutationUpdateTicketArgs } from "@/generated/graphql";
+import TicketEntity from "@/entities/Ticket.entity";
+import { MutationGenerateTicketArgs, MutationUpdateTicketArgs, MutationUpdateTicketStatusArgs, UpdateStatusTicketInput } from "@/generated/graphql";
 import TicketRepository from "@/repositories/ticket.repository";
+import TicketLogService from "./ticketLogs.service";
+import TicketLogEntity from "@/entities/TicketLog.entity";
+import ManagerEntity from "@/entities/Manager.entity";
 
 export default class TicketService {
   db: TicketRepository;
@@ -50,5 +54,25 @@ export default class TicketService {
     const ticketFound = await this.getTicketById(id);
     const ticketUpdated = this.db.merge(ticketFound, { ...ticket });
     return await this.db.save(ticketUpdated);
+  }
+
+  async updateTicketStatus({ id, status }: UpdateStatusTicketInput, manager: ManagerEntity): Promise<TicketEntity> {
+
+    const found = await this.getTicketById(id);
+
+    if (!found) {
+      throw new Error('No ticket with this id.');
+    }
+    found.status = status
+    this.db.save(found)
+
+    //ON CREE UN TICKETLOG AVEC LE NOUVEAU STATUS
+    const ticketLog = new TicketLogEntity()
+    ticketLog.ticket = found
+    ticketLog.manager = manager
+    ticketLog.status = status
+    await TicketLogService.getInstance().createOne(ticketLog)
+    
+    return found
   }
 }

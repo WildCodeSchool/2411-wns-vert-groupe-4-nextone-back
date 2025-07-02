@@ -10,10 +10,24 @@ export const TICKETLOG = `#graphql
 query TicketLog($id: UUID!) {
   ticketLog(id: $id) {
     id
-    ticketId
-    managerId
+    ticket {
+      id
+      code
+      email
+      lastName
+      firstName
+      phone
+      status
+    }
+    manager {
+      id
+      email
+      first_name
+      last_name
+      role
+      is_globally_active
+    }
     status
-
   }
 }
 `;
@@ -41,9 +55,10 @@ export const UPDATE_TICKETLOG = `#graphql
 mutation UpdateTicketLog($data: UpdateTicketLogInput!) {
   ticketLog: updateTicketLog(data: $data) {
     id
-    ticketId
-    managerId
     status
+    ticket {
+      id
+    }
   }
 }
 `;

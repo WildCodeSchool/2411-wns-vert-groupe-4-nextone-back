@@ -11,8 +11,8 @@ enum Status {
 
 type TicketLog {
   id: UUID!
-  ticketId: UUID!
-  managerId: UUID!
+  ticket: Ticket!
+  manager: ManagerWithoutPassword
   status: Status!
   createdAt: DateTime!
   updatedAt: DateTime!
@@ -46,10 +46,12 @@ type DeleteResponse {
 
 input CreateTicketLogInput {
   ticketId: UUID!
-  managerId: UUID!
+  managerId: UUID
+  status: Status
 }
 
 input UpdateTicketLogInput {
   id: UUID!
   status: Status!
+  managerId: UUID
 }
