@@ -3,6 +3,10 @@ export const LIST_MANAGERS = `#graphql
     managers {
       email
       id
+      services {
+        id
+        name
+      }
     }
   }
 `;
@@ -56,6 +60,10 @@ export const FIND_MANAGER_BY_ID = `#graphql
       email
       role
       is_globally_active
+      services {
+        id
+        name
+      }
       created_at
       updated_at
     }
@@ -88,13 +96,8 @@ export const UPDATE_MANAGER = `#graphql
 export const ASSOCIATE_MANAGER_AT_SERVICE = `#graphql
   mutation associateManagerAtService($managerId: ID!, $serviceId: ID!) {
     associateManagerAtService(managerId: $managerId, serviceId: $serviceId) {
-      id
-      name
-      managers {
-        id
-        email
-        role
-      }
+      content
+      status
     }
   }
 `;

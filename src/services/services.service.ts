@@ -12,12 +12,18 @@ export default class ServicesService {
   }
 
   async getAllServices(): Promise<ServiceEntity[]> {
-    return this.db.find();
+    return this.db.find({
+      relations: ['managers'],
+    });
   }
 
   async getServiceById(id: string): Promise<ServiceEntity | null> {
-    return this.db.findOneBy({ id });
+    return this.db.findOne({
+      where: { id },
+      relations: ['managers'],
+    });
   }
+
 
   async createService(data: MutationCreateServiceArgs["data"]): Promise<ServiceEntity> {
     const service = this.db.create(data);

@@ -4,15 +4,23 @@ export const LIST_SERVICES = `#graphql
     services {
       id
       name
+      managers {
+        email
+        id
+      }
     }
   }
 `;
 
 export const FIND_SERVICE_BY_ID = `#graphql
-  query Service($serviceId: UUID!) {
-    service(id: $serviceId) {
+  query Service($id: UUID!) {
+    service(id: $id) {
       id
       name
+      managers {
+        id
+        email
+      }
     }
   }
 `;
@@ -43,25 +51,3 @@ export const DELETE_SERVICE = `#graphql
     }
   }
 `;
-
-export const MANAGERS_BY_SERVICES = `#graphql
-  query ManagersByServices {
-    managersByServices {
-      id
-      name
-      managers {
-        email
-        id
-      }
-    }
-  }
-`
-
-export const MANAGERS_BY_SERVICE = `#graphql
-  query ManagersByService($serviceId: ID!) {
-    managersByService(serviceId: $serviceId) {
-      id
-      email
-    }
-  }
-`

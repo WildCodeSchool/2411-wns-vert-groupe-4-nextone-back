@@ -1,5 +1,5 @@
 import { BeforeInsert, Column, CreateDateColumn,
-   Entity, PrimaryGeneratedColumn, UpdateDateColumn, ManyToMany, JoinTable} from "typeorm";
+  Entity, PrimaryGeneratedColumn, UpdateDateColumn, ManyToMany, JoinTable,} from "typeorm";
 import * as argon2 from "argon2";
 import { ManagerRole } from "@/generated/graphql";
 import { IsEmail, Length, IsString } from "class-validator";

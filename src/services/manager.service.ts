@@ -12,7 +12,9 @@ export default class ManagerService {
     }
 
     async listManagers() {
-        return this.db.find();
+        return this.db.find({
+            relations: ['services'],
+        });
     }
 
     async findManagerByEmail(email: string) {
@@ -20,9 +22,12 @@ export default class ManagerService {
     }
 
     async getManagerById(id: string) {
-        const manager = await this.db.findOne({ where: { id } });
+        const manager = await this.db.findOne({
+            where: { id },
+            relations: ['services'],  
+        });
         if (!manager) {
-        throw new Error("No manager found");
+            throw new Error("No manager found");
         }
         return manager;
     }

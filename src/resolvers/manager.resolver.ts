@@ -126,7 +126,7 @@ export default {
             return await new ManagerService().updateManager(id, data);
         },
 
-       associateManagerAtService: async (_: any, { managerId, serviceId }: MutationAssociateManagerAtServiceArgs, { manager }: MyContext) => {
+       associateManagerAtService: async (_: any, { managerId, serviceId }: MutationAssociateManagerAtServiceArgs, { manager }: MyContext): Promise<Message> => {
             if (!manager) throw new Error("Non authentifié");
             const targetManager = await new ManagerService().findOne({
                 where: { id: managerId },
@@ -144,11 +144,11 @@ export default {
                 targetManager.services.push(service);
             }
             await new ManagerService().save(targetManager);
-            const updatedService = await new ServicesService().findOne({
+            await new ServicesService().findOne({
                 where: { id: service.id },
                 relations: ["managers"],
             });
-            return updatedService;
+            return { content: "Manager associé du service spécifié", status: true };;
         },
 
         dissociateManagerFromService: async (_: any,{ managerId, serviceId }: { managerId: number; serviceId: number }, { manager }: MyContext): Promise<Message> => {
