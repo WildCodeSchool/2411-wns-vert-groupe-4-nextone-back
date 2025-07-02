@@ -4,6 +4,7 @@ HEALTHCHECK_URL="http://localhost:4005/graphql?query=%7B__typename%7D"
 
 echo "Démarrage du serveur backend..."
 npm run start:prod
+# not change command
 
 echo "Attente que le conteneur devienne healthy..."
 
