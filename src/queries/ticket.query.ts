@@ -10,13 +10,12 @@ export const LIST_TICKETS = `#graphql
 export const GENERATE_TICKET = `#graphql
     mutation generateTicket($data: GenerateTicketInput!) {
       generateTicket(data: $data) {
-        code
         id
         firstName
         lastName
         email
         phone
-        status
+        code
       }
     }
 `;

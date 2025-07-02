@@ -70,7 +70,6 @@ beforeAll(async () => {
   try {
     if (!testDataSource.isInitialized) {
       await testDataSource.initialize();
-      await testDataSource.synchronize(true);
     }
     await testDataSource.query("TRUNCATE TABLE ticketlog, tickets, managers CASCADE");
   } catch (error) {

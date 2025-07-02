@@ -14,6 +14,9 @@ export default abstract class BaseService<T extends ObjectLiteral> {
 
     const created = await this.repo.save(this.repo.create(entity));
 
+    console.log("CREATED : ", created)
+    
+
     //ON RECHERCHE AVEC UN FIND POUR RECUPERER LES RELATIONS EN MEME TEMPS
     const finded = await this.repo.findOne({ where: { id: created.id } })
     if (!finded) {
