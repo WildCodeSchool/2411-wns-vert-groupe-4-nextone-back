@@ -3,19 +3,16 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import ManagerEntity from "./Manager.entity";
+import TicketEntity from "./Ticket.entity";
 
-// export enum StatusEnum {
-//   created = "CREATED",
-//   canceled = "CANCELED",
-//   done = "DONE",
-//   pending = "PENDING",
-//   archived = "ARCHIVED",
-// }
 
-@Entity({ name: "ticketlog"})
+
+@Entity({ name: "ticketlog" })
 export default class TicketLogEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
@@ -27,11 +24,16 @@ export default class TicketLogEntity {
   })
   status: Status;
 
-  @Column()
-  ticketId: string;
+  @ManyToOne(() => ManagerEntity, (manager: ManagerEntity) => manager.id, {
+    eager: true,
+    nullable: true,
+  })
+  manager: ManagerEntity;
 
-  @Column()
-  managerId: string;
+  @ManyToOne(() => TicketEntity, (ticket: TicketEntity) => ticket.id, {
+    eager: true,
+  })
+  ticket: TicketEntity;
 
   @CreateDateColumn()
   createdAt: Date;

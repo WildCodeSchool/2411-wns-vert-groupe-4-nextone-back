@@ -11,8 +11,19 @@ export default abstract class BaseService<T extends ObjectLiteral> {
 
   //CREER UNE INSTANCE DE T
   public async createOne(entity: DeepPartial<T>) {
+
     const created = await this.repo.save(this.repo.create(entity));
-    return created;
+
+    console.log("CREATED : ", created)
+    
+
+    //ON RECHERCHE AVEC UN FIND POUR RECUPERER LES RELATIONS EN MEME TEMPS
+    const finded = await this.repo.findOne({ where: { id: created.id } })
+    if (!finded) {
+      throw new Error("Impossible de créer l'entité")
+    }
+
+    return finded;
   }
 
   //RECUPERER TOUTES LES INSTANCES
@@ -20,6 +31,7 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     const list = await this.repo.find();
     return list;
   }
+  
 
   //RECUPERER UNE INSTANCE VIA SON ID
   public async findById(id: string) {

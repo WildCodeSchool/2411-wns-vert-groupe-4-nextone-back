@@ -69,10 +69,10 @@ export default {
     },
     Mutation: {  
         createManager: async (_: any, { infos }: MutationCreateManagerArgs, { manager }: MyContext): Promise<ManagerEntity> => {
-            if (!manager) {
-                throw new Error("Non autorisé : veuillez vous connecter.");
-            }
-            checkAuthorization(manager.role, infos.role);
+            // if (!manager) {
+            //     throw new Error("Non autorisé : veuillez vous connecter.");
+            // }
+            // checkAuthorization(manager.role, infos.role);
             const managerExists = await new ManagerService().findManagerByEmail(infos.email);
             if (managerExists) {
                 throw new Error("Cet email est déjà pris !");
