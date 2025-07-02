@@ -24,7 +24,7 @@ import {
   CREATE_COMPANY,
   DELETE_COMPANY,
   UPDATE_COMPANY,
-} from "../../src/queries/query";
+} from "../../src/queries/company.query";
 
 const fakeCompanies: Partial<CompanyEntity>[] = [
   {

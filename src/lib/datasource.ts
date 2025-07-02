@@ -5,6 +5,11 @@ import AuthorizationEntity from "@/entities/Authorization.entity";
 import { DataSource } from "typeorm";
 import SettingEntity from "@/entities/setting.entity";
 
+import TicketLogEntity from "@/entities/TicketLog.entity";
+import ManagerEntity from "@/entities/Manager.entity";
+import { TicketSubscriber } from "@/subscribers/ticket.subscriber";
+
+
 export default new DataSource({
   type: "postgres",
   host: "db",
@@ -12,7 +17,20 @@ export default new DataSource({
   username: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
   database: process.env.POSTGRES_DB,
-  entities: [TicketEntity, ServiceEntity, AuthorizationEntity, CompanyEntity, SettingEntity],
-  logging: ["error", "query"],
+
+  entities: [
+    TicketEntity,
+    ServiceEntity,
+    AuthorizationEntity,
+    CompanyEntity,
+    SettingEntity,
+    TicketLogEntity,
+    ManagerEntity
+  ],
+  subscribers:[TicketSubscriber],
+  logging: ["error"],
+  synchronize: true,
+
 });
+
 

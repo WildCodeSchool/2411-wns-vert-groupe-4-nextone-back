@@ -55,6 +55,9 @@ beforeAll(async () => {
     if (!testDataSource.isInitialized) {
       await testDataSource.initialize();
     }
+
+    await testDataSource.query("TRUNCATE TABLE setting CASCADE");
+
   } catch (error) {
     console.error("Error initializing test database:", error);
     throw error;

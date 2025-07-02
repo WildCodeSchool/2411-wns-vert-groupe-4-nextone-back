@@ -1,7 +1,9 @@
 node_modules
 db.env
-.env
+db_test.env
+*.env
 .qodo
 .vscode
 frontend
 src/generated
+dist

@@ -6,6 +6,7 @@ import {
   MutationUpdateServiceArgs,
   MutationDeleteServiceArgs,
   QueryServiceArgs,
+  QueryManagersByServiceArgs,
 } from "@/generated/graphql";
 import { MyContext } from ".."; // adapte si besoin
 
@@ -23,17 +24,28 @@ export default {
     service: async (_: any, { id }: QueryServiceArgs, ctx: MyContext) => {
       return await new ServicesService().getServiceById(id);
     },
+
+    managersByServices: async (_: any, __: any, ctx: MyContext) => {
+      return await new ServicesService().getAllServicesWithManagers();
+    },
+
+    managersByService: async (_: any, { serviceId }: QueryManagersByServiceArgs, ctx: MyContext) => {
+      return await new ServicesService().getManagersByServiceId(serviceId);
+    },
   },
 
   Mutation: {
-    createService: async (
+     createService: async (
       _: any,
       { data }: MutationCreateServiceArgs,
-      ctx: MyContext
+      { manager }: MyContext
     ) => {
-      const newService = await new ServicesService().createService(data);
-      return newService;
-    },
+    if (!manager || (manager.role !== 'SUPER_ADMIN')) {
+      throw new Error("Unauthorized: insufficient permissions");
+    }
+    const newService = await new ServicesService().createService(data);
+    return newService;
+  },
 
     updateService: async (
       _: any,

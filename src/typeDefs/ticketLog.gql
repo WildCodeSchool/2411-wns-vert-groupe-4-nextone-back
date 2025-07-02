@@ -1,0 +1,57 @@
+scalar DateTime
+scalar UUID
+
+enum Status {
+  CREATED
+  CANCELED
+  DONE
+  PENDING
+  ARCHIVED
+}
+
+type TicketLog {
+  id: UUID!
+  ticket: Ticket!
+  manager: ManagerWithoutPassword
+  status: Status!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+
+type Query {
+  ticketLog(id: UUID!): TicketLog
+  ticketLogs: [TicketLog!]!
+  ticketLogsByProperty(field: TicketLogPropertyInput!): [TicketLog!]!
+}
+
+type Mutation {
+  createTicketLog(data: CreateTicketLogInput!): TicketLog!
+  updateTicketLog(data: UpdateTicketLogInput!): TicketLog
+  deleteTicketLog(id: UUID!): DeleteResponse!
+}
+
+input TicketLogPropertyInput @oneOf {
+  ticketId: UUID
+  managerId: UUID
+  status: Status
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type DeleteResponse {
+  content: String!
+  success: Boolean!
+}
+
+input CreateTicketLogInput {
+  ticketId: UUID!
+  managerId: UUID
+  status: Status
+}
+
+input UpdateTicketLogInput {
+  id: UUID!
+  status: Status!
+  managerId: UUID
+}
