@@ -1,3 +1,4 @@
+
 import { DeepPartial, EntityTarget, ObjectLiteral, Repository } from "typeorm";
 import AppDataSource from "../lib/datasource";
 import { CreateCompanyInput } from "@/generated/graphql";
@@ -75,3 +76,4 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     return updatedEntity;
   }
 }
+
