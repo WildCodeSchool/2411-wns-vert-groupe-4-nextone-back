@@ -22,6 +22,10 @@ const serviceTypeDefs = loadFilesSync(path.join(__dirname, "../../src/typeDefs/s
 });
 const combinedTypeDefs = [...managerTypeDefs, ...serviceTypeDefs];
 
+type StatusResponse = {
+  content: string;
+  status: boolean;
+};
 
 type ResponseListManager = {
   managers: Manager[];
@@ -31,16 +35,53 @@ type ResponseCreateManager = {
   createManager: Manager;
 };
 
+type ResponseLoginManager = {
+  manager: Manager;
+  token: string;
+}
+
+type ReponseDisconnectManager = {
+  logout: StatusResponse
+}
+
+type ResponseGetManager = {
+  manager: Manager;
+}
+
+type ResponseDeleteManager = {
+  deleteManager: StatusResponse;
+}
+
+type ResponseUpdateManager = {
+  updateManager: Manager;
+}
+
+type ResponseAssociateManagerFromService = {
+  associateManagerFromService: StatusResponse
+}
+
+type ResponseDissociateManagerFromService = {
+  dissociateManagerFromService: StatusResponse
+}
+
 const listManagers = [
   { 
     id: "1", 
     email: "jean@example.com",
+    services: [
+      {
+        id: "10",
+        name: "Service Test",
+      }
+    ]
   },
   { 
     id: "2", 
     email: "jean1@example.com",
+    services: []
   },
 ];
+
 
 const createManagerExample = {
   first_name: "Jean",
@@ -62,6 +103,23 @@ const mockManager = {
   updated_at: new Date().toISOString(),
 };
 
+const manager = {
+  id: "1",
+  first_name: "Jean",
+  last_name: "Dupont",
+  email: "jean@example.com",
+  role: ManagerRole.Admin,
+  is_globally_active: true,
+  services: [
+      {
+        id: "10",
+        name: "Service Test",
+      }
+    ],
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+}
+
 let server: ApolloServer;
 
 const schema = makeExecutableSchema({
@@ -82,7 +140,7 @@ beforeAll(async () => {
           return { manager: mockManager, token: "mocked-token-123" };
         }
       },
-      logout: (_: any, __: any, ctx: any) => 
+      logout: (_: any, __: any) => 
         ({ content: "Vous êtes déconnecté", status: true }),
     },
     Mutation: {
@@ -101,20 +159,13 @@ beforeAll(async () => {
         store.set("Manager", "1", { ...mockManager, ...data });
         return store.get("Manager", "1");
       },
-      associateManagerAtService: (_: any, { managerId, serviceId }: { managerId: string, serviceId: string }) => {
+      associateManagerAtService: (_: any) => {
         return {
-          id: serviceId,
-          name: "Informatique",
-          managers: [
-            {
-              id: managerId,
-              email: "jean@example.com",
-              role: "ADMIN",
-            },
-          ],
+          content: "Manager associé au service avec succès",
+          status: true,
         };
       },
-      dissociateManagerFromService: (_: any, { managerId, serviceId }: { managerId: string; serviceId: string }, ctx: any) => {
+      dissociateManagerFromService: (_: any) => {
         return {
           content: "Manager dissocié du service spécifié",
           status: true,
@@ -131,7 +182,7 @@ beforeAll(async () => {
     }),
   });
   store.set("Query", "ROOT", "managers", listManagers);
-  store.set("Manager", "1", mockManager);
+  store.set("Manager", "1", manager);
 });
 
 describe("Test sur les managers", () => {
@@ -144,6 +195,7 @@ describe("Test sur les managers", () => {
       managers: listManagers,
     });
   });
+
 
   it("Inscription d'un manager", async () => {
     const response = await server.executeOperation<ResponseCreateManager>({
@@ -160,7 +212,7 @@ describe("Test sur les managers", () => {
   });
 
   it("Connexion avec un email et mot de passe valides", async () => {
-    const response = await server.executeOperation({
+    const response = await server.executeOperation<ResponseLoginManager>({
       query: LOGIN_MANAGER,
       variables: {
         infos: {
@@ -179,8 +231,8 @@ describe("Test sur les managers", () => {
   });
 
   it("Déconnexion du manager connecté", async () => {
-    const response = await server.executeOperation(
-      { query: LOGOUT_MANAGER },
+    const response = await server.executeOperation<ReponseDisconnectManager>({ 
+      query: LOGOUT_MANAGER },
       {
         contextValue: {
           manager: mockManager,
@@ -197,19 +249,19 @@ describe("Test sur les managers", () => {
   });
 
   it("Récupération d'un manager par son id après l'ajout", async () => {
-    const response = await server.executeOperation<ResponseListManager>({
+    const response = await server.executeOperation<ResponseGetManager>({
       query: FIND_MANAGER_BY_ID,
       variables: { managerId: "1" },
     });
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.data).toEqual({
-      manager: mockManager
+      manager: manager
     });
   })
 
   it("Suppression d'un manager", async () => {
-    const response = await server.executeOperation<ResponseListManager>({
+    const response = await server.executeOperation<ResponseDeleteManager>({
       query: DELETE_MANAGER,
       variables: { deleteManagerId: "1" },
     });
@@ -224,7 +276,7 @@ describe("Test sur les managers", () => {
     const updatedFirstName = "Jean-Michel";
     const updatedLastName = "Durand";
 
-    const response = await server.executeOperation({
+    const response = await server.executeOperation<ResponseUpdateManager>({
       query: UPDATE_MANAGER,
       variables: {
         updateManagerId: "1",
@@ -234,10 +286,8 @@ describe("Test sur les managers", () => {
         },
       },
     });
-
     assert(response.body.kind === "single");
     const result = response.body.singleResult.data?.updateManager;
-
     expect(result).toEqual({
       id: "1",
       first_name: updatedFirstName,
@@ -251,32 +301,25 @@ describe("Test sur les managers", () => {
   });
 
   it("Associe un manager à un service", async () => {
-  const response = await server.executeOperation({
+  const response = await server.executeOperation<ResponseAssociateManagerFromService>({
     query: ASSOCIATE_MANAGER_AT_SERVICE,
     variables: {
       managerId: "1",
       serviceId: "10",
     },
   });
-
   assert(response.body.kind === "single");
   expect(response.body.singleResult.data).toEqual({
-    associateManagerAtService: {
-      id: "10",
-      name: "Informatique",
-      managers: [
-        {
-          id: "1",
-          email: "jean@example.com",
-          role: "ADMIN",
-        },
-      ],
-    },
-  });
+  associateManagerAtService: {
+    content: "Manager associé au service avec succès",
+    status: true,
+  },
+});
+
 });
 
   it("Dissocie un manager d un service", async () => {
-    const response = await server.executeOperation(
+    const response = await server.executeOperation<ResponseDissociateManagerFromService>(
       {
         query: DISSOCIATE_MANAGER_FROM_SERVICE,
         variables: {

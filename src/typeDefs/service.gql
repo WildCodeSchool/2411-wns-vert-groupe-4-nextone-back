@@ -8,7 +8,7 @@ scalar DateTime
 type Service {
   id: UUID!
   name: String!
-  managers: [Manager!]!
+  managers: [Manager]
   createdAt: DateTime!
   updatedAt: String!
 }
@@ -26,11 +26,10 @@ type Manager {
 }
 
 type Query {
-  services: [ServiceWithoutManagers!]!
-  service(id: UUID!): ServiceWithoutManagers
-  managersByServices: [Service!]!
-  managersByService(serviceId: ID!): [Manager!]!
+  services: [Service!]!
+  service(id: UUID!): Service
 }
+
 type Mutation {
   createService(data: CreateServiceInput!): ServiceWithoutManagers!
   updateService(id: UUID!, data: UpdateServiceInput!): ServiceResponse!
@@ -41,7 +40,6 @@ type ServiceResponse {
   message: String!
   success: Boolean!
 }
-
 
 ### Input
 input CreateServiceInput {

@@ -7,8 +7,7 @@ import fs from 'fs';
 import path from 'path';
 import { LIST_SERVICES, FIND_SERVICE_BY_ID,
   CREATE_SERVICE, UPDATE_SERVICE,
-  DELETE_SERVICE, MANAGERS_BY_SERVICES,
-  MANAGERS_BY_SERVICE
+  DELETE_SERVICE
 } from "../../src/queries/service.query"
 
 const serviceTypeDefs = fs.readFileSync(
@@ -17,17 +16,26 @@ const serviceTypeDefs = fs.readFileSync(
 );
 
 // --- Types ---
-type Service = {
+type BaseService = {
   id: string;
   name: string;
 };
 
-type ResponseData = {
-  services: Service[];
+type Manager = {
+  id: string;
+  email: string;
 };
 
-type ResponseOneServiceData = {
-  service: Service | null;
+type Service = BaseService & {
+  managers: Manager[];
+};
+
+type ResponseListService = {
+  managersByServices: Service[];
+};
+
+type ResponseGetService = {
+  managersByService: Service;
 };
 
 type ResponseCreateServiceData = {
@@ -47,26 +55,8 @@ type ResponseDeleteServiceData = {
   deleteService: ServiceResponse;
 };
 
-type Manager = {
-  id: string;
-  email: string;
-};
-
-type ServiceWithManagers = Service & {
-  managers: Manager[];
-};
-
-type ResponseServicesWithManagers = {
-  managersByServices: ServiceWithManagers[];
-};
-
-type ResponseServiceWithManagers = {
-  managersByService: Manager[];
-};
-
-
-let servicesData: Service[];
-let servicesDataWithManagers: ServiceWithManagers[];
+let servicesData: BaseService[];
+let servicesDataWithManagers: Service[];
 let server: ApolloServer;
 
 beforeAll(async () => {
@@ -93,14 +83,11 @@ beforeAll(async () => {
 
   const serviceResolvers = {
     Query: {
-      services: () => servicesData,
-      service: (_: any, args: { id: string }) =>
-        servicesData.find((s) => s.id === args.id) || null,
-      managersByServices: () => servicesDataWithManagers,
-      managersByService: (_: any, args: { serviceId: string }) => {
-        const service = servicesDataWithManagers.find((s) => s.id === args.serviceId);
+      services: () => servicesDataWithManagers,
+      service: (_: any, args: { id: string }) => {
+        const service = servicesDataWithManagers.find((s) => s.id === args.id);
         if (!service) throw new Error('Service not found');
-        return service.managers;
+        return service;
       },
     },
     Mutation: {
@@ -138,19 +125,25 @@ beforeAll(async () => {
 
 // --- Tests ---
 describe('ServicesResolver (mocked)', () => {
-  it('récupère tous les services', async () => {
-    const response = await server.executeOperation<ResponseData>({ query: LIST_SERVICES });
-    assert(response.body.kind === 'single');
-    expect(response.body.singleResult.data).toEqual({ services: servicesData });
-  });
-
-  it('récupère un service par ID', async () => {
-    const response = await server.executeOperation<ResponseOneServiceData>({
-      query: FIND_SERVICE_BY_ID,
-      variables: { serviceId: 'uuid-1' },
+   it('récupère tous les services', async () => {
+    const response = await server.executeOperation<ResponseListService>({
+      query: LIST_SERVICES,
     });
     assert(response.body.kind === 'single');
-    expect(response.body.singleResult.data).toEqual({ service: servicesData[0] });
+    expect(response.body.singleResult.data).toEqual({
+      services: servicesDataWithManagers,
+    });
+  });
+
+  it("récupère un service par son ID", async () => {
+    const response = await server.executeOperation<ResponseGetService>({
+      query: FIND_SERVICE_BY_ID,
+      variables: { id: 'uuid-1' },
+    });
+    assert(response.body.kind === 'single');
+    expect(response.body.singleResult.data).toEqual({
+      service: servicesDataWithManagers.find((s) => s.id === 'uuid-1'),
+    });
   });
 
   it('crée un nouveau service', async () => {
@@ -185,26 +178,5 @@ describe('ServicesResolver (mocked)', () => {
     const deleted = response.body.singleResult.data?.deleteService;
     expect(deleted?.success).toBe(true);
     expect(deleted?.message).toBe('Service deleted successfully.');
-  });
-
-  it('récupère tous les services avec leurs managers', async () => {
-    const response = await server.executeOperation<ResponseServicesWithManagers>({
-      query: MANAGERS_BY_SERVICES,
-    });
-    assert(response.body.kind === 'single');
-    expect(response.body.singleResult.data).toEqual({
-      managersByServices: servicesDataWithManagers,
-    });
-  });
-
-  it("récupère les managers d'un service par son ID", async () => {
-    const response = await server.executeOperation<ResponseServiceWithManagers>({
-      query: MANAGERS_BY_SERVICE,
-      variables: { serviceId: 'uuid-1' },
-    });
-    assert(response.body.kind === 'single');
-    expect(response.body.singleResult.data).toEqual({
-      managersByService: servicesDataWithManagers.find((s) => s.id === 'uuid-1')!.managers,
-    });
   });
 });
