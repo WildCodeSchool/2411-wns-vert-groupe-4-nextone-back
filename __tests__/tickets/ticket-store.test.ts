@@ -8,14 +8,11 @@ import { ApolloServer } from "@apollo/server";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import TicketResolver from "../../src/resolvers/ticket.resolver";
 import {
-  DeletedTicketResponse,
   GenerateTicketInput,
   MutationGenerateTicketArgs,
   MutationUpdateTicketArgs,
-  QueryGetTicketArgs,
   Status,
   Ticket,
-  UpdateTicketInput,
 } from "../../src/generated/graphql";
 import { loadFilesSync } from "@graphql-tools/load-files";
 import path from "path";
@@ -76,10 +73,10 @@ beforeAll(async () => {
   const store = createMockStore({ schema });
   const resolvers = (store: IMockStore) => ({
     Query: {
-      getTickets: () => {
-        return store.get("Query", "ROOT", "getTickets");
+      tickets: () => {
+        return store.get("Query", "ROOT", "tickets");
       },
-      getTicket: (_: any, { id }: { id: string }) => {
+      ticket: (_: any, { id }: { id: string }) => {
         return store.get("Ticket", id);
       },
     },
@@ -95,7 +92,7 @@ beforeAll(async () => {
           return { message: "Ticket not found", success: false };
         }
         store.reset();
-        store.set("Query", "ROOT", "getTickets", ticketsData);
+        store.set("Query", "ROOT", "tickets", ticketsData);
         return { message: "Ticket deleted", success: true };
       },
       updateTicket: (_: null, args: MutationUpdateTicketArgs) => {
@@ -118,7 +115,7 @@ beforeAll(async () => {
   });
 
   //remplissage du store
-  store.set("Query", "ROOT", "getTickets", ticketsData);
+  store.set("Query", "ROOT", "tickets", ticketsData);
 });
 
  describe("Test sur les tickets", () => {
@@ -129,7 +126,7 @@ beforeAll(async () => {
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.data).toEqual({
-      getTickets: [
+      tickets: [
         { id: "1", code: "001" },
         { id: "2", code: "002" },
       ],
@@ -164,7 +161,7 @@ beforeAll(async () => {
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.data).toEqual({
-      getTicket: { code: generateTicketExample.code },
+      ticket: { code: generateTicketExample.code },
     });
   });
 

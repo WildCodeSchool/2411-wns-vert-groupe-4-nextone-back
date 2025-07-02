@@ -6,6 +6,8 @@ import {
   MutationCreateTicketLogArgs,
   MutationDeleteTicketLogArgs,
   MutationUpdateTicketLogArgs,
+  QueryTicketLogsByCreationSlotArgs,
+  QueryTicketLogsByPropertiesArgs,
   QueryTicketLogsByPropertyArgs,
 } from "@/generated/graphql";
 import TicketLogService from "@/services/ticketLogs.service";
@@ -29,16 +31,20 @@ export default {
     },
 
     async ticketLogsByProperty(_: any, args: QueryTicketLogsByPropertyArgs) {
+
       let key = Object.keys(args.field)[0] as keyof typeof args.field;
       const value = args.field[key];
-      console.log("KEY : ", key, "VALUE : ", value);
-      //MAPPER LA KEY SI MANAGER OU TICKET
-      let keyForService: keyof TicketLogEntity =
-        key !== "managerId" ? (key !== "ticketId" ? key : "ticket") : "manager";
-      console.log("SERVICEKEY : ", keyForService);
-      // const test = await ticketLogService.findByProperty()
-      return await ticketLogService.findByProperty(keyForService, value);
+
+      return await ticketLogService.findByProperty(key, value);
     },
+
+    async ticketLogsByProperties(_: any, { fields }: QueryTicketLogsByPropertiesArgs) {
+      return await ticketLogService.findByProperties(fields)
+    },
+
+    async ticketLogsByCreationSlot(_: any, args: QueryTicketLogsByCreationSlotArgs) {
+      return await ticketLogService.findByCreationSlot({...args.data})
+    }
 
   },
   Mutation: {

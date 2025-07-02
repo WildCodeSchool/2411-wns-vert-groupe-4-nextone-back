@@ -24,11 +24,17 @@ export default class TicketLogEntity {
   })
   status: Status;
 
+  @Column({ nullable: true})
+  managerId: string
+
   @ManyToOne(() => ManagerEntity, (manager: ManagerEntity) => manager.id, {
     eager: true,
     nullable: true,
   })
   manager: ManagerEntity;
+
+  @Column()
+  ticketId: string
 
   @ManyToOne(() => TicketEntity, (ticket: TicketEntity) => ticket.id, {
     eager: true,

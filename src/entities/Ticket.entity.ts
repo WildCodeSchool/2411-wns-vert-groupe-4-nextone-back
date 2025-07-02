@@ -5,7 +5,6 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  AfterInsert,
 } from "typeorm";
 
 @Entity({ name: "tickets" })

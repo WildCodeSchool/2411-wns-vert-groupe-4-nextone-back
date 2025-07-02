@@ -14,8 +14,8 @@ type Ticket {
 }
 
 type Query {
-  getTickets: [Ticket!]
-  getTicket(id: ID!): Ticket
+  tickets: [Ticket!]
+  ticket(id: ID!): Ticket
 }
 
 type Mutation {

@@ -5,7 +5,7 @@ import {
   MutationGenerateTicketArgs,
   MutationUpdateTicketArgs,
   MutationUpdateTicketStatusArgs,
-  QueryGetTicketArgs,
+  QueryTicketArgs,
 } from "@/generated/graphql";
 import { MyContext } from "..";
 import { buildResponse } from "@/utils/authorization";
@@ -17,13 +17,13 @@ type TicketDeleted = {
 
 export default {
   Query: {
-    getTickets: async (_: any): Promise<TicketEntity[]> => {
+    tickets: async (_: any): Promise<TicketEntity[]> => {
       const ticketsList = await new TicketService().getAllTickets();
       return ticketsList;
     },
-    getTicket: async (
+    ticket: async (
       _: any,
-      { id }: QueryGetTicketArgs
+      { id }: QueryTicketArgs
     ): Promise<TicketEntity> => {
       const ticket = await new TicketService().getTicketById(id);
       return ticket;
@@ -44,7 +44,7 @@ export default {
     },
     deleteTicket: async (
       _: any,
-      { id }: QueryGetTicketArgs,
+      { id }: QueryTicketArgs,
       ctx: MyContext
     ): Promise<DeletedTicketResponse> => {
       const isTicketDeleted = await new TicketService().deleteTicket(id);

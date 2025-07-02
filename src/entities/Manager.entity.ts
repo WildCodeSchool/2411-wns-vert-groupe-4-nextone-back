@@ -48,6 +48,10 @@ export default class ManagerEntity {
   })
   is_globally_active: boolean;
 
+  @ManyToMany(() => ServiceEntity, service => service.managers, { cascade: true })
+  @JoinTable({name: "authorization"})
+  services: ServiceEntity[];
+
   @OneToMany(() => AuthorizationEntity, (auth) => auth.manager)
   authorizations: AuthorizationEntity[];
 

@@ -13,7 +13,7 @@ import {
   MutationCreateSettingArgs,
   MutationDeleteSettingArgs,
   MutationUpdateSettingArgs,
-  QueryGetTicketArgs,
+  QueryTicketArgs,
   Setting,
 } from "../../src/generated/graphql";
 import {
@@ -112,7 +112,7 @@ describe("TESTS SETTINGS DANS UN STORE", () => {
   it("RECUPERATION D'UN SETTING", async () => {
     const response = await server.executeOperation<
       TResponse,
-      QueryGetTicketArgs
+      QueryTicketArgs
     >({
       query: SETTING,
       variables: {
