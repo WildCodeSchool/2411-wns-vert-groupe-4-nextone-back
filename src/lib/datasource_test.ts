@@ -8,6 +8,7 @@ import SettingEntity from "@/entities/setting.entity";
 import ManagerEntity from "@/entities/Manager.entity";
 import TicketLogEntity from "@/entities/TicketLog.entity";
 import { TicketSubscriber } from "@/subscribers/ticket.subscriber";
+import CompanySubscriber from "@/subscribers/company.subscriber";
 
 export default new DataSource({
   type: "postgres",
@@ -27,7 +28,7 @@ export default new DataSource({
     TicketLogEntity,
     ConnectionLogEntity
   ],
-  subscribers: [TicketSubscriber],
+  subscribers: [TicketSubscriber, CompanySubscriber],
 
   synchronize: true, // pas à utiliser en prod (faire des migrations pour la prod);
 
