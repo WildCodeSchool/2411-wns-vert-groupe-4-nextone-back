@@ -17,16 +17,15 @@ type Query {
 }
 
 type Mutation {
-  addAuthorization(input: NewAuthInput!): Boolean!
-  updateAuthorization(input: UpdateAuthInput!): Boolean!
-  deleteAuthorization(serviceId: UUID!, managerId: UUID!): Boolean!
+  addAuthorization(input: NewAuthInput!): AuthorizationResponse!
+  updateAuthorization(input: UpdateAuthInput!): AuthorizationResponse!
+  deleteAuthorization(input: DeleteAuthInput!): AuthorizationResponse!
 }
 
 type AuthorizationResponse {
   message: String!
   success: Boolean!
 }
-
 
 ### Input
 input NewAuthInput {
@@ -38,4 +37,9 @@ input UpdateAuthInput {
   serviceId: UUID!
   managerId: UUID!
   isActive: Boolean
+}
+
+input DeleteAuthInput {
+  serviceId: UUID!
+  managerId: UUID!
 }

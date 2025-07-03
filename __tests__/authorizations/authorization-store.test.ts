@@ -66,16 +66,16 @@ const fakeResolvers = (store: IMockStore) => ({
   Mutation: {
     addAuthorization: (_: null, { input }: { input: NewAuthInput }) => {
       store.set("Authorization", "auth-1", { ...input, isActive: true });
-      return true;
+      return { success: true, message: "Authorization successfully created."};
     },
     updateAuthorization: (_: null, { input }: { input: UpdateAuthInput }) => {
       store.set("Authorization", "auth-1", input);
-      return true;
+      return { success: true, message: "Authorization update failed." };
     },
     deleteAuthorization: () => {
       store.set("Query", "ROOT", "getServiceAuthorizations", []);
       store.set("Query", "ROOT", "getEmployeeAuthorizations", []);
-      return true;
+      return { success: true, message: "Authorization delete failed." };
     },
   },
 });
@@ -133,36 +133,66 @@ describe("Tests sur les autorisations (depuis le store)", () => {
     });
   });
 
-  it("Ajoute une autorisation", async () => {
-    const response = await server.executeOperation<ResponseAdd>({
+  it("Ajoute une autorisation via la mutation ADD_AUTHORIZATION", async () => {
+    const variables = {
+      input: {
+        managerId: "manager-1",
+        serviceId: "service-1",
+      },
+    };
+    const response = await server.executeOperation({
       query: ADD_AUTHORIZATION,
+      variables,
     });
-
     assert(response.body.kind === "single");
-    expect(response.body.singleResult.data).toEqual({
-      addAuthorization: true,
+    const singleResult = response.body.singleResult;
+    expect(singleResult.data).toEqual({
+      addAuthorization: {
+        success: true,
+        message: "Authorization successfully created.",
+      },
     });
   });
 
+
   it("Met à jour une autorisation (désactivation)", async () => {
+    const variables = {
+      input: {
+        managerId: "manager-1",
+        serviceId: "service-1",
+      },
+    };
     const response = await server.executeOperation<ResponseUpdate>({
       query: UPDATE_AUTHORIZATION,
+      variables,
     });
-
     assert(response.body.kind === "single");
     expect(response.body.singleResult.data).toEqual({
-      updateAuthorization: true,
+      updateAuthorization: {
+        success: true,
+        message: "Authorization update failed.",
+      },
     });
   });
 
   it("Supprime une autorisation simulée", async () => {
+    const variables = {
+      input: {
+        managerId: "manager-1",
+        serviceId: "service-1",
+      },
+    };
     const response = await server.executeOperation<ResponseDelete>({
       query: DELETE_AUTHORIZATION,
+      variables,
     });
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.data).toEqual({
-      deleteAuthorization: true,
+      deleteAuthorization: {
+        success: true,
+        message: "Authorization delete failed.",
+      }
     });
   });
 });

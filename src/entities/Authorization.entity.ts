@@ -7,6 +7,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { ServiceEntity } from "./Service.entity";
+import ManagerEntity from './Manager.entity';
 // import { ManagerEntity } from "./Manager.entity"; // commenté car pas encore créé
 
 @Entity('authorizations')
@@ -27,8 +28,15 @@ export default class AuthorizationEntity {
   // Relations
  
   // Relation vers Service (ManyToOne)
+  // @ManyToOne(() => ServiceEntity, (service) => service.authorizations)
+  // @JoinColumn({ name: "serviceId" })
+  // service: ServiceEntity;
+
+  
+  @ManyToOne(() => ManagerEntity, (manager) => manager.authorizations)
+  manager: ManagerEntity;
+
   @ManyToOne(() => ServiceEntity, (service) => service.authorizations)
-  @JoinColumn({ name: "serviceId" })
   service: ServiceEntity;
 
   // Relation vers Manager (ManyToOne) quand elle sera créée
