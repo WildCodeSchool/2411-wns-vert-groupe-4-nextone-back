@@ -18,10 +18,10 @@ export default class TicketEntity {
   @Column()
   code: string;
 
-  @Column()
+  @Column({ name: "first_name" })
   firstName: string;
 
-  @Column()
+  @Column({ name: "last_name"})
   lastName: string;
 
   @Column()
@@ -37,16 +37,16 @@ export default class TicketEntity {
   })
   status: Status;
 
-  @Column({ type: "uuid"})
+  @Column({ type: "uuid", name: "service_id"})
   ServiceId: string;
 
   @ManyToOne(() => ServiceEntity, (service: ServiceEntity) => service.id)
   service: ServiceEntity;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: "created_at"})
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: "updated_at"})
   updatedAt: Date;
 
 }

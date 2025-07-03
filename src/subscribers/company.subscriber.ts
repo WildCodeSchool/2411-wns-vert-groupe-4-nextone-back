@@ -25,9 +25,10 @@ export default class CompanySubscriber
     admin.password = "jambonneau";
     admin.first_name = name;
     admin.last_name = name;
+    admin.company = event.entity
     admin.is_globally_active = true;
 
     const saved = await event.manager.save(admin);
-    console.log("SAVED : ", saved);
+    console.log("SUPER ADMIN CREATED");
   }
 }
