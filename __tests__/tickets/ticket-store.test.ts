@@ -11,6 +11,7 @@ import {
   GenerateTicketInput,
   MutationGenerateTicketArgs,
   MutationUpdateTicketArgs,
+  Service,
   Status,
   Ticket,
 } from "../../src/generated/graphql";
@@ -33,6 +34,11 @@ type ResponseDataCreate = {
   generateTicket: Ticket;
 };
 
+const fakeService: Service = {
+  id: "8d106e86-5ffb-4e97-bb3a-cba9a329bbef",
+  name: "Radiologie",
+}
+
 const ticketsData: Ticket[] = [
   {
     id: "1",
@@ -42,7 +48,7 @@ const ticketsData: Ticket[] = [
     email: "corentin.tournier@gmail.com",
     phone: "0606060606",
     status: Status.Pending,
-  },
+
   {
     id: "2",
     code: "002",

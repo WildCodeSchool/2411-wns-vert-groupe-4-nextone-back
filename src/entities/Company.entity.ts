@@ -4,8 +4,10 @@ import {
     PrimaryGeneratedColumn,
     CreateDateColumn,
     UpdateDateColumn,
+    OneToMany,
 
   } from "typeorm";
+import { ServiceEntity } from "./Service.entity";
     
   @Entity({ name: "company" })
   export default class CompanyEntity {
@@ -18,6 +20,12 @@ import {
 
     @Column()
     address: string;
+
+    @Column()
+    postalCode: string;
+
+    @Column()
+    city: string;
 
     @Column({
       unique: true
@@ -37,4 +45,7 @@ import {
     
     @UpdateDateColumn()
     updated_at: Date; 
+
+    @OneToMany(() => ServiceEntity, (service: ServiceEntity) => service.id)
+    services: ServiceEntity[]
   }

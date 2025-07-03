@@ -2,13 +2,16 @@ scalar DateTime
 
 type Company {
   id: ID!
-  name: String
-  address: String
-  siret: String
-  email: String
-  phone: String
-  createdAt: DateTime
-  updatedAT: DateTime
+  name: String!
+  address: String!
+  postalCode: String!
+  city: String!
+  siret: String!
+  email: String!
+  phone: String!
+  services: [Service!]!
+  createdAt: DateTime!
+  updatedAT: DateTime!
 }
 
 
@@ -24,13 +27,15 @@ type Mutation {
 }
 
 type DeleteResponseCompany {
-  message: String!
+  content: String!
   success: Boolean!
 }
 
 input CreateCompanyInput {
   name: String!
   address: String!
+  postalCode: String!
+  city: String!
   siret: String!
   email: String!
   phone: String!
@@ -40,6 +45,8 @@ input UpdateCompanyInput {
   id: ID!
   name: String
   address: String
+  postalCode: String
+  city: String
   siret: String
   email: String
   phone: String

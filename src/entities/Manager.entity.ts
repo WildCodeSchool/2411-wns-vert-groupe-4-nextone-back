@@ -1,9 +1,20 @@
-import { BeforeInsert, Column, CreateDateColumn,
-  Entity, PrimaryGeneratedColumn, UpdateDateColumn, OneToMany} from "typeorm";
+import {
+  BeforeInsert,
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+  ManyToMany,
+  JoinTable,
+  ManyToOne,
+  OneToMany,
+} from "typeorm";
 import * as argon2 from "argon2";
 import { ManagerRole } from "@/generated/graphql";
 import { IsEmail, Length, IsString } from "class-validator";
 import AuthorizationEntity from "./Authorization.entity";
+import CompanyEntity from "./Company.entity";
 
 @Entity("managers")
 export default class ManagerEntity {
@@ -30,7 +41,9 @@ export default class ManagerEntity {
   email: string;
 
   @Column()
-  @Length(6, 50, { message: "Le mot de passe doit faire au moins 6 caractères." })
+  @Length(6, 50, {
+    message: "Le mot de passe doit faire au moins 6 caractères.",
+  })
   password: string;
 
   @Column({
@@ -44,16 +57,23 @@ export default class ManagerEntity {
   @Column({
     type: "boolean",
     nullable: true,
-    default: true, 
+    default: false,
   })
   is_globally_active: boolean;
 
-  @ManyToMany(() => ServiceEntity, service => service.managers, { cascade: true })
-  @JoinTable({name: "authorization"})
+  @ManyToMany(() => ServiceEntity, (service) => service.managers, {
+    cascade: true,
+  })
+  @JoinTable({ name: "authorization" })
   services: ServiceEntity[];
 
   @OneToMany(() => AuthorizationEntity, (auth) => auth.manager)
   authorizations: AuthorizationEntity[];
+  @Column({ type: "uuid"})
+  companyId: string
+
+  @ManyToOne(() => CompanyEntity, (company: CompanyEntity) => company.id)
+  company: CompanyEntity
 
   @CreateDateColumn()
   created_at: Date;
@@ -66,7 +86,9 @@ export class LoginInput {
   @IsEmail({}, { message: "L'adresse email n'est pas valide." })
   email: string;
 
-  @Length(6, 50, { message: "Le mot de passe doit faire au moins 6 caractères." })
+  @Length(6, 50, {
+    message: "Le mot de passe doit faire au moins 6 caractères.",
+  })
   password: string;
 }
 

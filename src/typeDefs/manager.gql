@@ -4,6 +4,13 @@ enum ManagerRole {
   SUPER_ADMIN
 }
 
+# type Service {
+#   id: UUID!
+#   name: String!
+#   createdAt: DateTime!
+#   updatedAt: String!
+# }
+
 type Manager {
   id: ID!
   first_name: String!
@@ -12,6 +19,8 @@ type Manager {
   password: String!
   role: ManagerRole!
   is_globally_active: Boolean
+  services: [Service!]!
+  company: Company!
   created_at: String
   updated_at: String
 }

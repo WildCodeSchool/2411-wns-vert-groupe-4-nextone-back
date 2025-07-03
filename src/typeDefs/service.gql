@@ -6,7 +6,9 @@ scalar DateTime
 type Service {
   id: UUID!
   name: String!
-  isGloballyActive: Boolean
+  managers: [Manager!]!
+  company: Company!
+  tickets: [Ticket!]!
   createdAt: DateTime!
   updatedAt: String!
 }

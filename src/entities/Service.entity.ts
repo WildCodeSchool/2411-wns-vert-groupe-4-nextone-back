@@ -1,34 +1,50 @@
 import {
-    Entity,
-    PrimaryGeneratedColumn,
-    Column,
-    CreateDateColumn,
-    UpdateDateColumn,
-    OneToMany
-  } from 'typeorm';
-  import AuthorizationEntity  from './Authorization.entity';
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToMany,
+  OneToMany,
+  ManyToOne,
+} from "typeorm";
+import AuthorizationEntity from "./Authorization.entity";
+import ManagerEntity from "./Manager.entity";
+import TicketEntity from "./Ticket.entity";
+import CompanyEntity from "./Company.entity";
 
- @Entity("services")
-  export class ServiceEntity {
-    @PrimaryGeneratedColumn('uuid')
-    id!: string;
-  
-    @Column()
-    name!: string;
+@Entity("service")
+export class ServiceEntity {
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
 
-    @Column({
-      type: "boolean",
-      nullable: true,
-      default: true, 
-    })
-    isGloballyActive: boolean;
-  
-    @CreateDateColumn()
-    createdAt!: Date;
-  
-    @UpdateDateColumn()
-    updatedAt!: Date;
+  @Column()
+  name: string;
 
-    @OneToMany(() => AuthorizationEntity, (auth) => auth.service)
-    authorizations: AuthorizationEntity[];
-  }
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  // Relations
+
+  //AUTHORIZATION
+  @OneToMany(() => AuthorizationEntity, (auth) => auth.service)
+  authorizations: AuthorizationEntity[];
+
+  //MANAGERS
+  @ManyToMany(() => ManagerEntity, (manager) => manager.id)
+  managers: ManagerEntity[];
+
+  //TICKETS
+  @OneToMany(() => TicketEntity, (ticket) => ticket.id)
+  tickets: TicketEntity[];
+
+  //COMPANY
+  @Column({ type: "uuid"})
+  companyId: string;
+
+  @ManyToOne(() => CompanyEntity, (company) => company.id)
+  company: CompanyEntity;
+}
