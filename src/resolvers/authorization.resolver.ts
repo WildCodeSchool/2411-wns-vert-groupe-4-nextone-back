@@ -5,82 +5,47 @@ import {
   MutationDeleteAuthorizationArgs,
   QueryGetEmployeeAuthorizationsArgs,
   QueryGetServiceAuthorizationsArgs,
+  AuthorizationResponse
 } from "@/generated/graphql";
-import { MyContext } from ".."; // adapte le chemin si besoin
+import { MyContext } from "..";
+import { buildResponse } from "@/utils/authorization";
 
-type AuthorizationResponse = {
-  message: string;
-  success: boolean;
-};
+  const authorizationService = new AuthorizationService
 
 export default {
   Query: {
-    getServiceAuthorizations: async (
-      _: any,
-      { serviceId }: QueryGetServiceAuthorizationsArgs,
-      ctx: MyContext
-    ) => {
-      return await new AuthorizationService().getByService(serviceId);
+    getServiceAuthorizations: async (_: any, { serviceId }: QueryGetServiceAuthorizationsArgs, ctx: MyContext) => {
+      return await authorizationService.getByService(serviceId);
     },
 
-    getEmployeeAuthorizations: async (
-      _: any,
-      { managerId }: QueryGetEmployeeAuthorizationsArgs,
-      ctx: MyContext
-    ) => {
-      return await new AuthorizationService().getByManager(managerId);
+    getEmployeeAuthorizations: async (_: any, { managerId }: QueryGetEmployeeAuthorizationsArgs, ctx: MyContext) => {
+      return await authorizationService.getByManager(managerId);
     },
   },
 
   Mutation: {
-    addAuthorization: async (
-      _: any,
-      { input }: MutationAddAuthorizationArgs,
-      ctx: MyContext
-    ): Promise<AuthorizationResponse> => {
-      const success = await new AuthorizationService().addAuthorization(input);
-
-      if (!success) {
-        return {
-          message: "Authorization already exists or failed to create.",
-          success: false,
-        };
+    addAuthorization: async (_: any, { input }: MutationAddAuthorizationArgs, { manager }: MyContext): Promise<AuthorizationResponse> => {
+      if (!manager) {
+        throw new Error("Manager non authentifié");
       }
-
-      return {
-        message: "Authorization successfully created.",
-        success: true,
-      };
+      const success = await authorizationService.addAuthorization(input, manager);
+      return buildResponse(success, "Authorization successfully created.", "Authorization already exists.");
     },
 
-    updateAuthorization: async (
-      _: any,
-      { input }: MutationUpdateAuthorizationArgs,
-      ctx: MyContext
-    ): Promise<AuthorizationResponse> => {
-      const success = await new AuthorizationService().updateAuthorization(input);
-
-      return {
-        message: success
-          ? "Authorization updated successfully."
-          : "Authorization update failed.",
-        success,
-      };
+    updateAuthorization: async (_: any, { input }: MutationUpdateAuthorizationArgs, { manager }: MyContext): Promise<AuthorizationResponse> => {
+      if (!manager) {
+        throw new Error("Manager non authentifié");
+      }
+      const success = await authorizationService.updateAuthorization(input, manager);
+      return buildResponse(success, "Authorization updated successfully.", "Authorization update failed.");
     },
 
-    deleteAuthorization: async (
-      _: any,
-      { serviceId, managerId }: MutationDeleteAuthorizationArgs,
-      ctx: MyContext
-    ): Promise<AuthorizationResponse> => {
-      const success = await new AuthorizationService().deleteAuthorization(serviceId, managerId);
-
-      return {
-        message: success
-          ? "Authorization deleted successfully."
-          : "Authorization not found or already deleted.",
-        success,
-      };
+    deleteAuthorization: async (_: any, { input }: MutationDeleteAuthorizationArgs, { manager }: MyContext): Promise<AuthorizationResponse> => {
+      if (!manager) {
+        throw new Error("Manager non authentifié");
+      }
+      const success = await authorizationService.deleteAuthorization(input, manager);
+      return buildResponse(success, "Authorization deleted successfully.", "Authorization not found or already deleted.");
     },
   },
 };

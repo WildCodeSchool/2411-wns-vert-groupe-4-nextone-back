@@ -19,26 +19,28 @@ export const LIST_BY_MANAGER = `#graphql
 `;
 
 export const ADD_AUTHORIZATION = `#graphql
-  mutation {
-    addAuthorization(input: {
-      serviceId: "service-1"
-      managerId: "manager-1"
-    })
+  mutation Mutation($input: NewAuthInput!) {
+    addAuthorization(input: $input) {
+      message
+      success
+    }
   }
-`;
+`
 
 export const UPDATE_AUTHORIZATION = `#graphql
-  mutation {
-    updateAuthorization(input: {
-      serviceId: "service-1"
-      managerId: "manager-1"
-      isActive: false
-    })
+  mutation Mutation($input: UpdateAuthInput!) {
+    updateAuthorization(input: $input) {
+      message
+      success
+    }
   }
-`;
+`
 
 export const DELETE_AUTHORIZATION = `#graphql
-  mutation {
-    deleteAuthorization(serviceId: "service-1", managerId: "manager-1")
+  mutation Mutation($input: DeleteAuthInput!) {
+    deleteAuthorization(input: $input) {
+      message
+      success
+    }
   }
 `;
