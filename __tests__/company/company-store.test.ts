@@ -80,7 +80,7 @@ const fakeResolvers = (store: IMockStore) => ({
       store.reset();
       store.set("Query", "ROOT", "companies", fakeCompanies);
       return {
-        content: "Company 3 deleted",
+        message: "Company 3 deleted",
         success: true,
       };
     },
@@ -179,7 +179,7 @@ describe("TEST DES COMPANIES DANS LE STORE", () => {
     expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data).toEqual<TResponseDelete>({
       message: {
-        content: "Company 3 deleted",
+        message: "Company 3 deleted",
         success: true,
       },
     });

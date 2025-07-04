@@ -42,8 +42,8 @@ type Auth {
 }
 
 type Message {
-  content: String
-  status: Boolean 
+  message: String
+  success: Boolean 
 }
 
 type Query {
@@ -53,12 +53,17 @@ type Query {
   logout: Message!
 }
 
+type AccessManagerResponse {
+  is_globally_active: Boolean!
+}
+
 type Mutation {
   createManager(infos: InputRegister!): Manager
   deleteManager(id: ID!): Message!
   updateManager(id: ID!, data: UpdateManagerInput!): ManagerWithoutPassword!
   associateManagerAtService(managerId: ID!, serviceId: ID!): Message!
   dissociateManagerFromService(managerId: ID!, serviceId: ID!): Message!
+  toggleGlobalAccessManager(id: UUID!): AccessManagerResponse!
 }
 
 input InputRegister {

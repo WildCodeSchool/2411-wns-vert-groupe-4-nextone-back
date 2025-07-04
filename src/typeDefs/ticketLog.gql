@@ -40,7 +40,7 @@ input TicketLogPropertyInput @oneOf {
 }
 
 type DeleteResponse {
-  content: String!
+  message: String!
   success: Boolean!
 }
 

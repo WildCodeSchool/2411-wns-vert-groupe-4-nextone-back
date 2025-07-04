@@ -10,7 +10,8 @@ import { LIST_MANAGERS, REGISTER_MANAGER,
   LOGIN_MANAGER, LOGOUT_MANAGER,
   FIND_MANAGER_BY_ID, DELETE_MANAGER,
   UPDATE_MANAGER, ASSOCIATE_MANAGER_AT_SERVICE,
-  DISSOCIATE_MANAGER_FROM_SERVICE
+  DISSOCIATE_MANAGER_FROM_SERVICE,
+  TOGGLE_GLOBAL_ACCESS_MANAGER
  } from "../../src/queries/manager.query"
 
 const managerTypeDefs = loadFilesSync(path.join(__dirname, "../../src/typeDefs/manager.gql"), {
@@ -23,8 +24,8 @@ const serviceTypeDefs = loadFilesSync(path.join(__dirname, "../../src/typeDefs/s
 const combinedTypeDefs = [...managerTypeDefs, ...serviceTypeDefs];
 
 type StatusResponse = {
-  content: string;
-  status: boolean;
+  message: string;
+  success: boolean;
 };
 
 type ResponseListManager = {
@@ -64,6 +65,12 @@ type ResponseDissociateManagerFromService = {
   dissociateManagerFromService: StatusResponse
 }
 
+type ResponseToggleGlobalManager = {
+  toggleGlobalAccessManager: {
+    is_globally_active: boolean;
+  }
+}
+
 const listManagers = [
   { 
     id: "1", 
@@ -73,12 +80,14 @@ const listManagers = [
         id: "10",
         name: "Service Test",
       }
-    ]
+    ],
+    is_globally_active: false,
   },
   { 
     id: "2", 
     email: "jean1@example.com",
-    services: []
+    services: [],
+    is_globally_active: false,
   },
 ];
 
@@ -141,7 +150,7 @@ beforeAll(async () => {
         }
       },
       logout: (_: any, __: any) => 
-        ({ content: "Vous êtes déconnecté", status: true }),
+        ({ message: "Vous êtes déconnecté", success: true }),
     },
     Mutation: {
       createManager: (_: any, { infos }: { infos: InputRegister }) => {
@@ -153,7 +162,7 @@ beforeAll(async () => {
         store.get("Manager", id);
         store.reset();
         store.set("Query", "ROOT", "managers", listManagers);
-        return { content: "Manager deleted", status: true };
+        return { message: "Manager deleted", success: true };
       },
       updateManager: (_: null, { data }: MutationUpdateManagerArgs) => {
         store.set("Manager", "1", { ...mockManager, ...data });
@@ -161,16 +170,22 @@ beforeAll(async () => {
       },
       associateManagerAtService: (_: any) => {
         return {
-          content: "Manager associé au service avec succès",
-          status: true,
+          message: "Manager associé au service avec succès",
+          success: true,
         };
       },
       dissociateManagerFromService: (_: any) => {
         return {
-          content: "Manager dissocié du service spécifié",
-          status: true,
+          message: "Manager dissocié du service spécifié",
+          success: true,
         };
       },
+      toggleGlobalAccessManager: (_: any, args: { id: string }) => {
+        const manager = listManagers.find(s => s.id === args.id);
+        if (!manager) throw new Error("Manager not found.");
+        manager.is_globally_active = !manager.is_globally_active;
+        return { is_globally_active: manager.is_globally_active };
+      }
     },
   });
 
@@ -242,8 +257,8 @@ describe("Test sur les managers", () => {
     assert(response.body.kind === "single");
     expect(response.body.singleResult.data).toEqual({
       logout: {
-        content: "Vous êtes déconnecté",
-        status: true,
+        message: "Vous êtes déconnecté",
+        success: true,
       },
     });
   });
@@ -268,7 +283,7 @@ describe("Test sur les managers", () => {
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.data).toEqual({
-      deleteManager: { content: "Manager deleted", status: true },
+      deleteManager: { message: "Manager deleted", success: true },
     });
   })
 
@@ -311,11 +326,10 @@ describe("Test sur les managers", () => {
   assert(response.body.kind === "single");
   expect(response.body.singleResult.data).toEqual({
   associateManagerAtService: {
-    content: "Manager associé au service avec succès",
-    status: true,
+    message: "Manager associé au service avec succès",
+    success: true,
   },
 });
-
 });
 
   it("Dissocie un manager d un service", async () => {
@@ -331,9 +345,26 @@ describe("Test sur les managers", () => {
     assert(response.body.kind === "single");
     expect(response.body.singleResult.data).toEqual({
       dissociateManagerFromService: {
-        content: "Manager dissocié du service spécifié",
-        status: true,
+        message: "Manager dissocié du service spécifié",
+        success: true,
       },
     });
   });
-});
+
+  it("bascule l'accès global d'un service", async () => {
+    const response = await server.executeOperation<ResponseToggleGlobalManager>({
+      query: TOGGLE_GLOBAL_ACCESS_MANAGER,
+      variables: { toggleGlobalAccessManagerId: '1' },
+    }, {
+      contextValue: {
+        manager: { id: 'mgr-99', role: 'ADMIN' }, 
+      },
+    });
+    assert(response.body.kind === 'single');
+    expect(response.body.singleResult.data).toEqual({
+      toggleGlobalAccessManager: {
+        is_globally_active: true, 
+      },
+    });
+  })
+})

@@ -74,7 +74,7 @@ const mockedResolver = (store: IMockStore) => ({
       store.reset();
       store.set("Query", "ROOT", "settings", fakeSettings);
       return {
-        content: "Setting deleted",
+        message: "Setting deleted",
         success: true,
       };
     },
@@ -189,7 +189,7 @@ describe("TESTS SETTINGS DANS UN STORE", () => {
     expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data).toEqual<TresponseDelete>({
       message: {
-        content: "Setting deleted",
+        message: "Setting deleted",
         success: true,
       },
     });

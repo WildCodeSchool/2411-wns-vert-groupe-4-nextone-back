@@ -24,17 +24,17 @@ export default class ServicesService {
     });
   }
 
-
   async createService(data: MutationCreateServiceArgs["data"]): Promise<ServiceEntity> {
     const service = this.db.create(data);
     return this.db.save(service);
   }
 
-  async updateService(id: string, data: MutationUpdateServiceArgs["data"]): Promise<ServiceEntity | null> {
+  async updateService(id: string, data: MutationUpdateServiceArgs["data"]): Promise<boolean> {
     const existing = await this.getServiceById(id);
-    if (!existing) return null;
+    if (!existing) return false;
     const updated = this.db.merge(existing, data);
-    return this.db.save(updated);
+    await this.db.save(updated);
+    return true;
   }
 
   async deleteService(id: string): Promise<boolean> {
@@ -46,20 +46,8 @@ export default class ServicesService {
     return this.db.findOne(options);
   }
 
-  async getManagersByServiceId(serviceId: string) {
-    const serviceWithManagers = await this.db.findOne({
-      where: { id: serviceId },
-      relations: ['managers'], 
-    });
-    if (!serviceWithManagers) {
-      throw new Error('Service not found');
-    }
-    return serviceWithManagers.managers;
-  }
-
-  async getAllServicesWithManagers() {
-    return await this.db.find({
-      relations: ['managers'],
-    });
+  async toggleGlobalAccess(service: ServiceEntity): Promise<ServiceEntity> {
+    service.isGloballyActive = !service.isGloballyActive;
+    return this.db.save(service);
   }
 }

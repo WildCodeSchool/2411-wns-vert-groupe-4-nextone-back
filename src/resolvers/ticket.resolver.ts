@@ -1,12 +1,14 @@
 import TicketService from "@/services/ticket.service";
 import TicketEntity from "@/entities/Ticket.entity";
 import {
+  DeletedTicketResponse,
   MutationGenerateTicketArgs,
   MutationUpdateTicketArgs,
   MutationUpdateTicketStatusArgs,
   QueryGetTicketArgs,
 } from "@/generated/graphql";
 import { MyContext } from "..";
+import { buildResponse } from "@/utils/authorization";
 
 type TicketDeleted = {
   message: string;
@@ -44,14 +46,9 @@ export default {
       _: any,
       { id }: QueryGetTicketArgs,
       ctx: MyContext
-    ): Promise<TicketDeleted> => {
+    ): Promise<DeletedTicketResponse> => {
       const isTicketDeleted = await new TicketService().deleteTicket(id);
-
-      if (!isTicketDeleted) {
-        return { message: "Ticket not found", success: isTicketDeleted };
-      }
-
-      return { message: "Ticket deleted", success: isTicketDeleted };
+      return buildResponse(isTicketDeleted, "Ticket deleted", "Ticket not found")
     },
     updateTicket: async (
       _: any,

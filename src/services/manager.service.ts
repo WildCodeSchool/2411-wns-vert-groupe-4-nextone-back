@@ -78,4 +78,9 @@ export default class ManagerService {
     async findOne(options: any) {
         return this.db.findOne(options);
     }
+
+    async toggleGlobalAccess(manager: ManagerEntity): Promise<ManagerEntity> {
+        manager.is_globally_active = !manager.is_globally_active;
+        return this.db.save(manager);
+    }
 }
