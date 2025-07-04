@@ -24,7 +24,7 @@ type Mutation {
 }
 
 type DeleteResponseCompany {
-  content: String!
+  message: String!
   success: Boolean!
 }
 

@@ -7,7 +7,8 @@ import fs from 'fs';
 import path from 'path';
 import { LIST_SERVICES, FIND_SERVICE_BY_ID,
   CREATE_SERVICE, UPDATE_SERVICE,
-  DELETE_SERVICE
+  DELETE_SERVICE,
+  TOGGLE_GLOBAL_ACCESS_SERVICE
 } from "../../src/queries/service.query"
 
 const serviceTypeDefs = fs.readFileSync(
@@ -28,6 +29,7 @@ type Manager = {
 
 type Service = BaseService & {
   managers: Manager[];
+  isGloballyActive?: boolean;
 };
 
 type ResponseListService = {
@@ -55,6 +57,12 @@ type ResponseDeleteServiceData = {
   deleteService: ServiceResponse;
 };
 
+type ResponseToggleGlobalAccess = {
+  toggleGlobalAccessService: {
+    isGloballyActive: boolean;
+  };
+};
+
 let servicesData: BaseService[];
 let servicesDataWithManagers: Service[];
 let server: ApolloServer;
@@ -72,12 +80,15 @@ beforeAll(async () => {
         { id: 'mgr-1', email: 'Alice@gmail.com' },
         { id: 'mgr-2', email: 'Bob@gmail.com' },
       ],
+      isGloballyActive: false,
     },
     { id: 'uuid-2', name: 'Cardiologie',
       managers: [{ id: 'mgr-3', email: 'Charlie@gmail.com' }],
+      isGloballyActive: false,
     },
     { id: 'uuid-3', name: 'Pneumologie',
       managers: [],
+      isGloballyActive: false,
     },
   ]
 
@@ -95,6 +106,7 @@ beforeAll(async () => {
         const newService = {
           id: `uuid-${servicesData.length + 1}`,
           name: args.data.name,
+          isGloballyActive: false,
         };
         servicesData.push(newService);
         return newService;
@@ -111,6 +123,13 @@ beforeAll(async () => {
         servicesData.splice(index, 1);
         return { success: true, message: "Service deleted successfully." };
       },
+
+      toggleGlobalAccessService: (_: any, args: { id: string }) => {
+        const service = servicesDataWithManagers.find(s => s.id === args.id);
+        if (!service) throw new Error("Service not found.");
+        service.isGloballyActive = !service.isGloballyActive;
+        return { isGloballyActive: service.isGloballyActive };
+      }
     },
   };
 
@@ -179,4 +198,21 @@ describe('ServicesResolver (mocked)', () => {
     expect(deleted?.success).toBe(true);
     expect(deleted?.message).toBe('Service deleted successfully.');
   });
+  
+  it("bascule l'accès global d'un service", async () => {
+  const response = await server.executeOperation<ResponseToggleGlobalAccess>({
+    query: TOGGLE_GLOBAL_ACCESS_SERVICE,
+    variables: { toggleGlobalAccessServiceId: 'uuid-3' },
+  }, {
+    contextValue: {
+      manager: { id: 'mgr-99', role: 'ADMIN' }, 
+    },
+  });
+  assert(response.body.kind === 'single');
+  expect(response.body.singleResult.data).toEqual({
+    toggleGlobalAccessService: {
+      isGloballyActive: true, 
+    },
+  });
+});
 });

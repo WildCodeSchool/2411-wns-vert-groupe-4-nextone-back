@@ -7,6 +7,7 @@ export const LIST_MANAGERS = `#graphql
         id
         name
       }
+      is_globally_active
     }
   }
 `;
@@ -45,8 +46,8 @@ export const LOGIN_MANAGER = `#graphql
 export const LOGOUT_MANAGER = `#graphql
   query Logout {
     logout {
-      content
-      status
+      message
+      success
     }
   }
 `
@@ -73,8 +74,8 @@ export const FIND_MANAGER_BY_ID = `#graphql
 export const DELETE_MANAGER = `#graphql
   mutation DeleteManager($deleteManagerId: ID!) {
     deleteManager(id: $deleteManagerId) {
-      content
-      status
+      message
+      success
     }
   }
 `
@@ -96,8 +97,8 @@ export const UPDATE_MANAGER = `#graphql
 export const ASSOCIATE_MANAGER_AT_SERVICE = `#graphql
   mutation associateManagerAtService($managerId: ID!, $serviceId: ID!) {
     associateManagerAtService(managerId: $managerId, serviceId: $serviceId) {
-      content
-      status
+      message
+      success
     }
   }
 `;
@@ -105,8 +106,16 @@ export const ASSOCIATE_MANAGER_AT_SERVICE = `#graphql
 export const DISSOCIATE_MANAGER_FROM_SERVICE = `#graphql
   mutation dissociateManagerFromService($managerId: ID!, $serviceId: ID!) {
     dissociateManagerFromService(managerId: $managerId, serviceId: $serviceId) {
-      content
-      status
+      message
+      success
     }
   }
 `;
+
+export const TOGGLE_GLOBAL_ACCESS_MANAGER = `#graphql
+  mutation Mutation($toggleGlobalAccessManagerId: UUID!) {
+    toggleGlobalAccessManager(id: $toggleGlobalAccessManagerId) {
+      is_globally_active
+    }
+  }
+`

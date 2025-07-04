@@ -45,7 +45,7 @@ export default class ManagerEntity {
   @Column({
     type: "boolean",
     nullable: true,
-    default: false, 
+    default: true, 
   })
   is_globally_active: boolean;
 

@@ -21,7 +21,7 @@ query Setting($id: ID!) {
 export const DELETE_SETTING = `#graphql
 mutation DeleteSetting($id: ID!) {
   message: deleteSetting(id: $id) {
-    content
+    message
     success
   }
 }

@@ -55,9 +55,7 @@ beforeAll(async () => {
     if (!testDataSource.isInitialized) {
       await testDataSource.initialize();
     }
-
     await testDataSource.query("TRUNCATE TABLE setting CASCADE");
-
   } catch (error) {
     console.error("Error initializing test database:", error);
     throw error;
@@ -156,7 +154,7 @@ describe("TEST SETTINGS DANS LA DB", () => {
     expect(errors).toBeUndefined();
     expect(data).toEqual<TresponseDelete>({
       message: {
-        content: "Setting deleted.",
+        message:  "Le paramètre a été supprimé",
         success: true,
       },
     });

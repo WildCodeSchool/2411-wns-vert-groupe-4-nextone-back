@@ -182,7 +182,7 @@ describe("TEST TICKETLOG DANS LA DB", () => {
     expect(response.body.singleResult.data).toEqual<TResponseDelete>({
       message: {
         success: true,
-        content: `Ticket log ${baseId} deleted.`,
+        message: `Ticket log ${baseId} deleted.`,
       },
     });
   });

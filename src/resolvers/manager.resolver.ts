@@ -1,21 +1,29 @@
 import ManagerService from "@/services/manager.service";
-import { MutationCreateManagerArgs, QueryLoginArgs, Message, QueryManagerArgs, MutationUpdateManagerArgs,
-    MutationAssociateManagerAtServiceArgs, MutationDissociateManagerFromServiceArgs
+import { MutationCreateManagerArgs, QueryLoginArgs, QueryManagerArgs, MutationUpdateManagerArgs,
+    MutationAssociateManagerAtServiceArgs, MutationDissociateManagerFromServiceArgs,
+    MutationToggleGlobalAccessManagerArgs,
+    Message
 } from "@/generated/graphql";
 import { MyContext } from "..";
 import Cookies from "cookies";
 import { plainToInstance } from "class-transformer";
 import ManagerEntity, { LoginInput, UpdateInput } from "@/entities/Manager.entity";
 import ServicesService from "@/services/services.service";
-import { validateOrThrow } from "@/utils/manager";
+import { validateOrThrow, verifyCreatorPermission } from "@/utils/manager";
 import { checkAuthorization } from "@/utils/manager";
+import { buildResponse } from "@/utils/authorization";
 
 const managerService = new ManagerService();
 const servicesService = new ServicesService();
 
 export default {
     Query: {
-        managers: async ( _: any,): Promise<ManagerEntity[]> => {
+        managers: async (_: any, __: any, ctx: MyContext): Promise<ManagerEntity[]> => {
+            const { manager } = ctx;
+            if (!manager) {
+                throw new Error("Manager non authentifié");
+            }
+            verifyCreatorPermission(manager?.role)
             return managerService.listManagers();
         },
 
@@ -37,11 +45,11 @@ export default {
         logout: async (_: any, __: any, ctx: MyContext): Promise<Message> => {
             const cookies = new Cookies(ctx.req, ctx.res);
             if (!ctx.manager) {
-                return { content: "Vous avez déjà été déconnecté", status: false };
+                throw new Error("Vous avez déjà été déconnecté");
             }
             cookies.set("token");
-            ctx.manager.is_globally_active = false
-            return { content: "Vous êtes déconnecté", status: true };
+            ctx.manager.is_globally_active = false;
+            return buildResponse(true, "Vous êtes déconnecté", "Vous n'êtes pas déconnecté");
         },
     },
     Mutation: {
@@ -59,13 +67,11 @@ export default {
         deleteManager: async (_: any, { id }: QueryManagerArgs, { manager }: MyContext): Promise<Message> => {
             const targetManager = await managerService.getManagerById(id);
             if (!targetManager) {
-                return { content: "Manager introuvable", status: false };
+                throw new Error("Manager introuvable");
             }
             checkAuthorization(manager?.role, manager, targetManager.role);
             const isManagerDeleted = await managerService.deleteManager(id);
-            return isManagerDeleted
-                ? { content: "Manager supprimé", status: true }
-                : { content: "Suppression échouée", status: false };
+            return buildResponse(isManagerDeleted, "Manager supprimé", "Suppression échouée");
         },
 
         updateManager: async (_: any, { id, data }: MutationUpdateManagerArgs, { manager }: MyContext): Promise<ManagerEntity> => {
@@ -88,17 +94,33 @@ export default {
                 targetManager.services.push(service);
                 await managerService.save(targetManager);
             }
-            return { content: "Manager associé au service", status: true };
+            return buildResponse(true, "Manager associé au service", "Le manager n'a pas été associé au service");
         },
 
         dissociateManagerFromService: async (_: any, { managerId, serviceId }: MutationDissociateManagerFromServiceArgs, { manager }: MyContext): Promise<Message> => {
             const targetManager = await managerService.findOne({ where: { id: managerId }, relations: ["services"] });
             const service = await servicesService.findOne({ where: { id: serviceId }, relations: ["managers"] });
-            if (!targetManager || !service) return { content: "Manager ou service introuvable", status: false };
+            if (!targetManager || !service) throw new Error("Manager ou service introuvable");
             checkAuthorization(manager?.role, manager, targetManager.role);
             targetManager.services = targetManager.services.filter(s => s.id !== service.id);
             await managerService.save(targetManager);
-            return { content: "Manager dissocié du service", status: true };
+            return buildResponse(true, "Manager dissocié du service", "Le manager n'a pas été dissocié du service");
         },
+
+        toggleGlobalAccessManager: async (_: any, { id }: MutationToggleGlobalAccessManagerArgs, ctx : MyContext) => {
+            const { manager } = ctx;
+            if (!manager) {
+                throw new Error("Manager non authentifié");
+            }
+            verifyCreatorPermission(manager?.role)
+            const targetManager  = await managerService.getManagerById(id);
+            if (!targetManager ) {
+                throw new Error("Manager introuvable.");
+            }
+            const updatedManager= await managerService.toggleGlobalAccess(targetManager);
+            return {
+                is_globally_active: updatedManager.is_globally_active,
+            };
+        }
     },
 };

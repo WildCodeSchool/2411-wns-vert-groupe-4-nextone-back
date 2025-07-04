@@ -1,6 +1,7 @@
 import SettingEntity from "@/entities/setting.entity";
-import { DeleteResponse, MutationCreateServiceArgs, MutationUpdateSettingArgs } from "@/generated/graphql";
+import { DeleteResponse, DeleteResponseSetting, MutationCreateServiceArgs, MutationUpdateSettingArgs } from "@/generated/graphql";
 import SettingsSystemService from "@/services/setting.service";
+import { buildResponse } from "@/utils/authorization";
 
 const SettingService = SettingsSystemService.getService()
 
@@ -20,12 +21,9 @@ export default {
       const created = await SettingService.createOne(args.data)
       return created
     },
-    deleteSetting: async (_: any, args: { id: string }): Promise<DeleteResponse> => {
+    deleteSetting: async (_: any, args: { id: string }): Promise<DeleteResponseSetting> => {
       const isDeleted = await SettingService.deleteOne(args.id)
-      return {
-        content:  `Setting ${isDeleted ? "" : "not "}deleted.`,
-        success: isDeleted
-      }
+      return buildResponse(isDeleted, "Le paramètre a été supprimé", "Le paramètre n'a pas été supprimé");
     },
     updateSetting: async (_: any, args: MutationUpdateSettingArgs): Promise<SettingEntity | null> => {
       const { id } = args.data;

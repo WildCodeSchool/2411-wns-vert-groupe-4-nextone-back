@@ -9,6 +9,7 @@ type Service {
   id: UUID!
   name: String!
   managers: [Manager]
+  isGloballyActive: Boolean
   createdAt: DateTime!
   updatedAt: String!
 }
@@ -25,6 +26,10 @@ type Manager {
   email: String!
 }
 
+type AccessServiceResponse {
+  isGloballyActive: Boolean!
+}
+
 type Query {
   services: [Service!]!
   service(id: UUID!): Service
@@ -34,6 +39,7 @@ type Mutation {
   createService(data: CreateServiceInput!): ServiceWithoutManagers!
   updateService(id: UUID!, data: UpdateServiceInput!): ServiceResponse!
   deleteService(id: UUID!): ServiceResponse!
+  toggleGlobalAccessService(id: UUID!): AccessServiceResponse!
 }
 
 type ServiceResponse {

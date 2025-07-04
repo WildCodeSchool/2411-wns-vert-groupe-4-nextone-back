@@ -174,7 +174,7 @@ describe("TEST COMPANY AVEC DB", () => {
     expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data).toEqual<TResponseDelete>({
       message: {
-        content: "Company deleted",
+        message: "Company deleted",
         success: true,
       },
     });

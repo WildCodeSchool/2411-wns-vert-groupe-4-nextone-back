@@ -1,7 +1,7 @@
 import TicketLogEntity from "@/entities/TicketLog.entity";
 import TicketLogsEntity from "@/entities/TicketLog.entity";
 import {
-  DeletedTicketResponse,
+  AuthorizationResponse,
   DeleteResponse,
   MutationCreateTicketLogArgs,
   MutationDeleteTicketLogArgs,
@@ -9,7 +9,7 @@ import {
   QueryTicketLogsByPropertyArgs,
 } from "@/generated/graphql";
 import TicketLogService from "@/services/ticketLogs.service";
-import { DeepPartial } from "typeorm";
+import { buildResponse } from "@/utils/authorization";
 
 const ticketLogService = TicketLogService.getInstance();
 
@@ -64,16 +64,7 @@ export default {
       { id }: MutationDeleteTicketLogArgs
     ): Promise<DeleteResponse> {
       const deleted = await ticketLogService.deleteOne(id);
-      if (deleted) {
-        return {
-          success: true,
-          content: `Ticket log ${id} deleted.`,
-        };
-      }
-      return {
-        success: false,
-        content: `failed to delete ticket log ${id}`,
-      };
+      return buildResponse(deleted, `Ticket log ${id} deleted.`, `failed to delete ticket log ${id}`)
     },
   },
 };
