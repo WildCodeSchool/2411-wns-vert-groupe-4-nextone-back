@@ -10,5 +10,5 @@ RUN apk --update --no-cache add curl
 
 COPY dist/ ./dist
 
-COPY scripts/wait-for-healthcheck.sh /usr/local/bin/wait-for-healthcheck.sh
-RUN chmod +x /usr/local/bin/wait-for-healthcheck.sh
+COPY scripts/wait-for-healthcheck-prod.sh /usr/local/bin/wait-for-healthcheck-prod.sh
+RUN chmod +x /usr/local/bin/wait-for-healthcheck-prod.sh
