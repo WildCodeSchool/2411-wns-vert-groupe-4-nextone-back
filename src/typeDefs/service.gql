@@ -4,29 +4,48 @@ scalar UUID
 scalar DateTime
 
 ####### Types
+
 type Service {
+  id: UUID!
+  name: String!
+  managers: [Manager]
+  isGloballyActive: Boolean
+  createdAt: DateTime!
+  updatedAt: String!
+}
+
+type ServiceWithoutManagers {
   id: UUID!
   name: String!
   createdAt: DateTime!
   updatedAt: String!
 }
 
+type Manager {
+  id: ID!
+  email: String!
+}
+
+type AccessServiceResponse {
+  isGloballyActive: Boolean!
+}
+
 type Query {
   services: [Service!]!
   service(id: UUID!): Service
 }
+
 type Mutation {
-  createService(data: CreateServiceInput!): Service!
+  createService(data: CreateServiceInput!): ServiceWithoutManagers!
   updateService(id: UUID!, data: UpdateServiceInput!): ServiceResponse!
   deleteService(id: UUID!): ServiceResponse!
-  
+  toggleGlobalAccessService(id: UUID!): AccessServiceResponse!
 }
 
 type ServiceResponse {
   message: String!
   success: Boolean!
 }
-
 
 ### Input
 input CreateServiceInput {

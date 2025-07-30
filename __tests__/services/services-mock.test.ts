@@ -5,70 +5,39 @@ import { ApolloServer } from '@apollo/server';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import fs from 'fs';
 import path from 'path';
+import { LIST_SERVICES, FIND_SERVICE_BY_ID,
+  CREATE_SERVICE, UPDATE_SERVICE,
+  DELETE_SERVICE,
+  TOGGLE_GLOBAL_ACCESS_SERVICE
+} from "../../src/queries/service.query"
 
 const serviceTypeDefs = fs.readFileSync(
   path.join(__dirname, '../../src/typeDefs/service.gql'),
   { encoding: 'utf-8' }
 );
 
-// --- GraphQL Queries ---
-export const LIST_SERVICES = `#graphql
-  query Services {
-    services {
-      id
-      name
-    }
-  }
-`;
-
-export const FIND_SERVICE_BY_ID = `#graphql
-  query Service($serviceId: UUID!) {
-    service(id: $serviceId) {
-      id
-      name
-    }
-  }
-`;
-
-export const CREATE_SERVICE = `#graphql
-  mutation CreateService($data: CreateServiceInput!) {
-    createService(data: $data) {
-      id
-      name
-    }
-  }
-`;
-
-export const UPDATE_SERVICE = `#graphql
-  mutation UpdateService($id: UUID!, $data: UpdateServiceInput!) {
-    updateService(id: $id, data: $data) {
-      success
-      message
-    }
-  }
-`;
-
-export const DELETE_SERVICE = `#graphql
-  mutation DeleteService($id: UUID!) {
-    deleteService(id: $id) {
-      success
-      message
-    }
-  }
-`;
-
 // --- Types ---
-type Service = {
+type BaseService = {
   id: string;
   name: string;
 };
 
-type ResponseData = {
-  services: Service[];
+type Manager = {
+  id: string;
+  email: string;
 };
 
-type ResponseOneServiceData = {
-  service: Service | null;
+type Service = BaseService & {
+  managers: Manager[];
+  isGloballyActive?: boolean;
+};
+
+type ResponseListService = {
+  managersByServices: Service[];
+};
+
+type ResponseGetService = {
+  managersByService: Service;
 };
 
 type ResponseCreateServiceData = {
@@ -88,27 +57,56 @@ type ResponseDeleteServiceData = {
   deleteService: ServiceResponse;
 };
 
-let servicesData: Service[];
+type ResponseToggleGlobalAccess = {
+  toggleGlobalAccessService: {
+    isGloballyActive: boolean;
+  };
+};
+
+let servicesData: BaseService[];
+let servicesDataWithManagers: Service[];
 let server: ApolloServer;
 
 beforeAll(async () => {
-  servicesData = [
+    servicesData = [
     { id: 'uuid-1', name: 'Radiologie' },
     { id: 'uuid-2', name: 'Cardiologie' },
     { id: 'uuid-3', name: 'Pneumologie' },
   ];
 
+  servicesDataWithManagers = [
+    { id: 'uuid-1', name: 'Radiologie',
+      managers: [
+        { id: 'mgr-1', email: 'Alice@gmail.com' },
+        { id: 'mgr-2', email: 'Bob@gmail.com' },
+      ],
+      isGloballyActive: false,
+    },
+    { id: 'uuid-2', name: 'Cardiologie',
+      managers: [{ id: 'mgr-3', email: 'Charlie@gmail.com' }],
+      isGloballyActive: false,
+    },
+    { id: 'uuid-3', name: 'Pneumologie',
+      managers: [],
+      isGloballyActive: false,
+    },
+  ]
+
   const serviceResolvers = {
     Query: {
-      services: () => servicesData,
-      service: (_: any, args: { id: string }) =>
-        servicesData.find((s) => s.id === args.id) || null,
+      services: () => servicesDataWithManagers,
+      service: (_: any, args: { id: string }) => {
+        const service = servicesDataWithManagers.find((s) => s.id === args.id);
+        if (!service) throw new Error('Service not found');
+        return service;
+      },
     },
     Mutation: {
       createService: (_: any, args: { data: { name: string } }) => {
         const newService = {
           id: `uuid-${servicesData.length + 1}`,
           name: args.data.name,
+          isGloballyActive: false,
         };
         servicesData.push(newService);
         return newService;
@@ -125,6 +123,13 @@ beforeAll(async () => {
         servicesData.splice(index, 1);
         return { success: true, message: "Service deleted successfully." };
       },
+
+      toggleGlobalAccessService: (_: any, args: { id: string }) => {
+        const service = servicesDataWithManagers.find(s => s.id === args.id);
+        if (!service) throw new Error("Service not found.");
+        service.isGloballyActive = !service.isGloballyActive;
+        return { isGloballyActive: service.isGloballyActive };
+      }
     },
   };
 
@@ -139,19 +144,25 @@ beforeAll(async () => {
 
 // --- Tests ---
 describe('ServicesResolver (mocked)', () => {
-  it('récupère tous les services', async () => {
-    const response = await server.executeOperation<ResponseData>({ query: LIST_SERVICES });
-    assert(response.body.kind === 'single');
-    expect(response.body.singleResult.data).toEqual({ services: servicesData });
-  });
-
-  it('récupère un service par ID', async () => {
-    const response = await server.executeOperation<ResponseOneServiceData>({
-      query: FIND_SERVICE_BY_ID,
-      variables: { serviceId: 'uuid-1' },
+   it('récupère tous les services', async () => {
+    const response = await server.executeOperation<ResponseListService>({
+      query: LIST_SERVICES,
     });
     assert(response.body.kind === 'single');
-    expect(response.body.singleResult.data).toEqual({ service: servicesData[0] });
+    expect(response.body.singleResult.data).toEqual({
+      services: servicesDataWithManagers,
+    });
+  });
+
+  it("récupère un service par son ID", async () => {
+    const response = await server.executeOperation<ResponseGetService>({
+      query: FIND_SERVICE_BY_ID,
+      variables: { id: 'uuid-1' },
+    });
+    assert(response.body.kind === 'single');
+    expect(response.body.singleResult.data).toEqual({
+      service: servicesDataWithManagers.find((s) => s.id === 'uuid-1'),
+    });
   });
 
   it('crée un nouveau service', async () => {
@@ -187,4 +198,21 @@ describe('ServicesResolver (mocked)', () => {
     expect(deleted?.success).toBe(true);
     expect(deleted?.message).toBe('Service deleted successfully.');
   });
+  
+  it("bascule l'accès global d'un service", async () => {
+  const response = await server.executeOperation<ResponseToggleGlobalAccess>({
+    query: TOGGLE_GLOBAL_ACCESS_SERVICE,
+    variables: { toggleGlobalAccessServiceId: 'uuid-3' },
+  }, {
+    contextValue: {
+      manager: { id: 'mgr-99', role: 'ADMIN' }, 
+    },
+  });
+  assert(response.body.kind === 'single');
+  expect(response.body.singleResult.data).toEqual({
+    toggleGlobalAccessService: {
+      isGloballyActive: true, 
+    },
+  });
+});
 });

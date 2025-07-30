@@ -7,7 +7,7 @@ type Ticket {
   lastName: String
   email: String
   phone: String
-  status: TicketStatus
+  status: Status
   #service: Service
   createdAt: DateTime
   updatedAt: DateTime
@@ -22,6 +22,12 @@ type Mutation {
   generateTicket(data: GenerateTicketInput!): Ticket!
   deleteTicket(id: ID!): DeletedTicketResponse!
   updateTicket(data: UpdateTicketInput!): Ticket!
+  updateTicketStatus(data: UpdateStatusTicketInput!): Ticket!
+}
+
+input UpdateStatusTicketInput {
+  id: ID!
+  status: Status!
 }
 
 input GenerateTicketInput {
@@ -30,7 +36,7 @@ input GenerateTicketInput {
   lastName: String
   email: String
   phone: String
-  status: TicketStatus
+  #status: Status
   #serviceId: ID!
 }
 
@@ -41,17 +47,25 @@ input UpdateTicketInput {
   lastName: String
   email: String
   phone: String
-  status: TicketStatus
+  status: Status
   #serviceId: ID
 }
 
-type DeletedTicketResponse {
+  type DeletedTicketResponse {
   success: Boolean!
   message: String
 }
 
-enum TicketStatus {
-  PENDING
+# enum TicketStatus {
+#   PENDING
+#   CANCELED
+#   DONE
+# }
+
+enum Status {
+  CREATED
   CANCELED
   DONE
+  PENDING
+  ARCHIVED
 }

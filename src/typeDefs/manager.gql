@@ -1,0 +1,87 @@
+enum ManagerRole {
+  OPERATOR
+  ADMIN
+  SUPER_ADMIN
+}
+
+type Service {
+  id: UUID!
+  name: String!
+  createdAt: DateTime!
+  updatedAt: String!
+}
+
+type Manager {
+  id: ID!
+  first_name: String!
+  last_name: String!
+  email: String!
+  password: String!
+  role: ManagerRole!
+  is_globally_active: Boolean
+  services: [Service]
+  created_at: String
+  updated_at: String
+}
+
+type ManagerWithoutPassword {
+  id: ID!
+  first_name: String!
+  last_name: String!
+  email: String!  
+  role: ManagerRole!
+  is_globally_active: Boolean
+  services: [Service]
+  created_at: String
+  updated_at: String
+}
+
+type Auth {
+  manager: ManagerWithoutPassword
+  token: String
+}
+
+type Message {
+  message: String
+  success: Boolean 
+}
+
+type Query {
+  managers: [ManagerWithoutPassword!]
+  manager(id: ID!): ManagerWithoutPassword!
+  login(infos: InputLogin!): Auth
+  logout: Message!
+}
+
+type AccessManagerResponse {
+  is_globally_active: Boolean!
+}
+
+type Mutation {
+  createManager(infos: InputRegister!): Manager
+  deleteManager(id: ID!): Message!
+  updateManager(id: ID!, data: UpdateManagerInput!): ManagerWithoutPassword!
+  associateManagerAtService(managerId: ID!, serviceId: ID!): Message!
+  dissociateManagerFromService(managerId: ID!, serviceId: ID!): Message!
+  toggleGlobalAccessManager(id: UUID!): AccessManagerResponse!
+}
+
+input InputRegister {
+  first_name: String!
+  last_name: String!
+  email: String!
+  password: String!
+  role: ManagerRole = OPERATOR
+  is_globally_active: Boolean = FALSE
+}
+
+input InputLogin {
+  email: String!
+  password: String!
+}
+
+input UpdateManagerInput {
+  first_name: String
+  last_name: String
+  role: ManagerRole
+}

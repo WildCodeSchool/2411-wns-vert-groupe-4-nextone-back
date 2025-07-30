@@ -9,7 +9,7 @@ import {
   CREATE_COMPANY_DB,
   DELETE_COMPANY,
   UPDATE_COMPANY_DB,
-} from "../../src/queries/query";
+} from "../../src/queries/company.query";
 import assert from "assert";
 import {
   Company,
@@ -54,11 +54,14 @@ beforeAll(async () => {
     schema,
   });
 
-  //ON INITIALISE LA DB DE TEST
-  try {
+  
+   try {
     if (!testDataSource.isInitialized) {
       await testDataSource.initialize();
+      await testDataSource.query("TRUNCATE TABLE company CASCADE");
     }
+     await testDataSource.query("TRUNCATE TABLE company CASCADE");
+    //  await testDataSource.synchronize(true)
   } catch (error) {
     console.error("Error initializing test database:", error);
     throw error;
@@ -68,10 +71,12 @@ beforeAll(async () => {
 afterAll(async () => {
   //ON VIDE LA DB DE TEST
   if (testDataSource.isInitialized) {
-    await testDataSource.dropDatabase();
+
     await testDataSource.destroy();
   }
+  jest.clearAllMocks();
 });
+
 
 type TResponse = {
   company: Company;
@@ -119,7 +124,13 @@ describe("TEST COMPANY AVEC DB", () => {
       variables: {
         data: { ...fakeCompanyDataUpdate, id: baseId },
       },
-    });
+    },
+    {
+      contextValue: {
+        manager: { role: "SUPER_ADMIN" },
+      },
+    }
+  );
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.errors).toBeUndefined();
@@ -163,7 +174,7 @@ describe("TEST COMPANY AVEC DB", () => {
     expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data).toEqual<TResponseDelete>({
       message: {
-        content: "Company deleted",
+        message: "Company deleted",
         success: true,
       },
     });

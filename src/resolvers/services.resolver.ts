@@ -1,69 +1,61 @@
-// service.resolver.ts
-
 import ServicesService from "@/services/services.service";
 import {
   MutationCreateServiceArgs,
   MutationUpdateServiceArgs,
   MutationDeleteServiceArgs,
   QueryServiceArgs,
+  MutationToggleGlobalAccessServiceArgs,
+  ServiceResponse
 } from "@/generated/graphql";
-import { MyContext } from ".."; // adapte si besoin
+import { MyContext } from "..";
+import { checkStrictRole, verifyCreatorPermission } from "@/utils/manager";
+import { buildResponse } from "@/utils/authorization";
 
-type ServiceResponse = {
-  message: string;
-  success: boolean;
-};
+const servicesService = new ServicesService();
 
 export default {
   Query: {
     services: async (_: any, __: any, ctx: MyContext) => {
-      return await new ServicesService().getAllServices();
+      return servicesService.getAllServices();
     },
 
     service: async (_: any, { id }: QueryServiceArgs, ctx: MyContext) => {
-      return await new ServicesService().getServiceById(id);
+      return servicesService.getServiceById(id);
     },
   },
 
   Mutation: {
-    createService: async (
-      _: any,
-      { data }: MutationCreateServiceArgs,
-      ctx: MyContext
-    ) => {
-      const newService = await new ServicesService().createService(data);
+    createService: async (_: any, { data }: MutationCreateServiceArgs, { manager }: MyContext) => {
+      checkStrictRole(manager?.role, "SUPER_ADMIN")
+      const newService = await servicesService.createService(data);
       return newService;
     },
 
-    updateService: async (
-      _: any,
-      { id, data }: MutationUpdateServiceArgs,
-      ctx: MyContext
-    ): Promise<ServiceResponse> => {
-      const updated = await new ServicesService().updateService(id, data);
-
-      return {
-        message: updated
-          ? "Service updated successfully."
-          : "Service not found.",
-        success: !!updated,
-      };
+    updateService: async (_: any, { id, data }: MutationUpdateServiceArgs, ctx: MyContext): Promise<ServiceResponse> => {
+      const updated = await servicesService.updateService(id, data);
+      return buildResponse(updated, "Service updated successfully.", "Service not found.")
     },
 
-    deleteService: async (
-      _: any,
-      { id }: MutationDeleteServiceArgs,
-      ctx: MyContext
-    ): Promise<ServiceResponse> => {
-      const deleted = await new ServicesService().deleteService(id);
-
-      return {
-        message: deleted
-          ? "Service deleted successfully."
-          : "Service not found or already deleted.",
-        success: deleted,
-      };
+    deleteService: async (_: any, { id }: MutationDeleteServiceArgs, ctx: MyContext): Promise<ServiceResponse> => {
+      const deleted = await servicesService.deleteService(id);
+      return buildResponse(deleted, "Service deleted successfully.", "Service not found or already deleted.")
     },
+
+    toggleGlobalAccessService: async (_: any, { id }: MutationToggleGlobalAccessServiceArgs, ctx : MyContext) => {
+      const { manager } = ctx;
+      if (!manager) {
+        throw new Error("Manager non authentifié");
+      }
+      verifyCreatorPermission(manager?.role)
+      const service = await servicesService.getServiceById(id);
+      if (!service) {
+        throw new Error("Service introuvable.");
+      }
+      const updatedService = await servicesService.toggleGlobalAccess(service);
+      return {
+        isGloballyActive: updatedService.isGloballyActive,
+      };
+    }
   },
 };
 

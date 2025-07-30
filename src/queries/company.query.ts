@@ -38,7 +38,7 @@ mutation CreateCompany($data: CreateCompanyInput!) {
  export const DELETE_COMPANY = `#graphql
 mutation DeleteCompany($id: ID!) {
   message : deleteCompany(id: $id) {
-    content
+    message
     success
   }
 }

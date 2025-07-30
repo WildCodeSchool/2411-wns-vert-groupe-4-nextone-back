@@ -8,6 +8,8 @@ import {
 import { MyContext } from "..";
 import CompanyService from "@/services/company.service";
 import CompanyEntity from "@/entities/Company.entity";
+import { checkStrictRole } from "@/utils/manager";
+import { buildResponse } from "@/utils/authorization";
 
 const companyService = CompanyService.getService();
 
@@ -35,28 +37,12 @@ export default {
       const newCompany = await companyService.createOne(test);
       return newCompany;
     },
-    deleteCompany: async (
-      _: any,
-      args: MutationDeleteCompanyArgs,
-      ctx: MyContext
-    ): Promise<DeleteResponseCompany> => {
+    deleteCompany: async (_: any, args: MutationDeleteCompanyArgs, ctx: MyContext): Promise<DeleteResponseCompany> => {
       const isDeleted = await companyService.deleteOne(args.id);
-      if (isDeleted) {
-        return {
-          content: "Company deleted",
-          success: true,
-        };
-      }
-      return {
-        content: "Company no deleted 😢",
-        success: false,
-      };
+      return buildResponse(isDeleted, "Company deleted", "Company no deleted 😢")
     },
-    updateCompany: async (
-      _: any,
-      args: MutationUpdateCompanyArgs,
-      ctx: MyContext
-    ): Promise<CompanyEntity | null> => {
+    updateCompany: async (_: any, args: MutationUpdateCompanyArgs, {manager}: MyContext): Promise<CompanyEntity | null> => {
+      checkStrictRole(manager?.role, "SUPER_ADMIN")
       const partialCompany: Partial<CompanyEntity> = { ...args.data };
       const updatedCompany = await companyService.updateOne(
         args.data.id,
