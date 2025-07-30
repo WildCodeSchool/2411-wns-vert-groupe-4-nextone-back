@@ -18,7 +18,6 @@ export default abstract class BaseService<T extends ObjectLiteral> {
   //CREER UNE INSTANCE DE T
   public async createOne(entity: DeepPartial<T>) {
     const created = await this.repo.save(this.repo.create(entity));
-
     //ON RECHERCHE AVEC UN FIND POUR RECUPERER LES RELATIONS EN MEME TEMPS
     const finded = await this.repo.findOne({ where: { id: created.id } });
     if (!finded) {
@@ -77,7 +76,6 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     
     const result = await this.repo
       .createQueryBuilder(name)
-      // .leftJoinAndSelect(`${name}.ticket`, "ticket")
       .where(`${name}.createdAt >= :start`, { start: new Date(start) })
       .andWhere(`${name}.createdAt <= :end`, { end: new Date(end) }).getMany();
 

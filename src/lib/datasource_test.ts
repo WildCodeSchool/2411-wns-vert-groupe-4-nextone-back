@@ -7,6 +7,7 @@ import ConnectionLogEntity from "@/entities/ConnectionLog.entity";
 import SettingEntity from "@/entities/setting.entity";
 import ManagerEntity from "@/entities/Manager.entity";
 import TicketLogEntity from "@/entities/TicketLog.entity";
+import CounterEntity from "@/entities/Counter.entity";
 import { TicketSubscriber } from "@/subscribers/ticket.subscriber";
 import CompanySubscriber from "@/subscribers/company.subscriber";
 
@@ -19,14 +20,15 @@ export default new DataSource({
   database: "nextone-db-test",
 
   entities: [
-    TicketEntity,
     CompanyEntity,
+    TicketEntity,
     ServiceEntity,
     AuthorizationEntity,
     SettingEntity,
     ManagerEntity,
     TicketLogEntity,
     ConnectionLogEntity
+    CounterEntity
   ],
   subscribers: [TicketSubscriber, CompanySubscriber],
 

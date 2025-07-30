@@ -10,7 +10,8 @@ export default class ServicesService {
   }
 
   async getAllServices(): Promise<ServiceEntity[]> {
-    return this.db.find(); 
+    const services = await this.db.find();
+    return services
   }
 
   async getServiceById(id: string): Promise<ServiceEntity | null> {

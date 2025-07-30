@@ -8,23 +8,22 @@ import { ApolloServer } from "@apollo/server";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import TicketResolver from "../../src/resolvers/ticket.resolver";
 import {
+  Company,
   GenerateTicketInput,
+  ManagerRole,
+  ManagerWithoutPassword,
   MutationGenerateTicketArgs,
   MutationUpdateTicketArgs,
   Service,
   Status,
   Ticket,
 } from "../../src/generated/graphql";
-import { loadFilesSync } from "@graphql-tools/load-files";
-import path from "path";
 import { LIST_TICKETS, GENERATE_TICKET,
   FIND_TICKET_BY_ID, DELETE_TICKET,
   UPDATE_TICKET
 } from "../../src/queries/ticket.query"
+import typeDefs from "../../src/typeDefs";
 
-const ticketTypeDefs = loadFilesSync(path.join(__dirname, "../../src/typeDefs/ticket.gql"), {
-  extensions: ["gql"],
-});
 
 type ResponseData = {
   tickets: Ticket[];
@@ -34,10 +33,37 @@ type ResponseDataCreate = {
   generateTicket: Ticket;
 };
 
+const fakeCompany: Company = {
+  id: "f363fd0e-cb52-4089-bc25-75c72112d045",
+  name: "Jambonneau CORPORATION",
+  address: "38, Rue de la saucisse",
+  postalCode: "31000",
+  city: "TOULOUSE",
+  siret: "362 521 879 00034",
+  email: "jambo.no@gmail.com",
+  phone: "0123456789",
+  createdAt: "2025-07-04T10:46:23.954Z",
+  updatedAt: "2025-07-04T10:46:23.954Z",
+  services: [],
+};
+
 const fakeService: Service = {
-  id: "8d106e86-5ffb-4e97-bb3a-cba9a329bbef",
   name: "Radiologie",
-}
+  id: "8d106e86-5ffb-4e97-bb3a-cba9a329bbef",
+  createdAt: "2025-07-04T10:46:24.023Z",
+  updatedAt: "2025-07-04T10:46:24.023Z",
+  company: fakeCompany
+};
+
+const fakeManager: ManagerWithoutPassword = {
+  id: "1f50e0ca-ad6d-461d-b888-9d08c2ad6ff0",
+  email: "michelito@gmail.com",
+  first_name: "michel",
+  last_name: "dedroite",
+  role: ManagerRole.Operator,
+  is_globally_active: false,
+  company: fakeCompany,
+};
 
 const ticketsData: Ticket[] = [
   {
@@ -48,7 +74,8 @@ const ticketsData: Ticket[] = [
     email: "corentin.tournier@gmail.com",
     phone: "0606060606",
     status: Status.Pending,
-
+    service: fakeService
+  },
   {
     id: "2",
     code: "002",
@@ -57,6 +84,7 @@ const ticketsData: Ticket[] = [
     email: "marc.rogers@gmail.com",
     phone: "0706060606",
     status: Status.Pending,
+    service: fakeService
   },
 ];
 
@@ -71,7 +99,7 @@ const generateTicketExample: GenerateTicketInput= {
 let server: ApolloServer;
 
 const schema = makeExecutableSchema({
-  typeDefs: ticketTypeDefs,
+  typeDefs: typeDefs,
   resolvers: TicketResolver,
 });
 
@@ -184,7 +212,7 @@ beforeAll(async () => {
   });
 
   it("Mise à jour d'un ticket", async () => {
-    const { id, code, ...ticketWithoutId } = ticketsData[0];
+    const { id, code,service, ...ticketWithoutId } = ticketsData[0];
 
     const newTicketCode = "008";
 

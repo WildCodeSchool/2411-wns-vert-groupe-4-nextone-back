@@ -4,6 +4,7 @@ import typeDefs from "../../src/typeDefs";
 import resolvers from "../../src/resolvers";
 import testDataSource from "../../src/lib/datasource_test";
 import {
+  CreateCompanyInput,
   DeleteResponse,
   GenerateTicketInput,
   InputRegister,
@@ -13,6 +14,7 @@ import {
   MutationUpdateTicketLogArgs,
   QueryTicketLogArgs,
   Status,
+  Ticket,
   TicketLog,
 } from "../../src/generated/graphql";
 import TicketService from "../../src/services/ticket.service";
@@ -27,6 +29,9 @@ import {
 } from "../../src/queries/ticketlog.query";
 import assert from "assert";
 import { validate } from "uuid";
+import CompanyEntity from "../../src/entities/Company.entity";
+import TicketLogEntity from "../../src/entities/TicketLog.entity";
+import CompanyService from "../../src/services/company.service";
 
 type TResponse = {
   ticketLog: Partial<TicketLog> | null;
@@ -47,12 +52,23 @@ const fakeTicket: GenerateTicketInput = {
   phone: "0606060606",
 };
 
+const fakeCompany: CreateCompanyInput = {
+  address: "Rue du chateau",
+  email: "google@gmail.com",
+  name: "Google",
+  phone: "0404040404",
+  siret: "362 521 879 00034",
+  city: "TOULOUSE",
+  postalCode: "31000",
+};
+
 const fakeManager: InputRegister = {
   password: "test",
   email: "jeanmichel@gmail.com",
   role: ManagerRole.Admin,
   first_name: "jean",
   last_name: "MICHEL",
+  companyId: "",
 };
 
 // const fakeTicketLog: Partial<TicketLog> = {
@@ -67,11 +83,17 @@ beforeAll(async () => {
     schema,
   });
 
+
   try {
     if (!testDataSource.isInitialized) {
       await testDataSource.initialize();
     }
-    await testDataSource.query("TRUNCATE TABLE ticketlog, tickets, managers CASCADE");
+    // await testDataSource.query("TRUNCATE TABLE company, ticketlog, ticket, manager CASCADE");
+    // await testDataSource.getRepository(TicketLogEntity).delete({});
+    // await testDataSource.getRepository(TicketEntity).delete({});
+    // await testDataSource.getRepository(ManagerEntity).delete({});
+    // await testDataSource.getRepository(CompanyEntity).delete({});
+    await testDataSource.synchronize(true);
   } catch (error) {
     console.error("Error initializing test database:", error);
     throw error;
@@ -89,8 +111,11 @@ jest.mock("../../src/lib/datasource", () => {
 afterAll(async () => {
   //ON VIDE LA DB DE TEST
   if (testDataSource.isInitialized) {
-    await testDataSource.destroy();
+    // await testDataSource.dropDatabase();
   }
+  // await testDataSource.synchronize(true)
+  
+  await testDataSource.destroy();
   jest.clearAllMocks();
 });
 
@@ -98,15 +123,21 @@ describe("TEST TICKETLOG DANS LA DB", () => {
   let baseId: string;
   let baseTicketId: string;
   let baseManagerId: string;
+  let baseCompanyId: string;
 
   it("CREATION D'UN TICKETLOG", async () => {
+    //CREATION D'UNE COMPANY
+    const newCompany: CompanyEntity =
+      await CompanyService.getService().createOne(fakeCompany);
+    baseCompanyId = newCompany.id;
+
     //CREATION D'UN TICKET
-    const newTicket: TicketEntity = await new TicketService().generateTicket(
-      fakeTicket
-    );
+    const newTicket: TicketEntity =
+      await TicketService.gettInstance().createOne(fakeTicket);
     baseTicketId = newTicket.id;
 
     //CREATION D'UN MANAGER
+    fakeManager.companyId = baseCompanyId;
     const newManager: ManagerEntity = await new ManagerService().create(
       fakeManager
     );
@@ -125,7 +156,7 @@ describe("TEST TICKETLOG DANS LA DB", () => {
         },
       },
     });
-    
+
     assert(response.body.kind === "single");
     expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data).not.toBeNull();
@@ -148,7 +179,6 @@ describe("TEST TICKETLOG DANS LA DB", () => {
       },
     });
 
-
     assert(response.body.kind === "single");
     expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data).toEqual<TResponse>({
@@ -160,7 +190,7 @@ describe("TEST TICKETLOG DANS LA DB", () => {
         // },
         ticket: {
           id: baseTicketId,
-        },
+        } as Ticket,
         status: Status.Done,
       },
     });

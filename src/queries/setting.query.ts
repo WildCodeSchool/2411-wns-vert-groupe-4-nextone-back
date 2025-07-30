@@ -5,6 +5,7 @@ query Settings {
   settings {
     id
     name
+    value
   }
 }
 `;
@@ -14,6 +15,7 @@ query Setting($id: ID!) {
   setting(id: $id) {
     id
     name
+    value
   }
 }
 `;
@@ -41,6 +43,7 @@ mutation CreateSetting($data: CreateSettingInput!) {
   setting: createSetting(data: $data) {
     id
     name
+    value
   }
 }
 `;

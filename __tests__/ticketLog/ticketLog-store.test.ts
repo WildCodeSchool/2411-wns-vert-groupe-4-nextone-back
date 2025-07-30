@@ -10,19 +10,46 @@ import {
 import {
   CREATE_TICKETLOG,
   TICKETLOG,
+  TICKETLOG_ID,
   TICKETLOGS,
 } from "../../src/queries/ticketlog.query";
 import {
+  Company,
   Manager,
   ManagerRole,
   ManagerWithoutPassword,
   MutationCreateTicketLogArgs,
   QueryTicketLogArgs,
+  Service,
   Status,
   Ticket,
   TicketLog,
 } from "../../src/generated/graphql";
 import assert from "assert";
+
+
+
+const fakeCompany: Company = {
+  id: "f363fd0e-cb52-4089-bc25-75c72112d045",
+  name: "Jambonneau CORPORATION",
+  address: "38, Rue de la saucisse",
+  postalCode: "31000",
+  city: "TOULOUSE",
+  siret: "362 521 879 00034",
+  email: "jambo.no@gmail.com",
+  phone: "0123456789",
+  createdAt: "2025-07-04T10:46:23.954Z",
+  updatedAt: "2025-07-04T10:46:23.954Z",
+  services: [],
+};
+
+const fakeService: Service = {
+  name: "Accueil",
+  id: "aa953a24-7b28-4104-924a-d0dcda78131f",
+  createdAt: "2025-07-04T10:46:24.023Z",
+  updatedAt: "2025-07-04T10:46:24.023Z",
+  company: fakeCompany
+};
 
 const fakeManager: ManagerWithoutPassword = {
   id: "1f50e0ca-ad6d-461d-b888-9d08c2ad6ff0",
@@ -31,6 +58,7 @@ const fakeManager: ManagerWithoutPassword = {
   last_name: "dedroite",
   role: ManagerRole.Operator,
   is_globally_active: false,
+  company: fakeCompany,
 };
 
 const fakeTickets: Ticket[] = [
@@ -42,6 +70,7 @@ const fakeTickets: Ticket[] = [
     lastName: "testest",
     phone: "0606060606",
     status: Status.Pending,
+    service: fakeService,
   },
   {
     id: "00eec0d2-0082-4067-8e83-d13a47b55525",
@@ -51,6 +80,7 @@ const fakeTickets: Ticket[] = [
     lastName: "testest",
     phone: "0606060606",
     status: Status.Created,
+    service: fakeService,
   },
   {
     id: "12a75dd6-c9af-403a-a537-b4634424c85d",
@@ -60,6 +90,7 @@ const fakeTickets: Ticket[] = [
     lastName: "testest",
     phone: "0606060606",
     status: Status.Done,
+    service: fakeService,
   },
 ];
 
@@ -179,7 +210,7 @@ describe("TEST DES TICKETLOGS DANS LE STORE", () => {
       TResponseCreate,
       QueryTicketLogArgs
     >({
-      query: TICKETLOG,
+      query: TICKETLOG_ID,
       variables: {
         id: fakeData[0].id,
       },
@@ -188,7 +219,7 @@ describe("TEST DES TICKETLOGS DANS LE STORE", () => {
     assert(response.body.kind === "single");
     expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data).toEqual<TResponseCreate>({
-      ticketLog: fakeData[0],
+      ticketLog: {id: fakeData[0].id},
     });
   });
 });

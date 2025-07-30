@@ -15,20 +15,19 @@ export default class CompanySubscriber
     return CompanyEntity;
   }
 
-  public async afterInsert(event: InsertEvent<CompanyEntity>) {
+  public async afterInsert(event: InsertEvent<CompanyEntity>): Promise<void> {
     //CREATION D'UN SUPER ADMIN POUR LA COMPANY
     const { email, name } = event.entity;
 
     const admin = new ManagerEntity();
     admin.email = email;
     admin.role = ManagerRole.SuperAdmin;
-    admin.password = "jambonneau";
+    admin.password = "saucisson";
     admin.first_name = name;
     admin.last_name = name;
     admin.company = event.entity
     admin.is_globally_active = true;
 
-    const saved = await event.manager.save(admin);
-    console.log("SUPER ADMIN CREATED");
+    await event.manager.save(admin);
   }
 }

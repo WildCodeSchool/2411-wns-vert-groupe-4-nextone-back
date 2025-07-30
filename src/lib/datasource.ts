@@ -7,6 +7,9 @@ import ConnectionLogEntity from "@/entities/ConnectionLog.entity";
 import SettingEntity from "@/entities/setting.entity";
 import TicketLogEntity from "@/entities/TicketLog.entity";
 import ManagerEntity from "@/entities/Manager.entity";
+import CounterEntity from "@/entities/Counter.entity";
+
+
 import { TicketSubscriber } from "@/subscribers/ticket.subscriber";
 import CompanySubscriber from "@/subscribers/company.subscriber";
 
@@ -28,6 +31,7 @@ export default new DataSource({
     TicketLogEntity,
     ManagerEntity,
     ConnectionLogEntity
+    CounterEntity
   ],
   subscribers:[TicketSubscriber, CompanySubscriber],
   logging: ["error"],

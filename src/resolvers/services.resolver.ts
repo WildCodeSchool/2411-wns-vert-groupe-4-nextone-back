@@ -17,7 +17,10 @@ const servicesService = new ServicesService();
 export default {
   Query: {
     services: async (_: any, __: any, ctx: MyContext) => {
-      return servicesService.getAllServices();
+      console.log("ON RENTRE DANS LE RESOLVER")
+      const services = await new ServicesService().getAllServices();
+      console.log("SERVICES DANS RESOLVER", services);
+      return services
     },
 
     service: async (_: any, { id }: QueryServiceArgs, ctx: MyContext) => {

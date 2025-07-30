@@ -9,7 +9,7 @@ import {
 } from "typeorm";
 import { ServiceEntity } from "./Service.entity";
 
-@Entity({ name: "tickets" })
+@Entity({ name: "ticket" })
 export default class TicketEntity {
   
   @PrimaryGeneratedColumn("uuid")
@@ -37,7 +37,7 @@ export default class TicketEntity {
   })
   status: Status;
 
-  @Column({ type: "uuid", name: "service_id"})
+  @Column({ type: "uuid", name: "service_id", nullable: true})
   ServiceId: string;
 
   @ManyToOne(() => ServiceEntity, (service: ServiceEntity) => service.id)

@@ -21,6 +21,8 @@ import {
   QueryCompanyArgs,
 } from "../../src/generated/graphql";
 import { validate } from "uuid";
+import CompanyEntity from "../../src/entities/Company.entity";
+import ManagerEntity from "../../src/entities/Manager.entity";
 
 let server: ApolloServer;
 const schema = makeExecutableSchema({ typeDefs, resolvers });
@@ -31,6 +33,8 @@ const fakeCompanyData: CreateCompanyInput = {
   name: "Google",
   phone: "0404040404",
   siret: "362 521 879 00034",
+  city: "TOULOUSE",
+  postalCode: "31000",
 };
 
 const fakeCompanyDataUpdate: CreateCompanyInput = {
@@ -39,6 +43,8 @@ const fakeCompanyDataUpdate: CreateCompanyInput = {
   name: "JambonCorp",
   phone: "0123456789",
   siret: "362 521 879 00089",
+  city: "PARIS",
+  postalCode: "75000",
 };
 
 //ON MOCK LA DB AVEC CELLE DE TEST
@@ -54,14 +60,15 @@ beforeAll(async () => {
     schema,
   });
 
-  
-   try {
+  try {
     if (!testDataSource.isInitialized) {
       await testDataSource.initialize();
-      await testDataSource.query("TRUNCATE TABLE company CASCADE");
     }
-     await testDataSource.query("TRUNCATE TABLE company CASCADE");
-    //  await testDataSource.synchronize(true)
+    //  await testDataSource.query("TRUNCATE TABLE company CASCADE");
+    //  await testDataSource.getRepository(CompanyEntity).delete({})
+    //  await testDataSource.getRepository(ManagerEntity).delete({})
+    await testDataSource.synchronize(true);
+
   } catch (error) {
     console.error("Error initializing test database:", error);
     throw error;
@@ -71,12 +78,14 @@ beforeAll(async () => {
 afterAll(async () => {
   //ON VIDE LA DB DE TEST
   if (testDataSource.isInitialized) {
-
-    await testDataSource.destroy();
+    // await testDataSource.dropDatabase();
   }
+  // await testDataSource.synchronize(true)
+
+  await testDataSource.destroy();
+
   jest.clearAllMocks();
 });
-
 
 type TResponse = {
   company: Company;
@@ -87,7 +96,7 @@ type TResponseDelete = {
 };
 
 type TResponseALL = {
-  companies: Company[];
+  companies: Partial<Company>[];
 };
 
 describe("TEST COMPANY AVEC DB", () => {
@@ -119,18 +128,19 @@ describe("TEST COMPANY AVEC DB", () => {
     const response = await server.executeOperation<
       TResponse,
       MutationUpdateCompanyArgs
-    >({
-      query: UPDATE_COMPANY_DB,
-      variables: {
-        data: { ...fakeCompanyDataUpdate, id: baseId },
+    >(
+      {
+        query: UPDATE_COMPANY_DB,
+        variables: {
+          data: { ...fakeCompanyDataUpdate, id: baseId },
+        },
       },
-    },
-    {
-      contextValue: {
-        manager: { role: "SUPER_ADMIN" },
-      },
-    }
-  );
+      {
+        contextValue: {
+          manager: { role: "SUPER_ADMIN" },
+        },
+      }
+    );
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.errors).toBeUndefined();

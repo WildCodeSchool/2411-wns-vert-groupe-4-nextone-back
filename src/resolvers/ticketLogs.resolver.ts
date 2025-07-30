@@ -1,5 +1,4 @@
 import TicketLogEntity from "@/entities/TicketLog.entity";
-import TicketLogsEntity from "@/entities/TicketLog.entity";
 import {
   AuthorizationResponse,
   DeleteResponse,
@@ -17,41 +16,44 @@ const ticketLogService = TicketLogService.getInstance();
 
 export default {
   Query: {
-
     async ticketLog(
       _: any,
       { id }: { id: string }
-    ): Promise<TicketLogsEntity | null> {
+    ): Promise<TicketLogEntity | null> {
       return await ticketLogService.findById(id);
     },
 
-    async ticketLogs(): Promise<TicketLogsEntity[]> {
+    async ticketLogs(): Promise<TicketLogEntity[]> {
       const tickets = await ticketLogService.findAll();
       return tickets;
     },
 
     async ticketLogsByProperty(_: any, args: QueryTicketLogsByPropertyArgs) {
-
       let key = Object.keys(args.field)[0] as keyof typeof args.field;
       const value = args.field[key];
 
       return await ticketLogService.findByProperty(key, value);
     },
 
-    async ticketLogsByProperties(_: any, { fields }: QueryTicketLogsByPropertiesArgs) {
-      return await ticketLogService.findByProperties(fields)
+    async ticketLogsByProperties(
+      _: any,
+      { fields }: QueryTicketLogsByPropertiesArgs
+    ) {
+      return await ticketLogService.findByProperties(fields);
     },
 
-    async ticketLogsByCreationSlot(_: any, args: QueryTicketLogsByCreationSlotArgs) {
-      return await ticketLogService.findByCreationSlot({...args.data})
-    }
-
+    async ticketLogsByCreationSlot(
+      _: any,
+      args: QueryTicketLogsByCreationSlotArgs
+    ) {
+      return await ticketLogService.findByCreationSlot({ ...args.data });
+    },
   },
   Mutation: {
     async createTicketLog(
       _: any,
       { data }: MutationCreateTicketLogArgs
-    ): Promise<TicketLogsEntity> {
+    ): Promise<TicketLogEntity> {
       const newTicket = await ticketLogService.createOne({
         ...data,
         manager: data.managerId,
@@ -62,7 +64,7 @@ export default {
     async updateTicketLog(
       _: any,
       args: MutationUpdateTicketLogArgs
-    ): Promise<TicketLogsEntity | null> {
+    ): Promise<TicketLogEntity | null> {
       return await ticketLogService.updateOne(args.data.id, args.data);
     },
     async deleteTicketLog(

@@ -32,6 +32,7 @@ input CreateSettingInput {
 input UpdateSettingInput {
   id: ID!
   name: String
+  value: String
 }
 
 

@@ -16,7 +16,7 @@ import { IsEmail, Length, IsString } from "class-validator";
 import AuthorizationEntity from "./Authorization.entity";
 import CompanyEntity from "./Company.entity";
 
-@Entity("managers")
+@Entity("manager")
 export default class ManagerEntity {
   @BeforeInsert()
   async hashPassword() {
@@ -64,15 +64,17 @@ export default class ManagerEntity {
   @ManyToMany(() => ServiceEntity, (service) => service.managers, {
     cascade: true,
   })
-  @JoinTable({ name: "authorization" })
+  @JoinTable()
   services: ServiceEntity[];
 
   @OneToMany(() => AuthorizationEntity, (auth) => auth.manager)
   authorizations: AuthorizationEntity[];
+
+
   @Column({ type: "uuid"})
   companyId: string
 
-  @ManyToOne(() => CompanyEntity, (company: CompanyEntity) => company.id)
+  @ManyToOne(() => CompanyEntity, (company: CompanyEntity) => company.id,{ onDelete: "CASCADE"})
   company: CompanyEntity
 
   @CreateDateColumn()

@@ -1,26 +1,42 @@
 import assert from "assert";
 import { ApolloServer } from "@apollo/server";
 import { makeExecutableSchema } from "@graphql-tools/schema";
-import { addMocksToSchema, createMockStore, IMockStore } from "@graphql-tools/mock";
+import {
+  addMocksToSchema,
+  createMockStore,
+  IMockStore,
+} from "@graphql-tools/mock";
 import { loadFilesSync } from "@graphql-tools/load-files";
-import path from "path";
+// import path from "path";
 import Manager from "../../src/entities/Manager.entity";
-import { InputRegister, ManagerRole, InputLogin, MutationUpdateManagerArgs } from "../../src/generated/graphql";
-import { LIST_MANAGERS, REGISTER_MANAGER,
-  LOGIN_MANAGER, LOGOUT_MANAGER,
-  FIND_MANAGER_BY_ID, DELETE_MANAGER,
+import {
+  InputRegister,
+  ManagerRole,
+  InputLogin,
+  MutationUpdateManagerArgs,
+  MutationCreateManagerArgs,
+} from "../../src/generated/graphql";
+import {
+  LIST_MANAGERS,
+  REGISTER_MANAGER,
+  LOGIN_MANAGER,
+  LOGOUT_MANAGER,
+  FIND_MANAGER_BY_ID,
+  DELETE_MANAGER,
   UPDATE_MANAGER,
-  TOGGLE_GLOBAL_ACCESS_MANAGER
- } from "../../src/queries/manager.query"
+  ASSOCIATE_MANAGER_AT_SERVICE,
+  DISSOCIATE_MANAGER_FROM_SERVICE,
+} from "../../src/queries/manager.query";
+import typeDefs from "../../src/typeDefs";
 
-const managerTypeDefs = loadFilesSync(path.join(__dirname, "../../src/typeDefs/manager.gql"), {
-  extensions: ["gql"],
-});
+// const managerTypeDefs = loadFilesSync(path.join(__dirname, "../../src/typeDefs/manager.gql"), {
+//   extensions: ["gql"],
+// });
 
-const serviceTypeDefs = loadFilesSync(path.join(__dirname, "../../src/typeDefs/service.gql"), {
-  extensions: ["gql"],
-});
-const combinedTypeDefs = [...managerTypeDefs, ...serviceTypeDefs];
+// const serviceTypeDefs = loadFilesSync(path.join(__dirname, "../../src/typeDefs/service.gql"), {
+//   extensions: ["gql"],
+// });
+// const combinedTypeDefs = [...managerTypeDefs, ...serviceTypeDefs];
 
 type StatusResponse = {
   message: string;
@@ -38,31 +54,31 @@ type ResponseCreateManager = {
 type ResponseLoginManager = {
   manager: Manager;
   token: string;
-}
+};
 
 type ReponseDisconnectManager = {
-  logout: StatusResponse
-}
+  logout: StatusResponse;
+};
 
 type ResponseGetManager = {
   manager: Manager;
-}
+};
 
 type ResponseDeleteManager = {
   deleteManager: StatusResponse;
-}
+};
 
 type ResponseUpdateManager = {
   updateManager: Manager;
-}
+};
 
 type ResponseAssociateManagerFromService = {
-  associateManagerFromService: StatusResponse
-}
+  associateManagerFromService: StatusResponse;
+};
 
 type ResponseDissociateManagerFromService = {
-  dissociateManagerFromService: StatusResponse
-}
+  dissociateManagerFromService: StatusResponse;
+};
 
 type ResponseToggleGlobalManager = {
   toggleGlobalAccessManager: {
@@ -71,26 +87,33 @@ type ResponseToggleGlobalManager = {
 }
 
 const listManagers = [
-  { 
-    id: "1", 
+  {
+    id: "1",
     email: "jean@example.com",
     is_globally_active: false,
+    services: [
+      {
+        id: "10",
+        name: "Service Test",
+      },
+    ],
   },
-  { 
-    id: "2", 
+  {
+    id: "2",
     email: "jean1@example.com",
     is_globally_active: false,
+    services: [],
   },
 ];
 
-
-const createManagerExample = {
+const createManagerExample: InputRegister = {
   first_name: "Jean",
   last_name: "Dupont",
   email: "jean@example.com",
   password: "motdepasse",
   role: ManagerRole.Admin,
   is_globally_active: true,
+  companyId: "f363fd0e-cb52-4089-bc25-75c72112d045",
 };
 
 const mockManager = {
@@ -111,38 +134,49 @@ const manager = {
   email: "jean@example.com",
   role: ManagerRole.Admin,
   is_globally_active: true,
+  services: [
+    {
+      id: "10",
+      name: "Service Test",
+    },
+  ],
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
-}
+};
 
 let server: ApolloServer;
 
 const schema = makeExecutableSchema({
-  typeDefs: combinedTypeDefs,
+  typeDefs,
 });
 
-const store = createMockStore({schema})
+const store = createMockStore({ schema });
 
 beforeAll(async () => {
   const mockResolvers = (store: IMockStore) => ({
     Query: {
-      managers: () => 
-        store.get("Query", "ROOT", "managers"),
-      manager: (_: any, { id }: { id: string }) => 
-        store.get("Manager", id),
+      managers: () => store.get("Query", "ROOT", "managers"),
+      manager: (_: any, { id }: { id: string }) => store.get("Manager", id),
       login: (_: any, { infos }: { infos: InputLogin }) => {
-        if (infos.email === "jean@example.com" && infos.password === "motdepasse") {
+        if (
+          infos.email === "jean@example.com" &&
+          infos.password === "motdepasse"
+        ) {
           return { manager: mockManager, token: "mocked-token-123" };
         }
       },
-      logout: (_: any, __: any) => 
-        ({ message: "Vous êtes déconnecté", success: true }),
+      logout: (_: any, __: any) => ({
+        content: "Vous êtes déconnecté",
+        status: true,
+      }),
     },
     Mutation: {
       createManager: (_: any, { infos }: { infos: InputRegister }) => {
-        store.set("Manager", "3", infos);
-        const { password, ...result } = store.get("Manager", "3") as Manager;
-        return result;
+        const { companyId, ...rest } = infos;
+        store.set("Manager", "3", rest);
+        const manager = store.get("Manager", "3") as Manager;
+        const { password, company, ...result } = manager;
+        return {...result, id: 3};
       },
       deleteManager: (_: null, { id }: { id: string }) => {
         store.get("Manager", id);
@@ -167,7 +201,7 @@ beforeAll(async () => {
     schema: addMocksToSchema({
       schema,
       resolvers: mockResolvers,
-      store
+      store,
     }),
   });
   store.set("Query", "ROOT", "managers", listManagers);
@@ -185,16 +219,18 @@ describe("Test sur les managers", () => {
     });
   });
 
-
   it("Inscription d'un manager", async () => {
-    const response = await server.executeOperation<ResponseCreateManager>({
+    const response = await server.executeOperation<
+      ResponseCreateManager,
+      MutationCreateManagerArgs
+    >({
       query: REGISTER_MANAGER,
       variables: {
         infos: createManagerExample,
       },
     });
     assert(response.body.kind === "single");
-    const { password, ...managerWithoutPassword } = createManagerExample;
+    const { password,companyId,  ...managerWithoutPassword } = createManagerExample;
     expect(response.body.singleResult.data).toEqual({
       createManager: { id: "3", ...managerWithoutPassword },
     });
@@ -220,8 +256,10 @@ describe("Test sur les managers", () => {
   });
 
   it("Déconnexion du manager connecté", async () => {
-    const response = await server.executeOperation<ReponseDisconnectManager>({ 
-      query: LOGOUT_MANAGER },
+    const response = await server.executeOperation<ReponseDisconnectManager>(
+      {
+        query: LOGOUT_MANAGER,
+      },
       {
         contextValue: {
           manager: mockManager,
@@ -245,9 +283,9 @@ describe("Test sur les managers", () => {
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.data).toEqual({
-      manager: manager
+      manager: manager,
     });
-  })
+  });
 
   it("Suppression d'un manager", async () => {
     const response = await server.executeOperation<ResponseDeleteManager>({
@@ -259,7 +297,7 @@ describe("Test sur les managers", () => {
     expect(response.body.singleResult.data).toEqual({
       deleteManager: { message: "Manager deleted", success: true },
     });
-  })
+  });
 
   it("Mise à jour d'un manager", async () => {
     const updatedFirstName = "Jean-Michel";

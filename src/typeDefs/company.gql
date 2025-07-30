@@ -11,7 +11,7 @@ type Company {
   phone: String!
   services: [Service!]!
   createdAt: DateTime!
-  updatedAT: DateTime!
+  updatedAt: DateTime!
 }
 
 

@@ -32,6 +32,14 @@ query TicketLog($id: UUID!) {
 }
 `;
 
+export const TICKETLOG_ID = `#graphql
+query TicketLog($id: UUID!) {
+  ticketLog(id: $id) {
+    id
+  }
+}
+`
+
 export const TICKETLOG_BY_PROPERTY = `#graphql
 query TicketLogsByProperty($field: TicketLogPropertyInput!) {
   ticketLogsByProperty(field: $field) {

@@ -1,0 +1,49 @@
+
+scalar DateTime
+scalar  UUID
+
+type Counter {
+  id: UUID!
+  name: String!
+  isAvailable: Boolean!
+  services: [Service!]!
+  manager: Manager
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type Query {
+  counter(counterId: UUID!): Counter
+  counters: [Counter!]!
+}
+
+type Mutation {
+  createCounter(data: CreateCounterInput!): Counter!
+  updateCounter(id: UUID!, data: UpdateCounterInput!): [Counter!]!
+  deleteCounter(id: UUID!): DeleteResponse!
+  addManagerOnCounter(data: AddManagerInput!): Counter!
+  removeManagerOnCounter(id: UUID!): Counter!
+  updateServiceOnCounter(id: UUID!, data: UpdateCounterServiceInput!): Counter!
+}
+
+input UpdateCounterServiceInput {
+  id: UUID!
+  serviceIdsToAdd: [UUID!]!
+  serviceIdsToRemove: [UUID!]!
+}
+
+input AddManagerInput {
+  id: UUID!
+  managerId: UUID!
+}
+
+input CreateCounterInput {
+  name: String!
+  isAvailable: Boolean
+  serviceIdS: [UUID!]!
+}
+
+input UpdateCounterInput {
+  name: String
+  isAvailable: Boolean
+}

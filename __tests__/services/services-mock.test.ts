@@ -8,11 +8,8 @@ import { LIST_SERVICES, FIND_SERVICE_BY_ID,
   DELETE_SERVICE,
   TOGGLE_GLOBAL_ACCESS_SERVICE
 } from "../../src/queries/service.query"
+import typeDefs from '../../src/typeDefs';
 
-const serviceTypeDefs = fs.readFileSync(
-  path.join(__dirname, '../../src/typeDefs/service.gql'),
-  { encoding: 'utf-8' }
-);
 
 type Service = {
   id: string;
@@ -98,6 +95,7 @@ beforeAll(async () => {
         return { success: true, message: "Service updated successfully." };
       },
       deleteService: (_: any, args: { id: string }) => {
+        console.log("delete service : ", args)
         const index = servicesData.findIndex((s) => s.id === args.id);
         if (index === -1) return { success: false, message: "Service not found." };
         servicesData.splice(index, 1);
@@ -114,7 +112,7 @@ beforeAll(async () => {
   };
 
   const schema = makeExecutableSchema({
-    typeDefs: serviceTypeDefs,
+    typeDefs: typeDefs,
     resolvers: serviceResolvers,
   });
 
@@ -174,6 +172,7 @@ describe('ServicesResolver (mocked)', () => {
       variables: { id: 'uuid-2' },
     });
     assert(response.body.kind === 'single');
+    console.log(response.body.singleResult.errors);
     const deleted = response.body.singleResult.data?.deleteService;
     expect(deleted?.success).toBe(true);
     expect(deleted?.message).toBe('Service deleted successfully.');

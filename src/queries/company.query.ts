@@ -27,15 +27,16 @@ export const CREATE_COMPANY = `#graphql
 `;
 
 export const CREATE_COMPANY_DB = `#graphql
-  mutation CreateCompany($data: CreateCompanyInput!) {
-    company: createCompany(data: $data) {
-      name
-      address
-      email
-      phone
-      siret
-      id
-    }
+mutation CreateCompany($data: CreateCompanyInput!) {
+  company: createCompany(data: $data) {
+    name
+    address
+    email
+    phone
+    siret
+    id
+    city
+    postalCode
   }
 `;
 
@@ -66,6 +67,8 @@ mutation UpdateCompany($data: UpdateCompanyInput!) {
     phone
     siret
     id
+    city
+    postalCode
   }
 }
 `;
