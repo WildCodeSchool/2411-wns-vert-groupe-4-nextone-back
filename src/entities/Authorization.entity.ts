@@ -8,15 +8,14 @@ import {
 } from 'typeorm';
 import { ServiceEntity } from "./Service.entity";
 import ManagerEntity from './Manager.entity';
-// import { ManagerEntity } from "./Manager.entity"; // commenté car pas encore créé
 
 @Entity('authorizations')
 export default class AuthorizationEntity {
   @PrimaryColumn('uuid')
-  serviceId: string; // composite key
+  serviceId: string;
 
   @PrimaryColumn('uuid')
-  managerId: string; // composite key
+  managerId: string;
 
   @Column({ default: true })
   isActive: boolean;
@@ -24,24 +23,15 @@ export default class AuthorizationEntity {
   @CreateDateColumn()
   createdAt: Date;
 
-
-  // Relations
- 
-  // Relation vers Service (ManyToOne)
-  // @ManyToOne(() => ServiceEntity, (service) => service.authorizations)
-  // @JoinColumn({ name: "serviceId" })
-  // service: ServiceEntity;
-
-  
-  @ManyToOne(() => ManagerEntity, (manager) => manager.authorizations)
+  @ManyToOne(() => ManagerEntity, (manager) => manager.authorizations, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'managerId' })
   manager: ManagerEntity;
 
-  @ManyToOne(() => ServiceEntity, (service) => service.authorizations)
+  @ManyToOne(() => ServiceEntity, (service) => service.authorizations, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'serviceId' })
   service: ServiceEntity;
-
-  // Relation vers Manager (ManyToOne) quand elle sera créée
-  // @ManyToOne(() => ManagerEntity, (manager) => manager.authorizations)
-  // @JoinColumn({ name: "managerId" })
-  // manager: ManagerEntity;
-
 }

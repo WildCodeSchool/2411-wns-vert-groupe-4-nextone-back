@@ -75,18 +75,11 @@ const listManagers = [
   { 
     id: "1", 
     email: "jean@example.com",
-    services: [
-      {
-        id: "10",
-        name: "Service Test",
-      }
-    ],
     is_globally_active: false,
   },
   { 
     id: "2", 
     email: "jean1@example.com",
-    services: [],
     is_globally_active: false,
   },
 ];
@@ -119,12 +112,6 @@ const manager = {
   email: "jean@example.com",
   role: ManagerRole.Admin,
   is_globally_active: true,
-  services: [
-      {
-        id: "10",
-        name: "Service Test",
-      }
-    ],
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
 }
@@ -184,7 +171,7 @@ beforeAll(async () => {
         const manager = listManagers.find(s => s.id === args.id);
         if (!manager) throw new Error("Manager not found.");
         manager.is_globally_active = !manager.is_globally_active;
-        return { is_globally_active: manager.is_globally_active };
+        return { success: true, message: "Manager updated successfully." };
       }
     },
   });
@@ -351,7 +338,7 @@ describe("Test sur les managers", () => {
     });
   });
 
-  it("bascule l'accès global d'un service", async () => {
+  it("bascule l'accès global d'un Manager", async () => {
     const response = await server.executeOperation<ResponseToggleGlobalManager>({
       query: TOGGLE_GLOBAL_ACCESS_MANAGER,
       variables: { toggleGlobalAccessManagerId: '1' },
@@ -361,10 +348,10 @@ describe("Test sur les managers", () => {
       },
     });
     assert(response.body.kind === 'single');
-    expect(response.body.singleResult.data).toEqual({
-      toggleGlobalAccessManager: {
-        is_globally_active: true, 
-      },
+    const result = response.body.singleResult.data?.toggleGlobalAccessManager;
+    expect(result).toEqual({
+      success: true,
+      message: "Manager updated successfully.",
     });
   })
 })

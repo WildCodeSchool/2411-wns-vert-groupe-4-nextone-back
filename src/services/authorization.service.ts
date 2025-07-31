@@ -6,7 +6,7 @@ import {
 import AuthorizationRepository from "@/repositories/Authorization.repository";
 import AuthorizationEntity from "@/entities/Authorization.entity";
 import ManagerEntity from "@/entities/Manager.entity";
-import { checkAuthorization } from "@/utils/manager";
+import { checkRoleInHierarchy } from "@/utils/manager";
 import ManagerService from "./manager.service";
 import ServicesService from "./services.service";
 import { ServiceEntity } from "@/entities/Service.entity";
@@ -37,7 +37,11 @@ export default class AuthorizationService {
 
   async addAuthorization(input: MutationAddAuthorizationArgs["input"], manager: ManagerEntity): Promise<boolean> {
     const [targetManager, targetService] = await this.validateEntities(input.managerId, input.serviceId);
-    checkAuthorization(manager?.role, manager, targetManager.role);
+    if (!targetManager) throw new Error("Manager à modifier introuvable.");
+    if (!manager?.role) {
+      throw new Error("Le rôle du manager est manquant.");
+    }
+    checkRoleInHierarchy(manager.role, targetManager.role);
     const exists = await this.findAuthorization(input.managerId, input.serviceId);
     if (exists) return false;
     const newAuthorization = this.db.create({
@@ -50,7 +54,11 @@ export default class AuthorizationService {
 
   async updateAuthorization(data: MutationUpdateAuthorizationArgs["input"], actor: ManagerEntity): Promise<boolean> {
     const [targetManager] = await this.validateEntities(data.managerId, data.serviceId);
-    checkAuthorization(actor.role, actor, targetManager.role);
+    if (!targetManager) throw new Error("Manager à modifier introuvable.");
+    if (!actor?.role) {
+        throw new Error("Le rôle du manager est manquant.");
+    }
+    checkRoleInHierarchy(actor.role, targetManager.role);
     const result = await this.db.update(
       {
         service: { id: data.serviceId },
@@ -65,7 +73,11 @@ export default class AuthorizationService {
     const existing = await this.findAuthorization(input.managerId, input.serviceId);
     if (!existing) return false;
     const [targetManager] = await this.validateEntities(input.managerId, input.serviceId);
-    checkAuthorization(actor.role, actor, targetManager.role);
+    if (!targetManager) throw new Error("Manager à modifier introuvable.");
+    if (!actor?.role) {
+      throw new Error("Le rôle du manager est manquant.");
+    }
+    checkRoleInHierarchy(actor.role, targetManager.role);
     await this.db.remove(existing);
     return true;
   }

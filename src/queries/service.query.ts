@@ -4,10 +4,6 @@ export const LIST_SERVICES = `#graphql
     services {
       id
       name
-      managers {
-        email
-        id
-      }
       isGloballyActive
     }
   }
@@ -18,10 +14,6 @@ export const FIND_SERVICE_BY_ID = `#graphql
     service(id: $id) {
       id
       name
-      managers {
-        id
-        email
-      }
       isGloballyActive
     }
   }
@@ -57,7 +49,8 @@ export const DELETE_SERVICE = `#graphql
 export const TOGGLE_GLOBAL_ACCESS_SERVICE = `#graphql
   mutation Mutation($toggleGlobalAccessServiceId: UUID!) {
     toggleGlobalAccessService(id: $toggleGlobalAccessServiceId) {
-      isGloballyActive
+      success
+      message
     }
   }
 `

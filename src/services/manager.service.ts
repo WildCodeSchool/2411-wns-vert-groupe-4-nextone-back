@@ -12,20 +12,22 @@ export default class ManagerService {
     }
 
     async listManagers() {
-        return this.db.find({
-            relations: ['services'],
-        });
+        return this.db.find();
     }
 
     async findManagerByEmail(email: string) {
         return await this.db.findOneBy({ email });
     }
 
-    async getManagerById(id: string) {
-        const manager = await this.db.findOne({
-            where: { id },
-            relations: ['services'],  
+    async findByIdWithAuthorizations(managerId: string) {
+        return this.db.findOne({
+            where: { id: managerId },
+            relations: ["authorizations", "authorizations.service"],
         });
+    }
+
+    async getManagerById(id: string) {
+        const manager = await this.db.findOne({ where: { id } });
         if (!manager) {
             throw new Error("No manager found");
         }
@@ -79,8 +81,9 @@ export default class ManagerService {
         return this.db.findOne(options);
     }
 
-    async toggleGlobalAccess(manager: ManagerEntity): Promise<ManagerEntity> {
+    async toggleGlobalAccess(manager: ManagerEntity): Promise<boolean> {
         manager.is_globally_active = !manager.is_globally_active;
-        return this.db.save(manager);
+        await this.db.save(manager);
+        return manager.is_globally_active;
     }
 }

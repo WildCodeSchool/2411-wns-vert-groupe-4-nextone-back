@@ -1,9 +1,8 @@
 import { BeforeInsert, Column, CreateDateColumn,
-  Entity, PrimaryGeneratedColumn, UpdateDateColumn, ManyToMany, JoinTable, OneToMany} from "typeorm";
+  Entity, PrimaryGeneratedColumn, UpdateDateColumn, OneToMany} from "typeorm";
 import * as argon2 from "argon2";
 import { ManagerRole } from "@/generated/graphql";
 import { IsEmail, Length, IsString } from "class-validator";
-import { ServiceEntity } from "./Service.entity";
 import AuthorizationEntity from "./Authorization.entity";
 
 @Entity("managers")
@@ -48,10 +47,6 @@ export default class ManagerEntity {
     default: true, 
   })
   is_globally_active: boolean;
-
-  @ManyToMany(() => ServiceEntity, service => service.managers, { cascade: true })
-  @JoinTable()
-  services: ServiceEntity[];
 
   @OneToMany(() => AuthorizationEntity, (auth) => auth.manager)
   authorizations: AuthorizationEntity[];

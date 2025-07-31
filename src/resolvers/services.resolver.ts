@@ -8,8 +8,9 @@ import {
   ServiceResponse
 } from "@/generated/graphql";
 import { MyContext } from "..";
-import { checkStrictRole, verifyCreatorPermission } from "@/utils/manager";
+import { canAccessAuthorization, checkStrictRole } from "@/utils/manager";
 import { buildResponse } from "@/utils/authorization";
+import AuthorizationService from "@/services/authorization.service";
 
 const servicesService = new ServicesService();
 
@@ -46,15 +47,14 @@ export default {
       if (!manager) {
         throw new Error("Manager non authentifié");
       }
-      verifyCreatorPermission(manager?.role)
       const service = await servicesService.getServiceById(id);
       if (!service) {
         throw new Error("Service introuvable.");
-      }
+      }  
+      const authorizationService = new AuthorizationService();
+      await canAccessAuthorization(manager, service.id, authorizationService)
       const updatedService = await servicesService.toggleGlobalAccess(service);
-      return {
-        isGloballyActive: updatedService.isGloballyActive,
-      };
+      return buildResponse(updatedService, "Service is active.", "Service is not active.")
     }
   },
 };

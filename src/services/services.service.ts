@@ -1,8 +1,6 @@
-// service.service.ts
 import { MutationCreateServiceArgs, MutationUpdateServiceArgs } from '@/generated/graphql';
 import ServiceRepository from '@/repositories/Service.repository';
 import { ServiceEntity } from '@/entities/Service.entity';
-import ManagerEntity from '@/entities/Manager.entity';
 
 export default class ServicesService {
   db: ServiceRepository;
@@ -12,15 +10,12 @@ export default class ServicesService {
   }
 
   async getAllServices(): Promise<ServiceEntity[]> {
-    return this.db.find({
-      relations: ['managers'],
-    });
+    return this.db.find(); 
   }
 
   async getServiceById(id: string): Promise<ServiceEntity | null> {
     return this.db.findOne({
       where: { id },
-      relations: ['managers'],
     });
   }
 
@@ -46,8 +41,9 @@ export default class ServicesService {
     return this.db.findOne(options);
   }
 
-  async toggleGlobalAccess(service: ServiceEntity): Promise<ServiceEntity> {
+  async toggleGlobalAccess(service: ServiceEntity): Promise<boolean> {
     service.isGloballyActive = !service.isGloballyActive;
-    return this.db.save(service);
+    await this.db.save(service);
+    return service.isGloballyActive;
   }
 }
