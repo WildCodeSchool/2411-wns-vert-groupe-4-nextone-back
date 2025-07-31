@@ -25,7 +25,7 @@ import ManagerEntity from "./Manager.entity";
     @Column({ default: true})
     isAvailable: boolean;
 
-    @ManyToMany(() => ServiceEntity)
+    @ManyToMany(() => ServiceEntity,{ eager: true })
     @JoinTable()
     services: ServiceEntity[]
 

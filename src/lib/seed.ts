@@ -158,5 +158,6 @@ export const seedDB = async(): Promise<boolean> => {
 if (require.main === module) {
   seedDB()
 }
+//DANS DOCKER
 
 //npx ts-node -r tsconfig-paths/register src/lib/seed.ts

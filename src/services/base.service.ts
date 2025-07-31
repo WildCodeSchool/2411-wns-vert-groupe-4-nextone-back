@@ -92,13 +92,17 @@ export default abstract class BaseService<T extends ObjectLiteral> {
   }
 
   //UPDATE
-  public async updateOne(id: string, entity: Partial<T>):Promise<T | null> {
+  public async updateOne(id: string, entity: Partial<T>): Promise<T | null> {
+
     const updated = await this.repo.update(id, entity);
     if (!updated) {
       throw new Error("Nothing affected.");
     }
     const updatedEntity = await this.findById(id);
 
+    if (!updatedEntity) {
+    throw new Error("Entity not found after update");
+  }
     return updatedEntity;
   }
 }

@@ -25,7 +25,7 @@ export default class CounterService extends BaseService<CounterEntity> {
     if (!counter) {
       throw new Error("No counter with this id.");
     }
-    const manager = await new ManagerService().findOne(managerId);
+    const manager = await new ManagerService().getManagerById(managerId);
     if (!manager) {
       throw new Error("No manager with this id.");
     }
@@ -53,7 +53,7 @@ export default class CounterService extends BaseService<CounterEntity> {
     if (!counter) {
       throw new Error("No counter with this id.");
     }
-
+    console.log('COUNTER DANS UPDATE : ', counter)
     //ON SUPPRIME D'ABORD LES SERVICES DE REMOVING
     const newServs = counter.services.filter((service) => {
       return !removingIds.includes(service.id);
@@ -72,7 +72,7 @@ export default class CounterService extends BaseService<CounterEntity> {
 
     //ON MET A JOUR
     counter.services = newServs;
-    this.repo.save(counter);
+    await this.repo.save(counter);
     return counter;
   }
 }

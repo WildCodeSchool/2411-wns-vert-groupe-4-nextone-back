@@ -25,8 +25,9 @@ export default {
     async createCounter(_: any, args: MutationCreateCounterArgs) {
       return await counterService.createOne(args.data);
     },
-    async updateCounter(_: any, { id, data }: MutationUpdateCounterArgs) {
-      return await counterService.updateOne(id, data);
+    async updateCounter(_: any, args: MutationUpdateCounterArgs) {
+      const { id, ...rest} = args.data
+      return await counterService.updateOne(id, rest);
     },
     async deleteCounter(_: any, { id }: MutationDeleteCounterArgs) {
       const deleted = await counterService.deleteOne(id);
@@ -57,9 +58,9 @@ export default {
       _: any,
       args: MutationUpdateServiceOnCounterArgs
     ): Promise<CounterEntity> {
-      const { serviceIdsToAdd, serviceIdsToRemove } = args.data;
+      const { serviceIdsToAdd, serviceIdsToRemove, id } = args.data;
       return await counterService.updateServices(
-        args.id,
+        id,
         serviceIdsToAdd,
         serviceIdsToRemove
       );

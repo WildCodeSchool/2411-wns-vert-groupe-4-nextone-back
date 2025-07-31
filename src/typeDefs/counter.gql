@@ -8,8 +8,8 @@ type Counter {
   isAvailable: Boolean!
   services: [Service!]!
   manager: Manager
-  createdAt: DateTime
-  updatedAt: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type Query {
@@ -19,11 +19,11 @@ type Query {
 
 type Mutation {
   createCounter(data: CreateCounterInput!): Counter!
-  updateCounter(id: UUID!, data: UpdateCounterInput!): [Counter!]!
+  updateCounter(data: UpdateCounterInput!): Counter!
   deleteCounter(id: UUID!): DeleteResponse!
   addManagerOnCounter(data: AddManagerInput!): Counter!
   removeManagerOnCounter(id: UUID!): Counter!
-  updateServiceOnCounter(id: UUID!, data: UpdateCounterServiceInput!): Counter!
+  updateServiceOnCounter(data: UpdateCounterServiceInput!): Counter!
 }
 
 input UpdateCounterServiceInput {
@@ -46,4 +46,5 @@ input CreateCounterInput {
 input UpdateCounterInput {
   name: String
   isAvailable: Boolean
+  id: UUID!
 }

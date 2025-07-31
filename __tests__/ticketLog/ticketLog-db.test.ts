@@ -71,12 +71,7 @@ const fakeManager: InputRegister = {
   companyId: "",
 };
 
-// const fakeTicketLog: Partial<TicketLog> = {
-//   id: "",
-//   manager: { ...fakeManager, id: "", role: ManagerRole.Admin },
-//   status: Status.Created,
-//   ticket: { ...fakeTicket, id: "" },
-// };
+
 
 beforeAll(async () => {
   server = new ApolloServer({
@@ -88,11 +83,7 @@ beforeAll(async () => {
     if (!testDataSource.isInitialized) {
       await testDataSource.initialize();
     }
-    // await testDataSource.query("TRUNCATE TABLE company, ticketlog, ticket, manager CASCADE");
-    // await testDataSource.getRepository(TicketLogEntity).delete({});
-    // await testDataSource.getRepository(TicketEntity).delete({});
-    // await testDataSource.getRepository(ManagerEntity).delete({});
-    // await testDataSource.getRepository(CompanyEntity).delete({});
+
     await testDataSource.synchronize(true);
   } catch (error) {
     console.error("Error initializing test database:", error);
@@ -111,11 +102,9 @@ jest.mock("../../src/lib/datasource", () => {
 afterAll(async () => {
   //ON VIDE LA DB DE TEST
   if (testDataSource.isInitialized) {
-    // await testDataSource.dropDatabase();
+    await testDataSource.destroy();
   }
-  // await testDataSource.synchronize(true)
-  
-  await testDataSource.destroy();
+
   jest.clearAllMocks();
 });
 

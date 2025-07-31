@@ -95,7 +95,6 @@ beforeAll(async () => {
         return { success: true, message: "Service updated successfully." };
       },
       deleteService: (_: any, args: { id: string }) => {
-        console.log("delete service : ", args)
         const index = servicesData.findIndex((s) => s.id === args.id);
         if (index === -1) return { success: false, message: "Service not found." };
         servicesData.splice(index, 1);
@@ -172,7 +171,6 @@ describe('ServicesResolver (mocked)', () => {
       variables: { id: 'uuid-2' },
     });
     assert(response.body.kind === 'single');
-    console.log(response.body.singleResult.errors);
     const deleted = response.body.singleResult.data?.deleteService;
     expect(deleted?.success).toBe(true);
     expect(deleted?.message).toBe('Service deleted successfully.');
