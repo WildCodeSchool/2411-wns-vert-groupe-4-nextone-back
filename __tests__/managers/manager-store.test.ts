@@ -9,8 +9,7 @@ import { InputRegister, ManagerRole, InputLogin, MutationUpdateManagerArgs } fro
 import { LIST_MANAGERS, REGISTER_MANAGER,
   LOGIN_MANAGER, LOGOUT_MANAGER,
   FIND_MANAGER_BY_ID, DELETE_MANAGER,
-  UPDATE_MANAGER, ASSOCIATE_MANAGER_AT_SERVICE,
-  DISSOCIATE_MANAGER_FROM_SERVICE,
+  UPDATE_MANAGER,
   TOGGLE_GLOBAL_ACCESS_MANAGER
  } from "../../src/queries/manager.query"
 
@@ -155,18 +154,6 @@ beforeAll(async () => {
         store.set("Manager", "1", { ...mockManager, ...data });
         return store.get("Manager", "1");
       },
-      associateManagerAtService: (_: any) => {
-        return {
-          message: "Manager associé au service avec succès",
-          success: true,
-        };
-      },
-      dissociateManagerFromService: (_: any) => {
-        return {
-          message: "Manager dissocié du service spécifié",
-          success: true,
-        };
-      },
       toggleGlobalAccessManager: (_: any, args: { id: string }) => {
         const manager = listManagers.find(s => s.id === args.id);
         if (!manager) throw new Error("Manager not found.");
@@ -299,42 +286,6 @@ describe("Test sur les managers", () => {
       is_globally_active: mockManager.is_globally_active,
       created_at: mockManager.created_at,
       updated_at: mockManager.updated_at,
-    });
-  });
-
-  it("Associe un manager à un service", async () => {
-  const response = await server.executeOperation<ResponseAssociateManagerFromService>({
-    query: ASSOCIATE_MANAGER_AT_SERVICE,
-    variables: {
-      managerId: "1",
-      serviceId: "10",
-    },
-  });
-  assert(response.body.kind === "single");
-  expect(response.body.singleResult.data).toEqual({
-  associateManagerAtService: {
-    message: "Manager associé au service avec succès",
-    success: true,
-  },
-});
-});
-
-  it("Dissocie un manager d un service", async () => {
-    const response = await server.executeOperation<ResponseDissociateManagerFromService>(
-      {
-        query: DISSOCIATE_MANAGER_FROM_SERVICE,
-        variables: {
-          managerId: "1",
-          serviceId: "101",
-        },
-      },
-    );
-    assert(response.body.kind === "single");
-    expect(response.body.singleResult.data).toEqual({
-      dissociateManagerFromService: {
-        message: "Manager dissocié du service spécifié",
-        success: true,
-      },
     });
   });
 

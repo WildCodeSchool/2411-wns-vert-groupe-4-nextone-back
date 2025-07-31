@@ -9,8 +9,8 @@ import { makeExecutableSchema } from "@graphql-tools/schema";
 import { NewAuthInput, UpdateAuthInput } from "../../src/generated/graphql";
 import { loadFilesSync } from "@graphql-tools/load-files";
 import path from "path";
-import { LIST_BY_SERVICE, 
-  LIST_BY_MANAGER,
+import { GET_SERVICE_AUTHORIZATIONS, 
+  GET_EMPLOYEE_AUTHORIZATIONS,
   ADD_AUTHORIZATION,
   UPDATE_AUTHORIZATION,
   DELETE_AUTHORIZATION
@@ -101,7 +101,7 @@ beforeAll(async () => {
 describe("Tests sur les autorisations (depuis le store)", () => {
   it("Récupère les autorisations par serviceId", async () => {
     const response = await server.executeOperation<ResponseList>({
-      query: LIST_BY_SERVICE,
+      query: GET_SERVICE_AUTHORIZATIONS,
     });
 
     assert(response.body.kind === "single");
@@ -118,7 +118,7 @@ describe("Tests sur les autorisations (depuis le store)", () => {
 
   it("Récupère les autorisations par managerId", async () => {
     const response = await server.executeOperation<ResponseList>({
-      query: LIST_BY_MANAGER,
+      query: GET_EMPLOYEE_AUTHORIZATIONS,
     });
 
     assert(response.body.kind === "single");
