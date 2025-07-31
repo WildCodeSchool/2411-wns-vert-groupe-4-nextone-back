@@ -21,20 +21,19 @@ import {
   QueryCompanyArgs,
 } from "../../src/generated/graphql";
 import { validate } from "uuid";
-import CompanyEntity from "../../src/entities/Company.entity";
-import ManagerEntity from "../../src/entities/Manager.entity";
+
 
 let server: ApolloServer;
 const schema = makeExecutableSchema({ typeDefs, resolvers });
 
 const fakeCompanyData: CreateCompanyInput = {
-  address: "Rue du chateau",
-  email: "google@gmail.com",
-  name: "Google",
-  phone: "0404040404",
-  siret: "362 521 879 00034",
-  city: "TOULOUSE",
-  postalCode: "31000",
+ address: "Rue du jambon",
+  email: "jambonneau@gmail.com",
+  name: "JambonCorp",
+  phone: "0123456789",
+  siret: "362 521 879 00089",
+  city: "PARIS",
+  postalCode: "75000",
 };
 
 const fakeCompanyDataUpdate: CreateCompanyInput = {
@@ -64,9 +63,7 @@ beforeAll(async () => {
     if (!testDataSource.isInitialized) {
       await testDataSource.initialize();
     }
-    //  await testDataSource.query("TRUNCATE TABLE company CASCADE");
-    //  await testDataSource.getRepository(CompanyEntity).delete({})
-    //  await testDataSource.getRepository(ManagerEntity).delete({})
+
     await testDataSource.synchronize(true);
 
   } catch (error) {
@@ -77,9 +74,9 @@ beforeAll(async () => {
 
 afterAll(async () => {
   //ON VIDE LA DB DE TEST
-  if (testDataSource.isInitialized) {
-    // await testDataSource.dropDatabase();
-  }
+  // if (testDataSource.isInitialized) {
+  //   // await testDataSource.dropDatabase();
+  // }
   // await testDataSource.synchronize(true)
 
   await testDataSource.destroy();
@@ -114,6 +111,7 @@ describe("TEST COMPANY AVEC DB", () => {
     });
 
     assert(response.body.kind === "single");
+
     expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data).not.toBeNull();
     const { id, ...rest } = response.body.singleResult.data?.company!;

@@ -21,7 +21,7 @@ mutation UpdateCounter($data: UpdateCounterInput!) {
 export const DELETE_COUNTER = `#graphql
 mutation DeleteCounter($id: UUID!) {
   message: deleteCounter(id: $id) {
-    content
+    message
     success
   }
 }

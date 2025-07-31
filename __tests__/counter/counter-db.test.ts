@@ -58,10 +58,10 @@ type PartialCounterService = {
   name: string;
   isAvailable?: boolean;
   services: Partial<Service>[];
-}
+};
 type TResponseServices = {
-  counter: PartialCounterService
-}
+  counter: PartialCounterService;
+};
 
 type TResponseDelete = {
   message: DeleteResponse;
@@ -84,8 +84,8 @@ const fakeManager: InputRegister = {
   password: "test",
   email: "jeanmichel@gmail.com",
   role: ManagerRole.Admin,
-  first_name: "jean",
-  last_name: "MICHEL",
+  firstName: "jean",
+  lastName: "MICHEL",
   companyId: "",
 };
 const fakeCounter: CreateCounterInput = {
@@ -132,14 +132,14 @@ describe("TEST COUTER DANS LA DB", () => {
   let baseManagerId: string;
   let baseCompanyId: string;
   let baseServiceId: string;
-  let BaseCompany: CompanyEntity
+  let BaseCompany: CompanyEntity;
 
   it("CREATION D'UN COUNTER", async () => {
     //CREATION D'UNE COMPANY
     const newCompany: CompanyEntity =
       await CompanyService.getService().createOne(fakeCompany);
     baseCompanyId = newCompany.id;
-    BaseCompany = newCompany
+    BaseCompany = newCompany;
 
     //CREATION D'UN MANAGER
     fakeManager.companyId = baseCompanyId;
@@ -160,7 +160,6 @@ describe("TEST COUTER DANS LA DB", () => {
 
     fakeCounter.serviceIdS.push(baseServiceId);
 
-    console.log("FAKE COUNTER : ", fakeCounter)
     //CREATION DU COUNTER
     const response = await server.executeOperation<
       TResponse,
@@ -236,14 +235,16 @@ describe("TEST COUTER DANS LA DB", () => {
     });
   });
 
-
   it("SUPPRESSION DU MANAGER AJOUTE", async () => {
-    const response = await server.executeOperation<TResponseAdd, MutationRemoveManagerOnCounterArgs>({
+    const response = await server.executeOperation<
+      TResponseAdd,
+      MutationRemoveManagerOnCounterArgs
+    >({
       query: REMOVE_MANAGER_ON_COUNTER,
       variables: {
-        id: baseId
-      }
-    })
+        id: baseId,
+      },
+    });
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.errors).toBeUndefined();
@@ -255,8 +256,7 @@ describe("TEST COUTER DANS LA DB", () => {
         manager: null,
       },
     });
-
-  })
+  });
 
   // it("UPDATE DES SERVICES", async () => {
 
@@ -279,7 +279,7 @@ describe("TEST COUTER DANS LA DB", () => {
   //       }
   //     }
   //   })
-    
+
   //   assert(response.body.kind === "single");
   //   expect(response.body.singleResult.errors).toBeUndefined();
   //   expect(response.body.singleResult.data).toEqual<TResponseServices>({
@@ -287,7 +287,7 @@ describe("TEST COUTER DANS LA DB", () => {
   //       id: baseId,
   //       name: fakeCounter.name,
   //       isAvailable: false,
-  //       services: [ 
+  //       services: [
   //         {
   //           id:newService.id
   //         }
@@ -312,7 +312,7 @@ describe("TEST COUTER DANS LA DB", () => {
     expect(response.body.singleResult.data).toEqual<TResponseDelete>({
       message: {
         success: true,
-        content: `Counter ${baseId} deleted.`,
+        message: `Counter ${baseId} deleted.`,
       },
     });
   });

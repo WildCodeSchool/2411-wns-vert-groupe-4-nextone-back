@@ -52,17 +52,21 @@ const fakeService: Service = {
   id: "8d106e86-5ffb-4e97-bb3a-cba9a329bbef",
   createdAt: "2025-07-04T10:46:24.023Z",
   updatedAt: "2025-07-04T10:46:24.023Z",
-  company: fakeCompany
+  company: fakeCompany,
+  isGloballyActive: true
 };
 
 const fakeManager: ManagerWithoutPassword = {
   id: "1f50e0ca-ad6d-461d-b888-9d08c2ad6ff0",
   email: "michelito@gmail.com",
-  first_name: "michel",
-  last_name: "dedroite",
+  firstName: "michel",
+  lastName: "dedroite",
   role: ManagerRole.Operator,
-  is_globally_active: false,
+  isGloballyActive: false,
   company: fakeCompany,
+  authorizations: [],
+  createdAt: new Date(),
+  updatedAt: new Date()
 };
 
 const ticketsData: Ticket[] = [

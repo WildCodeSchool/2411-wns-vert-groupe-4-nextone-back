@@ -34,12 +34,12 @@ export default {
       if (deleted) {
         return {
           success: true,
-          content: `Counter ${id} deleted.`,
+          message: `Counter ${id} deleted.`,
         };
       }
       return {
         success: false,
-        content: `failed to delete Counter ${id}`,
+        message: `failed to delete Counter ${id}`,
       };
     },
     async addManagerOnCounter(

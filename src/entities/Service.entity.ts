@@ -21,10 +21,17 @@ export class ServiceEntity {
   @Column()
   name: string;
 
-  @CreateDateColumn({ name: "created_at"})
+  @Column({
+    type: "boolean",
+    nullable: true,
+    default: true,
+  })
+  isGloballyActive: boolean;
+
+  @CreateDateColumn({ name: "created_at" })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: "updated_at"})
+  @UpdateDateColumn({ name: "updated_at" })
   updatedAt: Date;
 
   // Relations
@@ -33,16 +40,12 @@ export class ServiceEntity {
   @OneToMany(() => AuthorizationEntity, (auth) => auth.service)
   authorizations: AuthorizationEntity[];
 
-  //MANAGERS
-  @ManyToMany(() => ManagerEntity, (manager) => manager.id)
-  managers: ManagerEntity[];
-
   //TICKETS
   @OneToMany(() => TicketEntity, (ticket) => ticket.id)
   tickets: TicketEntity[];
 
   //COMPANY
-  @Column({ type: "uuid", name: "company_id"})
+  @Column({ type: "uuid", name: "company_id" })
   companyId: string;
 
   @ManyToOne(() => CompanyEntity, (company) => company.id)

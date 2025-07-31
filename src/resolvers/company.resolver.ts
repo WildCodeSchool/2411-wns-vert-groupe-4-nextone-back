@@ -37,12 +37,24 @@ export default {
       const newCompany = await companyService.createOne(test);
       return newCompany;
     },
-    deleteCompany: async (_: any, args: MutationDeleteCompanyArgs, ctx: MyContext): Promise<DeleteResponseCompany> => {
+    deleteCompany: async (
+      _: any,
+      args: MutationDeleteCompanyArgs,
+      ctx: MyContext
+    ): Promise<DeleteResponseCompany> => {
       const isDeleted = await companyService.deleteOne(args.id);
-      return buildResponse(isDeleted, "Company deleted", "Company no deleted 😢")
+      return buildResponse(
+        isDeleted,
+        "Company deleted",
+        "Company no deleted 😢"
+      );
     },
-    updateCompany: async (_: any, args: MutationUpdateCompanyArgs, {manager}: MyContext): Promise<CompanyEntity | null> => {
-      checkStrictRole(manager?.role, "SUPER_ADMIN")
+    updateCompany: async (
+      _: any,
+      args: MutationUpdateCompanyArgs,
+      { manager }: MyContext
+    ): Promise<CompanyEntity | null> => {
+      checkStrictRole(manager?.role, "SUPER_ADMIN");
       const partialCompany: Partial<CompanyEntity> = { ...args.data };
       const updatedCompany = await companyService.updateOne(
         args.data.id,

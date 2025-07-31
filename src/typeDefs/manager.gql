@@ -1,40 +1,39 @@
+scalar DateTime
+
+
 enum ManagerRole {
   OPERATOR
   ADMIN
   SUPER_ADMIN
 }
 
-# type Service {
-#   id: UUID!
-#   name: String!
-#   createdAt: DateTime!
-#   updatedAt: String!
-# }
+
 
 type Manager {
   id: ID!
-  first_name: String!
-  last_name: String!
+  firstName: String!
+  lastName: String!
   email: String!
   password: String!
   role: ManagerRole!
-  is_globally_active: Boolean
-  services: [Service!]!
+  isGloballyActive: Boolean!
+  authorizations: [Authorization!]!
   company: Company!
-  created_at: String
-  updated_at: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type ManagerWithoutPassword {
   id: ID!
-  first_name: String!
-  last_name: String!
-  email: String!  
+  firstName: String!
+  lastName: String!
+  email: String!
   role: ManagerRole!
+  isGloballyActive: Boolean!
+  authorizations: [Authorization!]!
   company: Company!
-  is_globally_active: Boolean
-  created_at: String
-  updated_at: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type Auth {
@@ -55,21 +54,21 @@ type Query {
 }
 
 type Mutation {
-  createManager(infos: InputRegister!): Manager
+  createManager(infos: InputRegister!): Manager!
   deleteManager(id: ID!): Message!
   updateManager(id: ID!, data: UpdateManagerInput!): ManagerWithoutPassword!
-  associateManagerAtService(managerId: ID!, serviceId: ID!): Message!
-  dissociateManagerFromService(managerId: ID!, serviceId: ID!): Message!
+  # associateManagerAtService(managerId: ID!, serviceId: ID!): Message!
+  # dissociateManagerFromService(managerId: ID!, serviceId: ID!): Message!
   toggleGlobalAccessManager(id: UUID!): Message!
 }
 
 input InputRegister {
-  first_name: String!
-  last_name: String!
+  firstName: String!
+  lastName: String!
   email: String!
   password: String!
   role: ManagerRole = OPERATOR
-  is_globally_active: Boolean = FALSE
+  isGloballyActive: Boolean = FALSE
   companyId: UUID!
 }
 
@@ -79,7 +78,7 @@ input InputLogin {
 }
 
 input UpdateManagerInput {
-  first_name: String
-  last_name: String
+  firstName: String
+  lastName: String
   role: ManagerRole
 }

@@ -66,8 +66,8 @@ const fakeManager: InputRegister = {
   password: "test",
   email: "jeanmichel@gmail.com",
   role: ManagerRole.Admin,
-  first_name: "jean",
-  last_name: "MICHEL",
+  firstName: "jean",
+  lastName: "MICHEL",
   companyId: "",
 };
 

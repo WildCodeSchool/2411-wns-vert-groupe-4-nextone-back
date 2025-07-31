@@ -22,10 +22,10 @@ query TicketLog($id: UUID!) {
     manager {
       id
       email
-      first_name
-      last_name
+      firstName
+      lastName
       role
-      is_globally_active
+      isGloballyActive
     }
     status
   }

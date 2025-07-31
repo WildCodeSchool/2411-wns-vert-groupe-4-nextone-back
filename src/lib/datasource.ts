@@ -20,7 +20,7 @@ export default new DataSource({
   username: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
   database: process.env.POSTGRES_DB,
-  logging: ["error", "query"],
+  logging: ["error"],
 
   entities: [
     TicketEntity,
@@ -30,11 +30,10 @@ export default new DataSource({
     SettingEntity,
     TicketLogEntity,
     ManagerEntity,
-    ConnectionLogEntity
+    ConnectionLogEntity,
     CounterEntity
   ],
   subscribers:[TicketSubscriber, CompanySubscriber],
-  logging: ["error"],
   synchronize: true,
 });
 

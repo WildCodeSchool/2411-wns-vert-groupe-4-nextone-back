@@ -29,12 +29,12 @@ export default class ManagerEntity {
   @Column()
   @IsString()
   @Length(2, 50, { message: "Le prénom est requis." })
-  first_name: string;
+  firstName: string;
 
   @Column()
   @IsString()
   @Length(2, 50, { message: "Le nom est requis." })
-  last_name: string;
+  lastName: string;
 
   @Column({ unique: true })
   @IsEmail({}, { message: "L'adresse email n'est pas valide." })
@@ -59,29 +59,30 @@ export default class ManagerEntity {
     nullable: true,
     default: false,
   })
-  is_globally_active: boolean;
+  isGloballyActive: boolean;
 
-  @ManyToMany(() => ServiceEntity, (service) => service.managers, {
-    cascade: true,
-  })
-  @JoinTable()
-  services: ServiceEntity[];
+  // @ManyToMany(() => ServiceEntity, (service) => service.managers, {
+  //   cascade: true,
+  // })
+  // @JoinTable()
+  // services: ServiceEntity[];
 
   @OneToMany(() => AuthorizationEntity, (auth) => auth.manager)
   authorizations: AuthorizationEntity[];
 
+  @Column({ type: "uuid" })
+  companyId: string;
 
-  @Column({ type: "uuid"})
-  companyId: string
-
-  @ManyToOne(() => CompanyEntity, (company: CompanyEntity) => company.id,{ onDelete: "CASCADE"})
-  company: CompanyEntity
+  @ManyToOne(() => CompanyEntity, (company: CompanyEntity) => company.id, {
+    onDelete: "CASCADE",
+  })
+  company: CompanyEntity;
 
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  updated_at: Date;
+  updatedAt: Date;
 }
 
 export class LoginInput {

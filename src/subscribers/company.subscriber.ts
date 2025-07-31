@@ -23,10 +23,10 @@ export default class CompanySubscriber
     admin.email = email;
     admin.role = ManagerRole.SuperAdmin;
     admin.password = "saucisson";
-    admin.first_name = name;
-    admin.last_name = name;
+    admin.firstName = name;
+    admin.lastName = name;
     admin.company = event.entity
-    admin.is_globally_active = true;
+    admin.isGloballyActive = true;
 
     await event.manager.save(admin);
   }

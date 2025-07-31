@@ -9,13 +9,11 @@ import {
 } from "@graphql-tools/mock";
 import {
   CREATE_TICKETLOG,
-  TICKETLOG,
   TICKETLOG_ID,
   TICKETLOGS,
 } from "../../src/queries/ticketlog.query";
 import {
   Company,
-  Manager,
   ManagerRole,
   ManagerWithoutPassword,
   MutationCreateTicketLogArgs,
@@ -48,17 +46,21 @@ const fakeService: Service = {
   id: "aa953a24-7b28-4104-924a-d0dcda78131f",
   createdAt: "2025-07-04T10:46:24.023Z",
   updatedAt: "2025-07-04T10:46:24.023Z",
-  company: fakeCompany
+  company: fakeCompany,
+  isGloballyActive: true
 };
 
 const fakeManager: ManagerWithoutPassword = {
   id: "1f50e0ca-ad6d-461d-b888-9d08c2ad6ff0",
   email: "michelito@gmail.com",
-  first_name: "michel",
-  last_name: "dedroite",
+  firstName: "michel",
+  lastName: "dedroite",
   role: ManagerRole.Operator,
-  is_globally_active: false,
+  isGloballyActive: false,
   company: fakeCompany,
+  authorizations: [],
+  createdAt: new Date(),
+  updatedAt: new Date()
 };
 
 const fakeTickets: Ticket[] = [

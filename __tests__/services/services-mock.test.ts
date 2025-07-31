@@ -1,8 +1,6 @@
 import assert from 'assert';
 import { ApolloServer } from '@apollo/server';
 import { makeExecutableSchema } from '@graphql-tools/schema';
-import fs from 'fs';
-import path from 'path';
 import { LIST_SERVICES, FIND_SERVICE_BY_ID,
   CREATE_SERVICE, UPDATE_SERVICE,
   DELETE_SERVICE,
@@ -46,18 +44,12 @@ type ResponseToggleGlobalAccess = {
   toggleGlobalAccessService: ServiceResponse;
 };
 
-let servicesData: Service[];
-let servicesDataWithGloballyActive: Service[];
-let server: ApolloServer;
-
-beforeAll(async () => {
-    servicesData = [
+let servicesData: Service[] = [
     { id: 'uuid-1', name: 'Radiologie' },
     { id: 'uuid-2', name: 'Cardiologie' },
     { id: 'uuid-3', name: 'Pneumologie' },
   ];
-
-  servicesDataWithGloballyActive = [
+let servicesDataWithGloballyActive: Service[] = [
     { id: 'uuid-1', name: 'Radiologie',
       isGloballyActive: false,
     },
@@ -67,11 +59,16 @@ beforeAll(async () => {
     { id: 'uuid-3', name: 'Pneumologie',
       isGloballyActive: false,
     },
-  ]
+  ];
+let server: ApolloServer;
+
+beforeAll(async () => {
 
   const serviceResolvers = {
     Query: {
-      services: () => servicesDataWithGloballyActive,
+      services: () => {
+        return servicesDataWithGloballyActive
+      },
       service: (_: any, args: { id: string }) => {
         const service = servicesDataWithGloballyActive.find((s) => s.id === args.id);
         if (!service) throw new Error('Service not found');
@@ -111,7 +108,7 @@ beforeAll(async () => {
   };
 
   const schema = makeExecutableSchema({
-    typeDefs: typeDefs,
+    typeDefs,
     resolvers: serviceResolvers,
   });
 
@@ -125,7 +122,7 @@ describe('ServicesResolver (mocked)', () => {
     const response = await server.executeOperation<ResponseListService>({
       query: LIST_SERVICES,
     });
-    assert(response.body.kind === 'single');
+     assert(response.body.kind === 'single');
     expect(response.body.singleResult.data).toEqual({
       services: servicesDataWithGloballyActive,
     });

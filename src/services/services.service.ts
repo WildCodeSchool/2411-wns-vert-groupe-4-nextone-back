@@ -1,6 +1,9 @@
-import { MutationCreateServiceArgs, MutationUpdateServiceArgs } from '@/generated/graphql';
-import ServiceRepository from '@/repositories/Service.repository';
-import { ServiceEntity } from '@/entities/Service.entity';
+import {
+  CreateServiceInput,
+  UpdateServiceInput,
+} from "@/generated/graphql";
+import ServiceRepository from "@/repositories/Service.repository";
+import { ServiceEntity } from "@/entities/Service.entity";
 
 export default class ServicesService {
   db: ServiceRepository;
@@ -11,7 +14,7 @@ export default class ServicesService {
 
   async getAllServices(): Promise<ServiceEntity[]> {
     const services = await this.db.find();
-    return services
+    return services;
   }
 
   async getServiceById(id: string): Promise<ServiceEntity | null> {
@@ -20,12 +23,12 @@ export default class ServicesService {
     });
   }
 
-  async createService(data: MutationCreateServiceArgs["data"]): Promise<ServiceEntity> {
+  async createService(data: CreateServiceInput): Promise<ServiceEntity> {
     const service = this.db.create(data);
     return this.db.save(service);
   }
 
-  async updateService(id: string, data: MutationUpdateServiceArgs["data"]): Promise<boolean> {
+  async updateService(id: string, data: UpdateServiceInput): Promise<boolean> {
     const existing = await this.getServiceById(id);
     if (!existing) return false;
     const updated = this.db.merge(existing, data);
@@ -37,7 +40,7 @@ export default class ServicesService {
     const result = await this.db.delete(id);
     return result.affected === 1;
   }
-  
+
   async findOne(options: any) {
     return this.db.findOne(options);
   }

@@ -27,7 +27,7 @@ export default new DataSource({
     SettingEntity,
     ManagerEntity,
     TicketLogEntity,
-    ConnectionLogEntity
+    ConnectionLogEntity,
     CounterEntity
   ],
   subscribers: [TicketSubscriber, CompanySubscriber],
