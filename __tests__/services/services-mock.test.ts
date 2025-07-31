@@ -1,5 +1,3 @@
-// services-mock.test.ts
-
 import assert from 'assert';
 import { ApolloServer } from '@apollo/server';
 import { makeExecutableSchema } from '@graphql-tools/schema';
@@ -16,19 +14,9 @@ const serviceTypeDefs = fs.readFileSync(
   { encoding: 'utf-8' }
 );
 
-// --- Types ---
-type BaseService = {
+type Service = {
   id: string;
   name: string;
-};
-
-type Manager = {
-  id: string;
-  email: string;
-};
-
-type Service = BaseService & {
-  managers: Manager[];
   isGloballyActive?: boolean;
 };
 
@@ -58,13 +46,11 @@ type ResponseDeleteServiceData = {
 };
 
 type ResponseToggleGlobalAccess = {
-  toggleGlobalAccessService: {
-    isGloballyActive: boolean;
-  };
+  toggleGlobalAccessService: ServiceResponse;
 };
 
-let servicesData: BaseService[];
-let servicesDataWithManagers: Service[];
+let servicesData: Service[];
+let servicesDataWithGloballyActive: Service[];
 let server: ApolloServer;
 
 beforeAll(async () => {
@@ -74,29 +60,23 @@ beforeAll(async () => {
     { id: 'uuid-3', name: 'Pneumologie' },
   ];
 
-  servicesDataWithManagers = [
+  servicesDataWithGloballyActive = [
     { id: 'uuid-1', name: 'Radiologie',
-      managers: [
-        { id: 'mgr-1', email: 'Alice@gmail.com' },
-        { id: 'mgr-2', email: 'Bob@gmail.com' },
-      ],
       isGloballyActive: false,
     },
     { id: 'uuid-2', name: 'Cardiologie',
-      managers: [{ id: 'mgr-3', email: 'Charlie@gmail.com' }],
       isGloballyActive: false,
     },
     { id: 'uuid-3', name: 'Pneumologie',
-      managers: [],
       isGloballyActive: false,
     },
   ]
 
   const serviceResolvers = {
     Query: {
-      services: () => servicesDataWithManagers,
+      services: () => servicesDataWithGloballyActive,
       service: (_: any, args: { id: string }) => {
-        const service = servicesDataWithManagers.find((s) => s.id === args.id);
+        const service = servicesDataWithGloballyActive.find((s) => s.id === args.id);
         if (!service) throw new Error('Service not found');
         return service;
       },
@@ -125,10 +105,10 @@ beforeAll(async () => {
       },
 
       toggleGlobalAccessService: (_: any, args: { id: string }) => {
-        const service = servicesDataWithManagers.find(s => s.id === args.id);
+        const service = servicesDataWithGloballyActive.find(s => s.id === args.id);
         if (!service) throw new Error("Service not found.");
         service.isGloballyActive = !service.isGloballyActive;
-        return { isGloballyActive: service.isGloballyActive };
+        return { success: true, message: "Service updated successfully." };
       }
     },
   };
@@ -150,7 +130,7 @@ describe('ServicesResolver (mocked)', () => {
     });
     assert(response.body.kind === 'single');
     expect(response.body.singleResult.data).toEqual({
-      services: servicesDataWithManagers,
+      services: servicesDataWithGloballyActive,
     });
   });
 
@@ -161,7 +141,7 @@ describe('ServicesResolver (mocked)', () => {
     });
     assert(response.body.kind === 'single');
     expect(response.body.singleResult.data).toEqual({
-      service: servicesDataWithManagers.find((s) => s.id === 'uuid-1'),
+      service: servicesDataWithGloballyActive.find((s) => s.id === 'uuid-1'),
     });
   });
 
@@ -209,10 +189,10 @@ describe('ServicesResolver (mocked)', () => {
     },
   });
   assert(response.body.kind === 'single');
-  expect(response.body.singleResult.data).toEqual({
-    toggleGlobalAccessService: {
-      isGloballyActive: true, 
-    },
+  const result = response.body.singleResult.data?.toggleGlobalAccessService;
+  expect(result).toEqual({
+    success: true,
+    message: "Service updated successfully.",
   });
 });
 });

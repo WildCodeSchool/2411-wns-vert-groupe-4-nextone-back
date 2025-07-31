@@ -3,10 +3,6 @@ export const LIST_MANAGERS = `#graphql
     managers {
       email
       id
-      services {
-        id
-        name
-      }
       is_globally_active
     }
   }
@@ -61,10 +57,6 @@ export const FIND_MANAGER_BY_ID = `#graphql
       email
       role
       is_globally_active
-      services {
-        id
-        name
-      }
       created_at
       updated_at
     }
@@ -115,7 +107,8 @@ export const DISSOCIATE_MANAGER_FROM_SERVICE = `#graphql
 export const TOGGLE_GLOBAL_ACCESS_MANAGER = `#graphql
   mutation Mutation($toggleGlobalAccessManagerId: UUID!) {
     toggleGlobalAccessManager(id: $toggleGlobalAccessManagerId) {
-      is_globally_active
+      success
+      message
     }
   }
 `

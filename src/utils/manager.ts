@@ -1,5 +1,7 @@
 import ManagerEntity from "@/entities/Manager.entity";
 import { validate } from "class-validator";
+import { MyContext } from "..";
+import AuthorizationService from "@/services/authorization.service";
 
 export async function validateOrThrow(entity: object) {
   const errors = await validate(entity);
@@ -24,6 +26,7 @@ export function checkStrictRole(currentRole: string | undefined, strictRole: str
   if (currentRole !== strictRole) {
     throw new Error(`Non autorisé : seul le rôle ${strictRole} est autorisé.`);
   }
+  return;
 }
 
 // Vérifie que le rôle actuel fait partie des rôles autorisés: "SUPER_ADMIN" et "ADMIN".
@@ -33,13 +36,6 @@ export function verifyCreatorPermission(currentRole: string) {
     throw new Error(
       "Non autorisé : seuls les superAdmin ou admin ont des droits sur les operators."
     );
-  }
-}
-
-// Vérifie que le rôle cible est bien fourni.
-function assertRoleExists(role?: string) {
-  if (!role) {
-    throw new Error("Le rôle est requis.");
   }
 }
 
@@ -57,27 +53,18 @@ export function checkRoleInHierarchy(currentRole: string, targetRole: string) {
   }
 }
 
-// Fonction principale de vérification des autorisations.
-// 1. Vérifie que le manager est connecté.
-// 2. Vérifie que son rôle est présent.
-// 3. Si un rôle strict est exigé, le compare strictement.
-// 4. Sinon, vérifie que le rôle est autorisé à créer des utilisateurs,
-//    que le rôle cible est défini et conforme à la hiérarchie.
-export function checkAuthorization(
-  currentRole: string | undefined,
-  manager: ManagerEntity | null,
-  targetRole?: string,
-  strictRole?: string
-) {
+//Check si le role est bien celui d'un super_admin ou d'un admin faisant parti du service en question
+export const canAccessAuthorization = async (manager: MyContext["manager"], targetServiceId: string, authorizationService: AuthorizationService) => {
   assertAuthenticated(manager);
-  if (!currentRole) {
-    throw new Error("Le rôle du manager est requis.");
+  const { role } = manager;
+  if (role === "SUPER_ADMIN") return;
+  const authorizations = await authorizationService.getByManager(manager.id);
+  const hasAccess = authorizations.some(
+    auth => auth.service.id === targetServiceId && auth.isActive
+  );
+  if (!hasAccess) {
+    throw new Error(
+      "Accès interdit : vous ne pouvez gérer que les autorisations de vos propres services."
+    );
   }
-  if (strictRole) {
-    checkStrictRole(currentRole, strictRole);
-    return;
-  }
-  verifyCreatorPermission(currentRole);
-  assertRoleExists(targetRole);
-  checkRoleInHierarchy(currentRole, targetRole!);
-}
+};

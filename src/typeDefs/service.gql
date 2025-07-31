@@ -1,5 +1,3 @@
-# service.gql
-
 scalar UUID
 scalar DateTime
 
@@ -8,26 +6,9 @@ scalar DateTime
 type Service {
   id: UUID!
   name: String!
-  managers: [Manager]
   isGloballyActive: Boolean
   createdAt: DateTime!
   updatedAt: String!
-}
-
-type ServiceWithoutManagers {
-  id: UUID!
-  name: String!
-  createdAt: DateTime!
-  updatedAt: String!
-}
-
-type Manager {
-  id: ID!
-  email: String!
-}
-
-type AccessServiceResponse {
-  isGloballyActive: Boolean!
 }
 
 type Query {
@@ -36,10 +17,10 @@ type Query {
 }
 
 type Mutation {
-  createService(data: CreateServiceInput!): ServiceWithoutManagers!
+  createService(data: CreateServiceInput!): Service!
   updateService(id: UUID!, data: UpdateServiceInput!): ServiceResponse!
   deleteService(id: UUID!): ServiceResponse!
-  toggleGlobalAccessService(id: UUID!): AccessServiceResponse!
+  toggleGlobalAccessService(id: UUID!): ServiceResponse!
 }
 
 type ServiceResponse {
