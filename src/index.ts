@@ -38,12 +38,17 @@ async function main() {
 
   app.use(
     "/graphql",
-    cors<cors.CorsRequest>({ credentials: true, origin: ["*"] }),
+    cors<cors.CorsRequest>({
+      credentials: true,
+      origin: ["http://localhost:4000"],
+    }),
     express.json(),
     expressMiddleware(server, { context: authContext })
   );
 
-  await new Promise<void>((resolve) => httpServer.listen({ port: 4005 }, resolve));
+  await new Promise<void>((resolve) =>
+    httpServer.listen({ port: 4005 }, resolve)
+  );
   console.log("✅ Serveur HTTP en écoute sur le port 4005");
 }
 
