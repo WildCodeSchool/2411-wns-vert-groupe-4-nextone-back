@@ -22,6 +22,11 @@ export interface MyContext {
 const app = express();
 const httpServer = http.createServer(app);
 
+const authorizedCorsUrls = [
+  "http://localhost:4000",
+  "https://david4.wns.wilders.dev",
+];
+
 const server = new ApolloServer<MyContext>({
   typeDefs,
   resolvers,
@@ -40,7 +45,7 @@ async function main() {
     "/graphql",
     cors<cors.CorsRequest>({
       credentials: true,
-      origin: ["http://localhost:4000"],
+      origin: authorizedCorsUrls,
     }),
     express.json(),
     expressMiddleware(server, { context: authContext })
