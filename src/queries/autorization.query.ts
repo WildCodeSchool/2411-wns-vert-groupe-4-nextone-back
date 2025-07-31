@@ -1,4 +1,4 @@
-export const LIST_BY_SERVICE = `#graphql
+export const GET_SERVICE_AUTHORIZATIONS = `#graphql
   query {
     getServiceAuthorizations(serviceId: "service-1") {
       serviceId
@@ -8,7 +8,7 @@ export const LIST_BY_SERVICE = `#graphql
   }
 `;
 
-export const LIST_BY_MANAGER = `#graphql
+export const GET_EMPLOYEE_AUTHORIZATIONS = `#graphql
   query {
     getEmployeeAuthorizations(managerId: "manager-1") {
       serviceId

@@ -86,23 +86,6 @@ export const UPDATE_MANAGER = `#graphql
     }
   }
 `
-export const ASSOCIATE_MANAGER_AT_SERVICE = `#graphql
-  mutation associateManagerAtService($managerId: ID!, $serviceId: ID!) {
-    associateManagerAtService(managerId: $managerId, serviceId: $serviceId) {
-      message
-      success
-    }
-  }
-`;
-
-export const DISSOCIATE_MANAGER_FROM_SERVICE = `#graphql
-  mutation dissociateManagerFromService($managerId: ID!, $serviceId: ID!) {
-    dissociateManagerFromService(managerId: $managerId, serviceId: $serviceId) {
-      message
-      success
-    }
-  }
-`;
 
 export const TOGGLE_GLOBAL_ACCESS_MANAGER = `#graphql
   mutation Mutation($toggleGlobalAccessManagerId: UUID!) {

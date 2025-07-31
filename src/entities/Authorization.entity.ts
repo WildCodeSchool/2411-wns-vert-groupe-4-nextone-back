@@ -23,6 +23,7 @@ export default class AuthorizationEntity {
   @CreateDateColumn()
   createdAt: Date;
 
+  // On a plusieurs autorisations pour un manager
   @ManyToOne(() => ManagerEntity, (manager) => manager.authorizations, {
     onDelete: 'CASCADE',
   })
