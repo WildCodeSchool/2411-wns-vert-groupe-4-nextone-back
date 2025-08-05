@@ -75,7 +75,7 @@ mutation RemoveManagerOnCounter($id: UUID!) {
 
 export const UPDATE_SERVICES_ON_COUNTER = `#graphql
 mutation UpdateServiceOnCounter($data: UpdateCounterServiceInput!) {
-  updateServiceOnCounter(data: $data) {
+  counter: updateServiceOnCounter(data: $data) {
     id
     name
     isAvailable

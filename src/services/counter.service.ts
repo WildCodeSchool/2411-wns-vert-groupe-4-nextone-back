@@ -53,7 +53,7 @@ export default class CounterService extends BaseService<CounterEntity> {
     if (!counter) {
       throw new Error("No counter with this id.");
     }
-    console.log('COUNTER DANS UPDATE : ', counter)
+    
     //ON SUPPRIME D'ABORD LES SERVICES DE REMOVING
     const newServs = counter.services.filter((service) => {
       return !removingIds.includes(service.id);

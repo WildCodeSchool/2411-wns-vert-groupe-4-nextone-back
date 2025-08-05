@@ -8,7 +8,7 @@
     "codegen": "graphql-codegen --config codegen.ts --watch",
     "ci-codegen": "graphql-codegen --config codegen.ts",
     "test": "jest --watchAll --runInBand",
-    "ci-test": "jest --ci",
+    "ci-test": "jest --ci --runInBand",
     "start:docker": "docker-compose pull && docker-compose up"
   },
   "dependencies": {

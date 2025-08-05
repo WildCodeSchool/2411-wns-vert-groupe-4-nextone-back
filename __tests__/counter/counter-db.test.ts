@@ -258,43 +258,43 @@ describe("TEST COUTER DANS LA DB", () => {
     });
   });
 
-  // it("UPDATE DES SERVICES", async () => {
+  it("UPDATE DES SERVICES", async () => {
 
-  //   //CREATION DUN SECOND SERVICE
-  //   const serv = new ServiceEntity()
-  //   serv.companyId = baseCompanyId
-  //   serv.company = BaseCompany
-  //   serv.name = "second service"
-  //   const newService: ServiceEntity = await new ServiceService().createService(
-  //     serv
-  //   );
+    //CREATION DUN SECOND SERVICE
+    const serv = new ServiceEntity()
+    serv.companyId = baseCompanyId
+    serv.company = BaseCompany
+    serv.name = "second service"
+    const newService: ServiceEntity = await new ServiceService().createService(
+      serv
+    );
 
-  //   const response = await server.executeOperation<TResponseServices, MutationUpdateServiceOnCounterArgs>({
-  //     query: UPDATE_SERVICES_ON_COUNTER,
-  //     variables: {
-  //       data: {
-  //         id: baseId,
-  //         serviceIdsToAdd: [newService.id],
-  //         serviceIdsToRemove:[baseServiceId]
-  //       }
-  //     }
-  //   })
+    const response = await server.executeOperation<TResponseServices, MutationUpdateServiceOnCounterArgs>({
+      query: UPDATE_SERVICES_ON_COUNTER,
+      variables: {
+        data: {
+          id: baseId,
+          serviceIdsToAdd: [newService.id],
+          serviceIdsToRemove:[baseServiceId]
+        }
+      }
+    })
 
-  //   assert(response.body.kind === "single");
-  //   expect(response.body.singleResult.errors).toBeUndefined();
-  //   expect(response.body.singleResult.data).toEqual<TResponseServices>({
-  //     counter: {
-  //       id: baseId,
-  //       name: fakeCounter.name,
-  //       isAvailable: false,
-  //       services: [
-  //         {
-  //           id:newService.id
-  //         }
-  //       ]
-  //     },
-  //   });
-  // })
+    assert(response.body.kind === "single");
+    expect(response.body.singleResult.errors).toBeUndefined();
+    expect(response.body.singleResult.data).toEqual<TResponseServices>({
+      counter: {
+        id: baseId,
+        name: fakeCounter.name,
+        isAvailable: false,
+        services: [
+          {
+            id:newService.id
+          }
+        ]
+      },
+    });
+  })
 
   it("DELETE DU COUNTER CREE", async () => {
     const response = await server.executeOperation<
