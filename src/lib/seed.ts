@@ -57,8 +57,8 @@ const createManagers = async (company: CompanyEntity): Promise<ManagerEntity[]> 
   const createRandomUser = (): InputRegister => {
     return {
       email: faker.internet.email(),
-      first_name: faker.person.firstName(),
-      last_name: faker.person.lastName(),
+      firstName: faker.person.firstName(),
+      lastName: faker.person.lastName(),
       password: "salami",
       role: ManagerRole.Admin,
       companyId: company.id

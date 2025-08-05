@@ -1,21 +1,35 @@
 export const GET_SERVICE_AUTHORIZATIONS = `#graphql
-  query {
-    getServiceAuthorizations(serviceId: "service-1") {
-      serviceId
-      managerId
-      isActive
+query GetServiceAuthorizations($serviceId: UUID!) {
+  authorizations: getServiceAuthorizations(serviceId: $serviceId) {
+    service {
+      id
+      name
     }
+    manager {
+      id
+      firstName
+      lastName
+    }
+    isActive
   }
+}
 `;
 
 export const GET_EMPLOYEE_AUTHORIZATIONS = `#graphql
-  query {
-    getEmployeeAuthorizations(managerId: "manager-1") {
-      serviceId
-      managerId
-      isActive
+query GetEmployeeAuthorizations($managerId: UUID!) {
+  authorizations : getEmployeeAuthorizations(managerId: $managerId) {
+    service {
+      id
+      name
     }
+    manager {
+      firstName
+      lastName
+      id
+    }
+    isActive
   }
+}
 `;
 
 export const ADD_AUTHORIZATION = `#graphql

@@ -5,10 +5,11 @@ scalar  UUID
 
 ####### Types
 type Authorization {
-  serviceId: UUID!
-  managerId: UUID!
+  service: Service!
+  manager: Manager!
   isActive: Boolean!
-  createdAt: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type Query {

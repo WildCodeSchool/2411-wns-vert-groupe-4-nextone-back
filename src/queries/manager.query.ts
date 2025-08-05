@@ -7,8 +7,6 @@ export const LIST_MANAGERS = `#graphql
       authorizations {
         isActive
         createdAt
-        serviceId
-        managerId
       }
     }
   }

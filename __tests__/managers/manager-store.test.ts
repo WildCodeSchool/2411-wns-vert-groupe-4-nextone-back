@@ -145,14 +145,7 @@ const listManagers: Partial<Manager>[] = [
     id: "1",
     email: "jean@example.com",
     isGloballyActive: false,
-    authorizations: [
-      {
-        createdAt: new Date(),
-        isActive: true,
-        serviceId: "",
-        managerId: manager.id,
-      },
-    ],
+    authorizations: [],
   },
   {
     id: "2",
@@ -190,7 +183,7 @@ beforeAll(async () => {
         const message: Message = {
           message: "Vous êtes déconnecté",
           success: true,
-        }
+        };
         return message;
       },
     },
