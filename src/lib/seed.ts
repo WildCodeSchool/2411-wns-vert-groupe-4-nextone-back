@@ -10,6 +10,9 @@ import ServicesService from "@/services/services.service";
 import TicketService from "@/services/ticket.service";
 import { fakerFR as faker } from "@faker-js/faker";
 import datasource from "./datasource";
+import { DeepPartial } from "typeorm";
+import CounterEntity from "@/entities/Counter.entity";
+import CounterService from "@/services/counter.service";
 
 const createCompanyAndSuperAdmin = async (): Promise<CompanyEntity> => {
   console.log('🏚️ --> CREATION DE LA COMPANY...')
@@ -100,17 +103,24 @@ const assignManagersToService = async (
       }
     })
   })
+
+
 };
 
-const createTicket = async (): Promise<TicketEntity[]> => {
+const createTicket = async (services: ServiceEntity[]): Promise<TicketEntity[]> => {
   console.log("🎫 --> CREATION DES TICKETS...")
   const createRandomTicket = () => {
-    const randomTicket: GenerateTicketInput = {
+
+    const randomIndex = Math.floor(Math.random() * services.length)
+    const service = services[randomIndex]
+    // console.log('SERVICEID : ', serviceId)
+    const randomTicket: DeepPartial<TicketEntity> = {
       code: faker.number.int({ max: 999 }).toString().padStart(3, "0"),
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
       email: faker.internet.email(),
-      phone: faker.phone.number()
+      phone: faker.phone.number(),
+      service
     }
     return randomTicket
   }
@@ -126,6 +136,49 @@ const createTicket = async (): Promise<TicketEntity[]> => {
   return tickets
 }
 
+const createCounter = async (services: ServiceEntity[]): Promise<CounterEntity[]> => {
+
+  console.log("🙈 --> CREATION DES GUICHETS...")
+
+  const createRandomCounter = async () => {
+
+    const service = services[Math.floor(Math.random() * services.length)];
+    console.log("SERVICE : ", service, service.id)
+    const authservice = new AuthorizationService()
+    const managers = await authservice.getByService(service.id)
+    console.log("MANAGERS : ", managers)
+    const managerId = managers[Math.floor(Math.random() * managers.length)].managerId
+    console.log('MANAGERID : ', managerId)
+    const manager = await new ManagerService().getManagerById(managerId)
+    console.log("MANAGER : ", manager)
+
+    const randomCounter: DeepPartial<CounterEntity> = {
+      name: faker.commerce.isbn(),
+      services: [service],
+      manager,
+      isAvailable: Math.random() > 0.5,
+    }
+
+    return randomCounter
+  }
+
+  // const randomCounters =  faker.helpers.multiple(createRandomCounter, { count: 50 })
+  const randomCounters: DeepPartial<CounterEntity>[] = []
+
+  for (let i = 0; i < 50; i++){
+    const rc = await createRandomCounter()
+    randomCounters.push(rc)
+  }
+
+  const counters = await Promise.all(
+    randomCounters.map(async (counter) => {
+      return await CounterService.getService().createOne(counter)
+    })
+  )
+
+  return counters
+}
+
 const initializeDataSource = async () => {
   console.log("📅 --> INITIALISATION DE LA BASE DE DONNEE")
   if (!datasource.isInitialized) {
@@ -136,20 +189,28 @@ const initializeDataSource = async () => {
 
 export const seedDB = async(): Promise<boolean> => {
   try {
+
     console.log("-------------------")
     console.log("🚀 DEBUT DU SEEDING ...")
     console.log('-------------------')
+
     await initializeDataSource()
+
     const company = await createCompanyAndSuperAdmin()
     const services = await createServices(company);
     const managers = await createManagers(company)
     await assignManagersToService(managers, services)
-    const tickets = await createTicket()
+    // await createCounter(services)
+    await createTicket(services)
+
     console.log("🥳 --> SEEDING OK.")
     return true
+
   } catch (error: any) {
+    console.log("-------------------")
     console.log("😭 --> ERREUR DANS LE SEEDING...");
-    console.log(error?.message);
+    console.log('-------------------')
+    console.log("😡 L'ERREUR : ", error?.message);
     return false
   }
 

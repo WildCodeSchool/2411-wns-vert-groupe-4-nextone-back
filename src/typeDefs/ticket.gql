@@ -31,13 +31,13 @@ input UpdateStatusTicketInput {
 }
 
 input GenerateTicketInput {
-  code: String
+  code: String!
   firstName: String
   lastName: String
-  email: String
+  email: String!
   phone: String
-  #status: Status
-  #serviceId: ID!
+  status: Status
+  serviceId: ID!
 }
 
 input UpdateTicketInput {
@@ -48,7 +48,7 @@ input UpdateTicketInput {
   email: String
   phone: String
   status: Status
-  #serviceId: ID
+  serviceId: ID
 }
 
   type DeletedTicketResponse {

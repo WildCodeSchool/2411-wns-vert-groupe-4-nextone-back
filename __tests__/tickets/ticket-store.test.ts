@@ -92,12 +92,13 @@ const ticketsData: Ticket[] = [
   },
 ];
 
-const generateTicketExample: GenerateTicketInput= {
+const generateTicketExample: GenerateTicketInput = {
   code: "003",
   firstName: "Ticket",
   lastName: "Test",
   email: "ticket.test@gmail.com",
-  phone: "0606060607"
+  phone: "0606060607",
+  serviceId: "8d106e86-5ffb-4e97-bb3a-cba9a329bbef"
 };
 
 let server: ApolloServer;
@@ -120,8 +121,9 @@ beforeAll(async () => {
     },
     Mutation: {
       generateTicket: (_: null, { data }: { data: GenerateTicketInput }) => {
-        store.set("Ticket", "3", data);
-        return store.get("Ticket", "3");
+        const { serviceId, ...rest} = data
+        store.set("Ticket", "3", rest);
+        return store.get("Ticket", "3")
       },
       deleteTicket: (_: null, { id }: { id: string }) => {
         const ticketId = id;
@@ -183,10 +185,11 @@ beforeAll(async () => {
     });
 
     assert(response.body.kind === "single");
+    const { serviceId, ...rest} = generateTicketExample
     expect(response.body.singleResult.data).toEqual({
       generateTicket: {
         id: "3",
-        ...generateTicketExample,
+        ...rest,
       },
     });
   });

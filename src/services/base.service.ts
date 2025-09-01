@@ -29,7 +29,7 @@ export default abstract class BaseService<T extends ObjectLiteral> {
 
   //RECUPERER TOUTES LES INSTANCES
   public async findAll() {
-    const list = await this.repo.find();
+    const list = await this.repo.find({ relations: {}});
     return list;
   }
 

@@ -6,6 +6,7 @@ import {
   QueryServiceArgs,
   MutationToggleGlobalAccessServiceArgs,
   ServiceResponse,
+  Service,
 } from "@/generated/graphql";
 import { MyContext } from "..";
 import { canAccessAuthorization, checkStrictRole } from "@/utils/manager";
@@ -30,8 +31,17 @@ export default {
       _: any,
       { id }: QueryServiceArgs,
       ctx: MyContext
-    ): Promise<ServiceEntity | null> => {
-      return servicesService.getServiceById(id);
+    ): Promise<Service | null> => {
+      const service = await servicesService.getServiceById(id);
+      console.log("SERVICXE : ", service)
+      // if (service ) {
+      //   const tickets = await service.tickets
+      //   console.log('TICKET : ', tickets)
+      //   const res: Service | null = { ...service, tickets: tickets }
+      //   return res
+        
+      // }
+      return service
     },
   },
 

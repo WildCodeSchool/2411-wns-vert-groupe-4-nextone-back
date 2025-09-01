@@ -9,10 +9,13 @@ import {
   GenerateTicketInput,
   InputRegister,
   ManagerRole,
-  MutationCreateTicketLogArgs,
+
   MutationDeleteTicketLogArgs,
   MutationUpdateTicketLogArgs,
   QueryTicketLogArgs,
+
+  QueryTicketLogsByPropertyArgs,
+
   Status,
   Ticket,
   TicketLog,
@@ -22,20 +25,23 @@ import TicketEntity from "../../src/entities/Ticket.entity";
 import ManagerEntity from "../../src/entities/Manager.entity";
 import ManagerService from "../../src/services/manager.service";
 import {
-  CREATE_TICKETLOG,
   DELETE_TICKETLOG,
   TICKETLOG,
+  TICKETLOG_BY_PROPERTY,
   UPDATE_TICKETLOG,
 } from "../../src/queries/ticketlog.query";
 import assert from "assert";
 import { validate } from "uuid";
 import CompanyEntity from "../../src/entities/Company.entity";
-import TicketLogEntity from "../../src/entities/TicketLog.entity";
 import CompanyService from "../../src/services/company.service";
 
+type PartialTicketLog = Partial<Omit<TicketLog, "ticket">> & {ticket: Pick<Ticket, "id" | "firstName" | "lastName">}
+
 type TResponse = {
-  ticketLog: Partial<TicketLog> | null;
+  ticketLog: PartialTicketLog[] | null;
 };
+
+
 
 type TResponseDelete = {
   message: DeleteResponse;
@@ -50,6 +56,7 @@ const fakeTicket: GenerateTicketInput = {
   lastName: "Tournier",
   email: "corentin.tournier@gmail.com",
   phone: "0606060606",
+  serviceId: ""
 };
 
 const fakeCompany: CreateCompanyInput = {
@@ -125,34 +132,43 @@ describe("TEST TICKETLOG DANS LA DB", () => {
       await TicketService.gettInstance().createOne(fakeTicket);
     baseTicketId = newTicket.id;
 
-    //CREATION D'UN MANAGER
-    fakeManager.companyId = baseCompanyId;
-    const newManager: ManagerEntity = await new ManagerService().create(
-      fakeManager
-    );
-    baseManagerId = newManager.id;
+    // //CREATION D'UN MANAGER
+    // fakeManager.companyId = baseCompanyId;
+    // const newManager: ManagerEntity = await new ManagerService().create(
+    //   fakeManager
+    // );
+    // baseManagerId = newManager.id;
 
-    //ET ENFIN, CREATION D'UN TICKETLOG 👍
-    const response = await server.executeOperation<
-      TResponse,
-      MutationCreateTicketLogArgs
-    >({
-      query: CREATE_TICKETLOG,
-      variables: {
-        data: {
-          managerId: baseManagerId,
-          ticketId: baseTicketId,
-        },
-      },
-    });
-
+    // //ET ENFIN, ON RECUPERE LE TICKETLOG QUI A ETE CREE VIA
+    // LE SUBSCRIBER SUR TICKETENTITY👍
+    const response = await server.executeOperation<TResponse, QueryTicketLogsByPropertyArgs>(
+      {
+        query: TICKETLOG_BY_PROPERTY,
+        variables: {
+          field: {
+            ticketId: baseTicketId
+          }
+        }
+      }
+    )
     assert(response.body.kind === "single");
-    expect(response.body.singleResult.errors).toBeUndefined();
-    expect(response.body.singleResult.data).not.toBeNull();
-    const { id } = response.body.singleResult.data?.ticketLog!;
-    baseId = id;
-    expect(validate(id)).toBeTruthy();
+
+    expect(response.body.singleResult.errors).toBeUndefined()
+    expect(response.body.singleResult.data).not.toBeNull()
+    expect(response.body.singleResult.data).not.toBeUndefined()
+    expect(response.body.singleResult.data?.ticketLog).toHaveLength(1)
+    const { id, ...rest } = response.body.singleResult.data?.ticketLog![0]!
+    expect(validate(id)).toBeTruthy
+    baseId = id!
+    expect(rest).toEqual<PartialTicketLog>({
+      ticket: {
+        id: baseTicketId,
+        firstName: fakeTicket.firstName,
+        lastName: fakeTicket.lastName
+      }
+    })
   });
+
 
   it("UPDATE DU TICKET CREE", async () => {
     const response = await server.executeOperation<
@@ -169,8 +185,10 @@ describe("TEST TICKETLOG DANS LA DB", () => {
     });
 
     assert(response.body.kind === "single");
+    // console.log("ERROR UPDATE : ", response.body.singleResult.errors)
+    // console.log("DATA UPDATE : ", response.body.singleResult.data)
     expect(response.body.singleResult.errors).toBeUndefined();
-    expect(response.body.singleResult.data).toEqual<TResponse>({
+    expect(response.body.singleResult.data).toEqual({
       ticketLog: {
         id: baseId,
         // manager: {
@@ -179,7 +197,7 @@ describe("TEST TICKETLOG DANS LA DB", () => {
         // },
         ticket: {
           id: baseTicketId,
-        } as Ticket,
+        },
         status: Status.Done,
       },
     });

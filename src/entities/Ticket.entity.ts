@@ -37,10 +37,10 @@ export default class TicketEntity {
   })
   status: Status;
 
-  @Column({ type: "uuid", name: "service_id", nullable: true})
-  ServiceId: string;
+  // @Column({ type: "uuid", nullable: true})
+  // ServiceId: string;
 
-  @ManyToOne(() => ServiceEntity, (service: ServiceEntity) => service.id)
+  @ManyToOne(() => ServiceEntity, (service: ServiceEntity) => service.id, { eager: true})
   service: ServiceEntity;
 
   @CreateDateColumn({ name: "created_at"})

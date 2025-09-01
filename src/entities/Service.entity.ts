@@ -7,6 +7,7 @@ import {
   ManyToMany,
   OneToMany,
   ManyToOne,
+  JoinColumn,
 } from "typeorm";
 import AuthorizationEntity from "./Authorization.entity";
 import ManagerEntity from "./Manager.entity";

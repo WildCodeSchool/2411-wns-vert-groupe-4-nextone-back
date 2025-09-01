@@ -9,17 +9,17 @@ import {
 } from "@/generated/graphql";
 import { MyContext } from "..";
 import { buildResponse } from "@/utils/authorization";
+import ServicesService from "@/services/services.service";
 
 type TicketDeleted = {
   message: string;
   success: boolean;
 };
 
-const ticketService = TicketService.gettInstance()
+const ticketService = TicketService.gettInstance();
 
 export default {
   Query: {
-
     tickets: async (_: any): Promise<TicketEntity[]> => {
       const ticketsList = await ticketService.findAll();
       return ticketsList;
@@ -32,7 +32,6 @@ export default {
       const ticket = await ticketService.findById(id);
       return ticket;
     },
-
   },
   Mutation: {
     generateTicket: async (
@@ -40,7 +39,16 @@ export default {
       { data }: MutationGenerateTicketArgs,
       ctx: MyContext
     ): Promise<TicketEntity> => {
-      const newTicket = await ticketService.createOne(data)
+      const service = await new ServicesService().findOne({
+        where: {
+          id: data.serviceId,
+        }
+      });
+      if (!service) {
+        throw new Error("No service with this id.");
+      }
+      const creationData = { ...data, service };
+      const newTicket = await ticketService.createOne(creationData);
       return newTicket;
     },
     deleteTicket: async (
@@ -61,8 +69,7 @@ export default {
       { data }: MutationUpdateTicketArgs,
       ctx: MyContext
     ): Promise<TicketEntity | null> => {
-
-      const updated = await ticketService.updateOne(data.id, data)
+      const updated = await ticketService.updateOne(data.id, data);
       return updated;
     },
     updateTicketStatus: async (
@@ -71,11 +78,16 @@ export default {
       ctx: MyContext
     ): Promise<TicketEntity> => {
       if (!ctx.manager) {
-        throw new Error('Vous devez etre connecté pour mettre à jour le status d\'un ticket.')
+        throw new Error(
+          "Vous devez etre connecté pour mettre à jour le status d'un ticket."
+        );
       }
-      const updated = await ticketService.updateTicketStatus(args.data, ctx.manager)
-      
-      return updated
+      const updated = await ticketService.updateTicketStatus(
+        args.data,
+        ctx.manager
+      );
+
+      return updated;
     },
   },
 };
