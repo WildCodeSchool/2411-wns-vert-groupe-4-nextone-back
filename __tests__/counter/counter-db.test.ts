@@ -125,7 +125,7 @@ describe("TEST COUTER DANS LA DB", () => {
     const service = new ServiceEntity();
     service.name = "service TEST";
     service.company = newCompany;
-    service.companyId = newCompany.id;
+    // service.companyId = newCompany.id;
     const newService: ServiceEntity = await new ServiceService().createService(
       service
     );
@@ -235,7 +235,7 @@ describe("TEST COUTER DANS LA DB", () => {
 
     //CREATION DUN SECOND SERVICE
     const serv = new ServiceEntity()
-    serv.companyId = baseCompanyId
+    // serv.companyId = baseCompanyId
     serv.company = BaseCompany
     serv.name = "second service"
     const newService: ServiceEntity = await new ServiceService().createService(

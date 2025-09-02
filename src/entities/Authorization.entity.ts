@@ -27,13 +27,14 @@ export default class AuthorizationEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  // On a plusieurs autorisations pour un manager
+  //MANAGER
   @ManyToOne(() => ManagerEntity, (manager) => manager.authorizations, {
     onDelete: "CASCADE",
   })
   @JoinColumn({ name: "managerId" })
   manager: ManagerEntity;
 
+  //SERVICE
   @ManyToOne(() => ServiceEntity, (service) => service.authorizations, {
     onDelete: "CASCADE",
   })

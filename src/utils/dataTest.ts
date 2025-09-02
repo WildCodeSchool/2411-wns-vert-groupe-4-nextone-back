@@ -76,6 +76,7 @@ export const fakeManager: Manager = {
   role: ManagerRole.Operator,
   isGloballyActive: false,
   company: fakeCompany,
+  connectionLogs:[],
   authorizations: [],
   createdAt: new Date(),
   updatedAt: new Date(),
@@ -97,6 +98,7 @@ export const fakeManagerWithoutPassword: ManagerWithoutPassword = {
   role: ManagerRole.Admin,
   isGloballyActive: true,
   authorizations: [],
+  connectionLogs:[],
   createdAt: new Date(),
   updatedAt: new Date(),
   company: fakeCompany,
@@ -112,6 +114,7 @@ export const  fakeTickets: Ticket[] = [
     phone: "0606060606",
     status: Status.Pending,
     service: fakeService,
+    ticketLogs:[]
   },
   {
     id: "00eec0d2-0082-4067-8e83-d13a47b55525",
@@ -122,6 +125,7 @@ export const  fakeTickets: Ticket[] = [
     phone: "0606060606",
     status: Status.Created,
     service: fakeService,
+    ticketLogs:[]
   },
   {
     id: "12a75dd6-c9af-403a-a537-b4634424c85d",
@@ -132,6 +136,7 @@ export const  fakeTickets: Ticket[] = [
     phone: "0606060606",
     status: Status.Done,
     service: fakeService,
+    ticketLogs:[]
   },
 ];
 

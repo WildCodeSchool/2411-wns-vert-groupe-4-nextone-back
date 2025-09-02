@@ -2,6 +2,7 @@ import TicketEntity from "@/entities/Ticket.entity";
 import TicketLogEntity from "@/entities/TicketLog.entity";
 import { EntitySubscriberInterface, EventSubscriber, InsertEvent, UpdateEvent } from "typeorm";
 import { MyContext } from "..";
+import { Status } from "@/generated/graphql";
 
 @EventSubscriber()
 export class TicketSubscriber implements EntitySubscriberInterface<TicketEntity> {
@@ -13,7 +14,7 @@ export class TicketSubscriber implements EntitySubscriberInterface<TicketEntity>
   async afterInsert({ entity, manager }: InsertEvent<TicketEntity>) {
     const ticketLog = new TicketLogEntity()
     ticketLog.ticket = entity
-    ticketLog.status = entity.status
+    ticketLog.status = Status.Created
     await manager.save(ticketLog)
   }
 

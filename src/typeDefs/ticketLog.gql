@@ -7,6 +7,7 @@ enum Status {
   DONE
   PENDING
   ARCHIVED
+  INPROGRESS
 }
 
 type TicketLog {

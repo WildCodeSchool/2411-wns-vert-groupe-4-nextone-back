@@ -26,7 +26,10 @@ import {
   TOGGLE_GLOBAL_ACCESS_MANAGER,
 } from "../../src/queries/manager.query";
 import typeDefs from "../../src/typeDefs";
-import {  fakeManagerInput, fakeManagerWithoutPassword } from "../../src/utils/dataTest";
+import {
+  fakeManagerInput,
+  fakeManagerWithoutPassword,
+} from "../../src/utils/dataTest";
 
 type StatusResponse = {
   message: string;
@@ -42,7 +45,7 @@ type ResponseCreateManager = {
 };
 
 type ResponseLoginManager = {
-  manager: Manager;
+  manager: Omit<Manager, "connectionLogs">;
   token: string;
 };
 
@@ -112,7 +115,10 @@ beforeAll(async () => {
           infos.email === "jean@example.com" &&
           infos.password === "motdepasse"
         ) {
-          return { manager: fakeManagerWithoutPassword, token: "mocked-token-123" };
+          return {
+            manager: fakeManagerWithoutPassword,
+            token: "mocked-token-123",
+          };
         }
       },
       logout: (_: any, __: any) => {
@@ -177,14 +183,17 @@ describe("Test sur les managers", () => {
     >({
       query: REGISTER_MANAGER,
       variables: {
-        infos: {...fakeManagerInput, isGloballyActive: true},
+        infos: { ...fakeManagerInput, isGloballyActive: true },
       },
     });
     assert(response.body.kind === "single");
-    const { password, companyId, ...managerWithoutPassword } =
-      fakeManagerInput;
+    const { password, companyId, ...managerWithoutPassword } = fakeManagerInput;
     expect(response.body.singleResult.data).toEqual({
-      createManager: { id: "3", ...managerWithoutPassword, isGloballyActive: true },
+      createManager: {
+        id: "3",
+        ...managerWithoutPassword,
+        isGloballyActive: true,
+      },
     });
   });
 
@@ -199,7 +208,7 @@ describe("Test sur les managers", () => {
       },
     });
     assert(response.body.kind === "single");
-    const { authorizations, company, ...rest } = fakeManagerWithoutPassword;
+    const { authorizations, company,connectionLogs, ...rest } = fakeManagerWithoutPassword;
     expect(response.body.singleResult.data).toEqual({
       login: {
         manager: rest,
@@ -235,7 +244,8 @@ describe("Test sur les managers", () => {
     });
 
     assert(response.body.kind === "single");
-    const { authorizations, company, ...rest } = fakeManagerWithoutPassword;
+    const { authorizations, company, connectionLogs, ...rest } =
+      fakeManagerWithoutPassword;
     expect(response.body.singleResult.data).toEqual({
       manager: rest,
     });

@@ -9,6 +9,7 @@ type Ticket {
   phone: String
   status: Status
   service: Service!
+  ticketLogs: [TicketLog!]!
   createdAt: DateTime
   updatedAt: DateTime
 }
@@ -68,4 +69,5 @@ enum Status {
   DONE
   PENDING
   ARCHIVED
+  INPROGRESS
 }

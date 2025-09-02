@@ -18,12 +18,14 @@ import {
   Status,
   Ticket,
 } from "../../src/generated/graphql";
-import { LIST_TICKETS, GENERATE_TICKET,
-  FIND_TICKET_BY_ID, DELETE_TICKET,
-  UPDATE_TICKET
-} from "../../src/queries/ticket.query"
+import {
+  LIST_TICKETS,
+  GENERATE_TICKET,
+  FIND_TICKET_BY_ID,
+  DELETE_TICKET,
+  UPDATE_TICKET,
+} from "../../src/queries/ticket.query";
 import typeDefs from "../../src/typeDefs";
-
 
 type ResponseData = {
   tickets: Ticket[];
@@ -53,7 +55,7 @@ const fakeService: Service = {
   createdAt: "2025-07-04T10:46:24.023Z",
   updatedAt: "2025-07-04T10:46:24.023Z",
   company: fakeCompany,
-  isGloballyActive: true
+  isGloballyActive: true,
 };
 
 const fakeManager: ManagerWithoutPassword = {
@@ -65,8 +67,9 @@ const fakeManager: ManagerWithoutPassword = {
   isGloballyActive: false,
   company: fakeCompany,
   authorizations: [],
+  connectionLogs: [],
   createdAt: new Date(),
-  updatedAt: new Date()
+  updatedAt: new Date(),
 };
 
 const ticketsData: Ticket[] = [
@@ -78,7 +81,8 @@ const ticketsData: Ticket[] = [
     email: "corentin.tournier@gmail.com",
     phone: "0606060606",
     status: Status.Pending,
-    service: fakeService
+    service: fakeService,
+    ticketLogs: [],
   },
   {
     id: "2",
@@ -88,7 +92,8 @@ const ticketsData: Ticket[] = [
     email: "marc.rogers@gmail.com",
     phone: "0706060606",
     status: Status.Pending,
-    service: fakeService
+    service: fakeService,
+    ticketLogs: [],
   },
 ];
 
@@ -98,7 +103,7 @@ const generateTicketExample: GenerateTicketInput = {
   lastName: "Test",
   email: "ticket.test@gmail.com",
   phone: "0606060607",
-  serviceId: "8d106e86-5ffb-4e97-bb3a-cba9a329bbef"
+  serviceId: "8d106e86-5ffb-4e97-bb3a-cba9a329bbef",
 };
 
 let server: ApolloServer;
@@ -121,9 +126,9 @@ beforeAll(async () => {
     },
     Mutation: {
       generateTicket: (_: null, { data }: { data: GenerateTicketInput }) => {
-        const { serviceId, ...rest} = data
-        store.set("Ticket", "3", rest);
-        return store.get("Ticket", "3")
+        const { serviceId, ...rest } = data;
+        store.set("Ticket", "3", { ...rest, ticketLogs: [] });
+        return store.get("Ticket", "3");
       },
       deleteTicket: (_: null, { id }: { id: string }) => {
         const ticketId = id;
@@ -142,7 +147,8 @@ beforeAll(async () => {
           return { message: "Ticket not found", success: false };
         }
         store.set("Ticket", ticketId, { ...args.data });
-        return store.get("Ticket", ticketId);
+        const item = store.get("Ticket", ticketId) as Ticket;
+        return { ...item, ticketLogs: [] };
       },
     },
   });
@@ -158,7 +164,7 @@ beforeAll(async () => {
   store.set("Query", "ROOT", "tickets", ticketsData);
 });
 
- describe("Test sur les tickets", () => {
+describe("Test sur les tickets", () => {
   it("Récupération des tickets depuis le store", async () => {
     const response = await server.executeOperation<ResponseData>({
       query: LIST_TICKETS,
@@ -174,18 +180,20 @@ beforeAll(async () => {
   });
 
   it("Création d'un ticket", async () => {
-    const response = await server.executeOperation<ResponseDataCreate, MutationGenerateTicketArgs>({
+    const response = await server.executeOperation<
+      ResponseDataCreate,
+      MutationGenerateTicketArgs
+    >({
       query: GENERATE_TICKET,
       variables: {
         data: {
           ...generateTicketExample,
-          
         },
       },
     });
 
     assert(response.body.kind === "single");
-    const { serviceId, ...rest} = generateTicketExample
+    const { serviceId, ...rest } = generateTicketExample;
     expect(response.body.singleResult.data).toEqual({
       generateTicket: {
         id: "3",
@@ -219,18 +227,28 @@ beforeAll(async () => {
   });
 
   it("Mise à jour d'un ticket", async () => {
-    const { id, code,service, ...ticketWithoutId } = ticketsData[0];
+    const { id, code, service,ticketLogs, ...ticketWithoutId } = ticketsData[0];
 
     const newTicketCode = "008";
 
     const response = await server.executeOperation<Ticket>({
       query: UPDATE_TICKET,
-      variables: { data: { id: id, code: newTicketCode } },
+      variables: {
+        data:
+        {
+          id: id,
+          code: newTicketCode
+        }
+      },
     });
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.data).toEqual({
-      updateTicket: { id: id, code: newTicketCode, ...ticketWithoutId },
+      updateTicket: {
+        id: id,
+        code: newTicketCode,
+        ...ticketWithoutId,
+      },
     });
   });
 });

@@ -9,6 +9,7 @@ import {
   } from "typeorm";
 import { ServiceEntity } from "./Service.entity";
 import ManagerEntity from "./Manager.entity";
+import SettingEntity from "./setting.entity";
     
   @Entity({ name: "company" })
   export default class CompanyEntity {
@@ -47,9 +48,12 @@ import ManagerEntity from "./Manager.entity";
     @UpdateDateColumn()
     updatedAt: Date; 
 
-    @OneToMany(() => ServiceEntity, (service: ServiceEntity) => service.id)
+    @OneToMany(() => ServiceEntity, (service: ServiceEntity) => service.company)
     services: ServiceEntity[]
 
-    @OneToMany(() => ManagerEntity, (manager: ManagerEntity) => manager.id, { onDelete: "CASCADE" })
+    @OneToMany(() => ManagerEntity, (manager: ManagerEntity) => manager.company, { onDelete: "CASCADE" })
     managers: ManagerEntity[]
+
+    @OneToMany(() => SettingEntity, (setting) => setting.company)
+    settings: SettingEntity[]
   }
