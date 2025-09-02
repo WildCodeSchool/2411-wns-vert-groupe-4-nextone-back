@@ -4,8 +4,11 @@ import {
     PrimaryGeneratedColumn,
     CreateDateColumn,
     UpdateDateColumn,
+    OneToMany,
 
   } from "typeorm";
+import { ServiceEntity } from "./Service.entity";
+import ManagerEntity from "./Manager.entity";
     
   @Entity({ name: "company" })
   export default class CompanyEntity {
@@ -18,6 +21,12 @@ import {
 
     @Column()
     address: string;
+
+    @Column()
+    postalCode: string;
+
+    @Column()
+    city: string;
 
     @Column({
       unique: true
@@ -33,8 +42,14 @@ import {
     phone: string
 
     @CreateDateColumn()
-    created_at: Date; 
+    createdAt: Date; 
     
     @UpdateDateColumn()
-    updated_at: Date; 
+    updatedAt: Date; 
+
+    @OneToMany(() => ServiceEntity, (service: ServiceEntity) => service.id)
+    services: ServiceEntity[]
+
+    @OneToMany(() => ManagerEntity, (manager: ManagerEntity) => manager.id, { onDelete: "CASCADE" })
+    managers: ManagerEntity[]
   }

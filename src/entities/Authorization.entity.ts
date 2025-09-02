@@ -5,16 +5,17 @@ import {
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
-} from 'typeorm';
+  UpdateDateColumn,
+} from "typeorm";
 import { ServiceEntity } from "./Service.entity";
-import ManagerEntity from './Manager.entity';
+import ManagerEntity from "./Manager.entity";
 
-@Entity('authorizations')
+@Entity("authorizations")
 export default class AuthorizationEntity {
-  @PrimaryColumn('uuid')
+  @PrimaryColumn("uuid")
   serviceId: string;
 
-  @PrimaryColumn('uuid')
+  @PrimaryColumn("uuid")
   managerId: string;
 
   @Column({ default: true })
@@ -23,16 +24,19 @@ export default class AuthorizationEntity {
   @CreateDateColumn()
   createdAt: Date;
 
+  @UpdateDateColumn()
+  updatedAt: Date;
+
   // On a plusieurs autorisations pour un manager
   @ManyToOne(() => ManagerEntity, (manager) => manager.authorizations, {
-    onDelete: 'CASCADE',
+    onDelete: "CASCADE",
   })
-  @JoinColumn({ name: 'managerId' })
+  @JoinColumn({ name: "managerId" })
   manager: ManagerEntity;
 
   @ManyToOne(() => ServiceEntity, (service) => service.authorizations, {
-    onDelete: 'CASCADE',
+    onDelete: "CASCADE",
   })
-  @JoinColumn({ name: 'serviceId' })
+  @JoinColumn({ name: "serviceId" })
   service: ServiceEntity;
 }

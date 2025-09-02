@@ -6,10 +6,25 @@ scalar DateTime
 type Service {
   id: UUID!
   name: String!
-  isGloballyActive: Boolean
+  isGloballyActive: Boolean!
+  authorizations: [Authorization!]
+  company: Company!
+  tickets: [Ticket!]
   createdAt: DateTime!
-  updatedAt: String!
+  updatedAt: DateTime!
 }
+
+# type ServiceWithoutManagers {
+#   id: UUID!
+#   name: String!
+#   createdAt: DateTime!
+#   updatedAt: DateTime!
+# }
+
+# type Manager {
+#   id: ID!
+#   email: String!
+# }
 
 type Query {
   services: [Service!]!

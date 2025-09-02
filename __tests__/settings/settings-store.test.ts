@@ -8,12 +8,13 @@ import { makeExecutableSchema } from "@graphql-tools/schema";
 import typeDefs from "../../src/typeDefs";
 import resolvers from "../../src/resolvers";
 import {
+  Company,
   DeleteResponse,
   MutationCreateServiceArgs,
   MutationCreateSettingArgs,
   MutationDeleteSettingArgs,
   MutationUpdateSettingArgs,
-  QueryGetTicketArgs,
+  QueryTicketArgs,
   Setting,
 } from "../../src/generated/graphql";
 import {
@@ -33,23 +34,26 @@ const fakeSettings: Setting[] = [
   {
     id: "1",
     name: "setting 1",
+    Company: {} as Company,
+    value: "test 1",
   },
   {
     id: "2",
     name: "setting 2",
+    Company: {} as Company,
+    value: "test 2",
   },
 ];
 
- type TresponseALL = {
-  settings: Setting[]
-}
- type TResponse = {
-  setting: Setting
-}
- type TresponseDelete = {
-  message: DeleteResponse
-}
-
+type TresponseALL = {
+  settings: Partial<Setting>[];
+};
+type TResponse = {
+  setting: Partial<Setting>;
+};
+type TresponseDelete = {
+  message: DeleteResponse;
+};
 
 store.set("Query", "ROOT", "settings", fakeSettings);
 
@@ -63,8 +67,8 @@ const mockedResolver = (store: IMockStore) => ({
     },
   },
   Mutation: {
-    createSetting: async (_: any, args: MutationCreateServiceArgs) => {
-      store.set("Setting", "3", { name: args.data.name });
+    createSetting: async (_: any, args: MutationCreateSettingArgs) => {
+      store.set("Setting", "3", { name: args.data.name, value: args.data.value });
       return store.get("Setting", "3");
     },
     deleteSetting: async (
@@ -105,15 +109,15 @@ describe("TESTS SETTINGS DANS UN STORE", () => {
     assert(response.body.kind === "single");
     expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data).toEqual<TresponseALL>({
-      settings: fakeSettings,
+      settings: fakeSettings.map((setting) => {
+        const { Company, ...rest } = setting;
+        return rest;
+      }),
     });
   });
 
   it("RECUPERATION D'UN SETTING", async () => {
-    const response = await server.executeOperation<
-      TResponse,
-      QueryGetTicketArgs
-    >({
+    const response = await server.executeOperation<TResponse, QueryTicketArgs>({
       query: SETTING,
       variables: {
         id: "1",
@@ -123,7 +127,11 @@ describe("TESTS SETTINGS DANS UN STORE", () => {
     assert(response.body.kind === "single");
     expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data).toEqual<TResponse>({
-      setting: fakeSettings[0],
+      setting: {
+        id: "1",
+        name: "setting 1",
+        value: "test 1",
+      },
     });
   });
 
@@ -136,6 +144,8 @@ describe("TESTS SETTINGS DANS UN STORE", () => {
       variables: {
         data: {
           name: "Nouveau setting",
+          companyId: "8321dd79-4cc5-4479-807e-b918f5d86c86",
+          value: "nouveau test",
         },
       },
     });
@@ -146,6 +156,7 @@ describe("TESTS SETTINGS DANS UN STORE", () => {
       setting: {
         id: "3",
         name: "Nouveau setting",
+        value: "nouveau test"
       },
     });
   });

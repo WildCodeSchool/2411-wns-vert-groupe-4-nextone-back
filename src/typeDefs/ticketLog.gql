@@ -23,6 +23,8 @@ type Query {
   ticketLog(id: UUID!): TicketLog
   ticketLogs: [TicketLog!]!
   ticketLogsByProperty(field: TicketLogPropertyInput!): [TicketLog!]!
+  ticketLogsByProperties(fields: TicketLogPropertiesInput!): [TicketLog!]!
+  ticketLogsByCreationSlot(data: ByCreationSlotInput!): [TicketLog!]!
 }
 
 type Mutation {
@@ -31,7 +33,21 @@ type Mutation {
   deleteTicketLog(id: UUID!): DeleteResponse!
 }
 
+input ByCreationSlotInput {
+  start: DateTime!
+  end: DateTime!
+  name: String!
+}
+
 input TicketLogPropertyInput @oneOf {
+  ticketId: UUID
+  managerId: UUID
+  status: Status
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input TicketLogPropertiesInput  {
   ticketId: UUID
   managerId: UUID
   status: Status
@@ -43,6 +59,10 @@ type DeleteResponse {
   message: String!
   success: Boolean!
 }
+# type DeleteResponse {
+#   content: String!
+#   success: Boolean!
+# }
 
 input CreateTicketLogInput {
   ticketId: UUID!

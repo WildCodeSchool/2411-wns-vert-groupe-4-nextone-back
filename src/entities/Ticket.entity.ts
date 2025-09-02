@@ -5,10 +5,11 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  AfterInsert,
+  ManyToOne,
 } from "typeorm";
+import { ServiceEntity } from "./Service.entity";
 
-@Entity({ name: "tickets" })
+@Entity({ name: "ticket" })
 export default class TicketEntity {
   
   @PrimaryGeneratedColumn("uuid")
@@ -17,10 +18,10 @@ export default class TicketEntity {
   @Column()
   code: string;
 
-  @Column()
+  @Column({ name: "first_name" })
   firstName: string;
 
-  @Column()
+  @Column({ name: "last_name"})
   lastName: string;
 
   @Column()
@@ -36,10 +37,16 @@ export default class TicketEntity {
   })
   status: Status;
 
-  @CreateDateColumn()
+  // @Column({ type: "uuid", nullable: true})
+  // ServiceId: string;
+
+  @ManyToOne(() => ServiceEntity, (service: ServiceEntity) => service.id, { eager: true})
+  service: ServiceEntity;
+
+  @CreateDateColumn({ name: "created_at"})
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: "updated_at"})
   updatedAt: Date;
 
 }

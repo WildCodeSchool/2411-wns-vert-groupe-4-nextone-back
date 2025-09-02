@@ -55,7 +55,7 @@ export default class ManagerService {
         .setIssuedAt()
         .setExpirationTime('7d')
         .sign(secret);
-        manager.is_globally_active = true
+        manager.isGloballyActive = true
         return { manager, token };
     }
 
@@ -67,7 +67,7 @@ export default class ManagerService {
         return true;
     }
 
-    async updateManager(id: string, data: Partial<Pick<ManagerEntity, 'first_name' | 'last_name' | 'role'>>) {
+    async updateManager(id: string, data: Partial<Pick<ManagerEntity, 'firstName' | 'lastName' | 'role'>>) {
         const managerFound = await this.getManagerById(id);
         const updatedManager = this.db.merge(managerFound, data);
         return await this.db.save(updatedManager);
@@ -82,8 +82,8 @@ export default class ManagerService {
     }
 
     async toggleGlobalAccess(manager: ManagerEntity): Promise<boolean> {
-        manager.is_globally_active = !manager.is_globally_active;
+        manager.isGloballyActive = !manager.isGloballyActive;
         await this.db.save(manager);
-        return manager.is_globally_active;
+        return manager.isGloballyActive;
     }
 }
