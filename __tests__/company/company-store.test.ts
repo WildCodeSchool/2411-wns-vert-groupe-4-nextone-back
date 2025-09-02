@@ -54,6 +54,8 @@ const fakeCreationData: CreateCompanyInput = {
   siret: "test",
   email: "test",
   phone: "test",
+  city: "test",
+  postalCode: "test"
 };
 
 let server: ApolloServer;

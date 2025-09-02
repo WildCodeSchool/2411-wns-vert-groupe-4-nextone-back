@@ -8,25 +8,22 @@ import { ApolloServer } from "@apollo/server";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import TicketResolver from "../../src/resolvers/ticket.resolver";
 import {
-  DeletedTicketResponse,
+  Company,
   GenerateTicketInput,
+  ManagerRole,
+  ManagerWithoutPassword,
   MutationGenerateTicketArgs,
   MutationUpdateTicketArgs,
-  QueryGetTicketArgs,
+  Service,
   Status,
   Ticket,
-  UpdateTicketInput,
 } from "../../src/generated/graphql";
-import { loadFilesSync } from "@graphql-tools/load-files";
-import path from "path";
 import { LIST_TICKETS, GENERATE_TICKET,
   FIND_TICKET_BY_ID, DELETE_TICKET,
   UPDATE_TICKET
 } from "../../src/queries/ticket.query"
+import typeDefs from "../../src/typeDefs";
 
-const ticketTypeDefs = loadFilesSync(path.join(__dirname, "../../src/typeDefs/ticket.gql"), {
-  extensions: ["gql"],
-});
 
 type ResponseData = {
   tickets: Ticket[];
@@ -34,6 +31,42 @@ type ResponseData = {
 
 type ResponseDataCreate = {
   generateTicket: Ticket;
+};
+
+const fakeCompany: Company = {
+  id: "f363fd0e-cb52-4089-bc25-75c72112d045",
+  name: "Jambonneau CORPORATION",
+  address: "38, Rue de la saucisse",
+  postalCode: "31000",
+  city: "TOULOUSE",
+  siret: "362 521 879 00034",
+  email: "jambo.no@gmail.com",
+  phone: "0123456789",
+  createdAt: "2025-07-04T10:46:23.954Z",
+  updatedAt: "2025-07-04T10:46:23.954Z",
+  services: [],
+};
+
+const fakeService: Service = {
+  name: "Radiologie",
+  id: "8d106e86-5ffb-4e97-bb3a-cba9a329bbef",
+  createdAt: "2025-07-04T10:46:24.023Z",
+  updatedAt: "2025-07-04T10:46:24.023Z",
+  company: fakeCompany,
+  isGloballyActive: true
+};
+
+const fakeManager: ManagerWithoutPassword = {
+  id: "1f50e0ca-ad6d-461d-b888-9d08c2ad6ff0",
+  email: "michelito@gmail.com",
+  firstName: "michel",
+  lastName: "dedroite",
+  role: ManagerRole.Operator,
+  isGloballyActive: false,
+  company: fakeCompany,
+  authorizations: [],
+  createdAt: new Date(),
+  updatedAt: new Date()
 };
 
 const ticketsData: Ticket[] = [
@@ -45,6 +78,7 @@ const ticketsData: Ticket[] = [
     email: "corentin.tournier@gmail.com",
     phone: "0606060606",
     status: Status.Pending,
+    service: fakeService
   },
   {
     id: "2",
@@ -54,21 +88,23 @@ const ticketsData: Ticket[] = [
     email: "marc.rogers@gmail.com",
     phone: "0706060606",
     status: Status.Pending,
+    service: fakeService
   },
 ];
 
-const generateTicketExample: GenerateTicketInput= {
+const generateTicketExample: GenerateTicketInput = {
   code: "003",
   firstName: "Ticket",
   lastName: "Test",
   email: "ticket.test@gmail.com",
-  phone: "0606060607"
+  phone: "0606060607",
+  serviceId: "8d106e86-5ffb-4e97-bb3a-cba9a329bbef"
 };
 
 let server: ApolloServer;
 
 const schema = makeExecutableSchema({
-  typeDefs: ticketTypeDefs,
+  typeDefs: typeDefs,
   resolvers: TicketResolver,
 });
 
@@ -76,17 +112,18 @@ beforeAll(async () => {
   const store = createMockStore({ schema });
   const resolvers = (store: IMockStore) => ({
     Query: {
-      getTickets: () => {
-        return store.get("Query", "ROOT", "getTickets");
+      tickets: () => {
+        return store.get("Query", "ROOT", "tickets");
       },
-      getTicket: (_: any, { id }: { id: string }) => {
+      ticket: (_: any, { id }: { id: string }) => {
         return store.get("Ticket", id);
       },
     },
     Mutation: {
       generateTicket: (_: null, { data }: { data: GenerateTicketInput }) => {
-        store.set("Ticket", "3", data);
-        return store.get("Ticket", "3");
+        const { serviceId, ...rest} = data
+        store.set("Ticket", "3", rest);
+        return store.get("Ticket", "3")
       },
       deleteTicket: (_: null, { id }: { id: string }) => {
         const ticketId = id;
@@ -95,7 +132,7 @@ beforeAll(async () => {
           return { message: "Ticket not found", success: false };
         }
         store.reset();
-        store.set("Query", "ROOT", "getTickets", ticketsData);
+        store.set("Query", "ROOT", "tickets", ticketsData);
         return { message: "Ticket deleted", success: true };
       },
       updateTicket: (_: null, args: MutationUpdateTicketArgs) => {
@@ -118,7 +155,7 @@ beforeAll(async () => {
   });
 
   //remplissage du store
-  store.set("Query", "ROOT", "getTickets", ticketsData);
+  store.set("Query", "ROOT", "tickets", ticketsData);
 });
 
  describe("Test sur les tickets", () => {
@@ -129,7 +166,7 @@ beforeAll(async () => {
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.data).toEqual({
-      getTickets: [
+      tickets: [
         { id: "1", code: "001" },
         { id: "2", code: "002" },
       ],
@@ -148,10 +185,11 @@ beforeAll(async () => {
     });
 
     assert(response.body.kind === "single");
+    const { serviceId, ...rest} = generateTicketExample
     expect(response.body.singleResult.data).toEqual({
       generateTicket: {
         id: "3",
-        ...generateTicketExample,
+        ...rest,
       },
     });
   });
@@ -164,7 +202,7 @@ beforeAll(async () => {
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.data).toEqual({
-      getTicket: { code: generateTicketExample.code },
+      ticket: { code: generateTicketExample.code },
     });
   });
 
@@ -181,7 +219,7 @@ beforeAll(async () => {
   });
 
   it("Mise à jour d'un ticket", async () => {
-    const { id, code, ...ticketWithoutId } = ticketsData[0];
+    const { id, code,service, ...ticketWithoutId } = ticketsData[0];
 
     const newTicketCode = "008";
 

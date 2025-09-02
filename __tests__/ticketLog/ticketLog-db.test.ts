@@ -4,15 +4,20 @@ import typeDefs from "../../src/typeDefs";
 import resolvers from "../../src/resolvers";
 import testDataSource from "../../src/lib/datasource_test";
 import {
+  CreateCompanyInput,
   DeleteResponse,
   GenerateTicketInput,
   InputRegister,
   ManagerRole,
-  MutationCreateTicketLogArgs,
+
   MutationDeleteTicketLogArgs,
   MutationUpdateTicketLogArgs,
   QueryTicketLogArgs,
+
+  QueryTicketLogsByPropertyArgs,
+
   Status,
+  Ticket,
   TicketLog,
 } from "../../src/generated/graphql";
 import TicketService from "../../src/services/ticket.service";
@@ -20,17 +25,23 @@ import TicketEntity from "../../src/entities/Ticket.entity";
 import ManagerEntity from "../../src/entities/Manager.entity";
 import ManagerService from "../../src/services/manager.service";
 import {
-  CREATE_TICKETLOG,
   DELETE_TICKETLOG,
   TICKETLOG,
+  TICKETLOG_BY_PROPERTY,
   UPDATE_TICKETLOG,
 } from "../../src/queries/ticketlog.query";
 import assert from "assert";
 import { validate } from "uuid";
+import CompanyEntity from "../../src/entities/Company.entity";
+import CompanyService from "../../src/services/company.service";
+
+type PartialTicketLog = Partial<Omit<TicketLog, "ticket">> & {ticket: Pick<Ticket, "id" | "firstName" | "lastName">}
 
 type TResponse = {
-  ticketLog: Partial<TicketLog> | null;
+  ticketLog: PartialTicketLog[] | null;
 };
+
+
 
 type TResponseDelete = {
   message: DeleteResponse;
@@ -45,33 +56,42 @@ const fakeTicket: GenerateTicketInput = {
   lastName: "Tournier",
   email: "corentin.tournier@gmail.com",
   phone: "0606060606",
+  serviceId: ""
+};
+
+const fakeCompany: CreateCompanyInput = {
+  address: "Rue du chateau",
+  email: "google@gmail.com",
+  name: "Google",
+  phone: "0404040404",
+  siret: "362 521 879 00034",
+  city: "TOULOUSE",
+  postalCode: "31000",
 };
 
 const fakeManager: InputRegister = {
   password: "test",
   email: "jeanmichel@gmail.com",
   role: ManagerRole.Admin,
-  first_name: "jean",
-  last_name: "MICHEL",
+  firstName: "jean",
+  lastName: "MICHEL",
+  companyId: "",
 };
 
-// const fakeTicketLog: Partial<TicketLog> = {
-//   id: "",
-//   manager: { ...fakeManager, id: "", role: ManagerRole.Admin },
-//   status: Status.Created,
-//   ticket: { ...fakeTicket, id: "" },
-// };
+
 
 beforeAll(async () => {
   server = new ApolloServer({
     schema,
   });
 
+
   try {
     if (!testDataSource.isInitialized) {
       await testDataSource.initialize();
     }
-    await testDataSource.query("TRUNCATE TABLE ticketlog, tickets, managers CASCADE");
+
+    await testDataSource.synchronize(true);
   } catch (error) {
     console.error("Error initializing test database:", error);
     throw error;
@@ -91,6 +111,7 @@ afterAll(async () => {
   if (testDataSource.isInitialized) {
     await testDataSource.destroy();
   }
+
   jest.clearAllMocks();
 });
 
@@ -98,41 +119,56 @@ describe("TEST TICKETLOG DANS LA DB", () => {
   let baseId: string;
   let baseTicketId: string;
   let baseManagerId: string;
+  let baseCompanyId: string;
 
   it("CREATION D'UN TICKETLOG", async () => {
+    //CREATION D'UNE COMPANY
+    const newCompany: CompanyEntity =
+      await CompanyService.getService().createOne(fakeCompany);
+    baseCompanyId = newCompany.id;
+
     //CREATION D'UN TICKET
-    const newTicket: TicketEntity = await new TicketService().generateTicket(
-      fakeTicket
-    );
+    const newTicket: TicketEntity =
+      await TicketService.gettInstance().createOne(fakeTicket);
     baseTicketId = newTicket.id;
 
-    //CREATION D'UN MANAGER
-    const newManager: ManagerEntity = await new ManagerService().create(
-      fakeManager
-    );
-    baseManagerId = newManager.id;
+    // //CREATION D'UN MANAGER
+    // fakeManager.companyId = baseCompanyId;
+    // const newManager: ManagerEntity = await new ManagerService().create(
+    //   fakeManager
+    // );
+    // baseManagerId = newManager.id;
 
-    //ET ENFIN, CREATION D'UN TICKETLOG 👍
-    const response = await server.executeOperation<
-      TResponse,
-      MutationCreateTicketLogArgs
-    >({
-      query: CREATE_TICKETLOG,
-      variables: {
-        data: {
-          managerId: baseManagerId,
-          ticketId: baseTicketId,
-        },
-      },
-    });
-    
+    // //ET ENFIN, ON RECUPERE LE TICKETLOG QUI A ETE CREE VIA
+    // LE SUBSCRIBER SUR TICKETENTITY👍
+    const response = await server.executeOperation<TResponse, QueryTicketLogsByPropertyArgs>(
+      {
+        query: TICKETLOG_BY_PROPERTY,
+        variables: {
+          field: {
+            ticketId: baseTicketId
+          }
+        }
+      }
+    )
     assert(response.body.kind === "single");
-    expect(response.body.singleResult.errors).toBeUndefined();
-    expect(response.body.singleResult.data).not.toBeNull();
-    const { id } = response.body.singleResult.data?.ticketLog!;
-    baseId = id;
-    expect(validate(id)).toBeTruthy();
+
+    expect(response.body.singleResult.errors).toBeUndefined()
+    expect(response.body.singleResult.data).not.toBeNull()
+    expect(response.body.singleResult.data).not.toBeUndefined()
+    expect(response.body.singleResult.data?.ticketLog).toHaveLength(1)
+    const { id, ...rest } = response.body.singleResult.data?.ticketLog![0]!
+    expect(validate(id)).toBeTruthy
+    baseId = id!
+    expect(rest).toEqual<PartialTicketLog>({
+      ticket: {
+        id: baseTicketId,
+        firstName: fakeTicket.firstName,
+        lastName: fakeTicket.lastName
+      }
+    })
   });
+
 
   it("UPDATE DU TICKET CREE", async () => {
     const response = await server.executeOperation<
@@ -148,10 +184,11 @@ describe("TEST TICKETLOG DANS LA DB", () => {
       },
     });
 
-
     assert(response.body.kind === "single");
+    // console.log("ERROR UPDATE : ", response.body.singleResult.errors)
+    // console.log("DATA UPDATE : ", response.body.singleResult.data)
     expect(response.body.singleResult.errors).toBeUndefined();
-    expect(response.body.singleResult.data).toEqual<TResponse>({
+    expect(response.body.singleResult.data).toEqual({
       ticketLog: {
         id: baseId,
         // manager: {

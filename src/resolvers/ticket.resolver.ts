@@ -5,33 +5,33 @@ import {
   MutationGenerateTicketArgs,
   MutationUpdateTicketArgs,
   MutationUpdateTicketStatusArgs,
-  QueryGetTicketArgs,
+  QueryTicketArgs,
 } from "@/generated/graphql";
 import { MyContext } from "..";
 import { buildResponse } from "@/utils/authorization";
+import ServicesService from "@/services/services.service";
 
 type TicketDeleted = {
   message: string;
   success: boolean;
 };
 
+const ticketService = TicketService.gettInstance();
+
 export default {
   Query: {
-    getTickets: async (_: any): Promise<TicketEntity[]> => {
-      const ticketsList = await new TicketService().getAllTickets();
+    tickets: async (_: any): Promise<TicketEntity[]> => {
+      const ticketsList = await ticketService.findAll();
       return ticketsList;
     },
-    getTicket: async (
+
+    ticket: async (
       _: any,
-      { id }: QueryGetTicketArgs
-    ): Promise<TicketEntity> => {
-      const ticket = await new TicketService().getTicketById(id);
+      { id }: QueryTicketArgs
+    ): Promise<TicketEntity | null> => {
+      const ticket = await ticketService.findById(id);
       return ticket;
     },
-    // getServiceTickets: async (_: any, { id }: QueryGetTicketArgs): Promise<TicketEntity[]> => {
-    //   const tickets = await new TicketService().getTicketByServiceId(id);
-    //   return tickets;
-    // },
   },
   Mutation: {
     generateTicket: async (
@@ -39,26 +39,38 @@ export default {
       { data }: MutationGenerateTicketArgs,
       ctx: MyContext
     ): Promise<TicketEntity> => {
-      const newTicket = await new TicketService().generateTicket({ ...data });
+      const service = await new ServicesService().findOne({
+        where: {
+          id: data.serviceId,
+        }
+      });
+      if (!service) {
+        throw new Error("No service with this id.");
+      }
+      const creationData = { ...data, service };
+      const newTicket = await ticketService.createOne(creationData);
       return newTicket;
     },
     deleteTicket: async (
       _: any,
-      { id }: QueryGetTicketArgs,
+      { id }: QueryTicketArgs,
       ctx: MyContext
-    ): Promise<DeletedTicketResponse> => {
-      const isTicketDeleted = await new TicketService().deleteTicket(id);
-      return buildResponse(isTicketDeleted, "Ticket deleted", "Ticket not found")
+    ): Promise<TicketDeleted> => {
+      const isTicketDeleted = await ticketService.deleteOne(id);
+
+      if (!isTicketDeleted) {
+        return { message: "Ticket not found", success: isTicketDeleted };
+      }
+
+      return { message: "Ticket deleted", success: isTicketDeleted };
     },
     updateTicket: async (
       _: any,
       { data }: MutationUpdateTicketArgs,
       ctx: MyContext
-    ): Promise<TicketEntity> => {
-      const ticketUpdated = await new TicketService().updateTicket(data.id, {
-        ...data,
-      });
-      return ticketUpdated;
+    ): Promise<TicketEntity | null> => {
+      const updated = await ticketService.updateOne(data.id, data);
+      return updated;
     },
     updateTicketStatus: async (
       _: any,
@@ -66,11 +78,16 @@ export default {
       ctx: MyContext
     ): Promise<TicketEntity> => {
       if (!ctx.manager) {
-        throw new Error('Vous devez etre connecté pour mettre à jour le status d\'un ticket.')
+        throw new Error(
+          "Vous devez etre connecté pour mettre à jour le status d'un ticket."
+        );
       }
-      const updated = await new TicketService().updateTicketStatus(args.data, ctx.manager)
-      
-      return updated
+      const updated = await ticketService.updateTicketStatus(
+        args.data,
+        ctx.manager
+      );
+
+      return updated;
     },
   },
 };

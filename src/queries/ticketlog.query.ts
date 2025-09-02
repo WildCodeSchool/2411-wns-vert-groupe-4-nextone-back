@@ -22,26 +22,37 @@ query TicketLog($id: UUID!) {
     manager {
       id
       email
-      first_name
-      last_name
+      firstName
+      lastName
       role
-      is_globally_active
+      isGloballyActive
     }
     status
   }
 }
 `;
 
-export const TICKETLOG_BY_PROPERTY = `#graphql
-query TicketLogsByProperty($field: TicketLogPropertyInput!) {
-  ticketLogsByProperty(field: $field) {
+export const TICKETLOG_ID = `#graphql
+query TicketLog($id: UUID!) {
+  ticketLog(id: $id) {
     id
-    ticketId
-    managerId
-    status
   }
 }
-`;
+`
+
+
+export const TICKETLOG_BY_PROPERTY = `#graphql
+query TicketLogsByProperty($field: TicketLogPropertyInput!) {
+  ticketLog: ticketLogsByProperty(field: $field) {
+    id
+    ticket {
+      id
+      firstName
+      lastName
+    }
+  }
+}
+`
 
 export const CREATE_TICKETLOG = `#graphql
 mutation CreateTicketLog($data: CreateTicketLogInput!) {

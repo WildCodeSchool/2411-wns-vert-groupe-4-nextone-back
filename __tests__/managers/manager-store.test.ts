@@ -1,26 +1,37 @@
 import assert from "assert";
 import { ApolloServer } from "@apollo/server";
 import { makeExecutableSchema } from "@graphql-tools/schema";
-import { addMocksToSchema, createMockStore, IMockStore } from "@graphql-tools/mock";
-import { loadFilesSync } from "@graphql-tools/load-files";
-import path from "path";
-import Manager from "../../src/entities/Manager.entity";
-import { InputRegister, ManagerRole, InputLogin, MutationUpdateManagerArgs } from "../../src/generated/graphql";
-import { LIST_MANAGERS, REGISTER_MANAGER,
-  LOGIN_MANAGER, LOGOUT_MANAGER,
-  FIND_MANAGER_BY_ID, DELETE_MANAGER,
+import {
+  addMocksToSchema,
+  createMockStore,
+  IMockStore,
+} from "@graphql-tools/mock";
+
+// import Manager from "../../src/entities/Manager.entity";
+import {
+  InputRegister,
+  ManagerRole,
+  InputLogin,
+  MutationUpdateManagerArgs,
+  MutationCreateManagerArgs,
+  ManagerWithoutPassword,
+  Company,
+  Service,
+  Manager,
+  UpdateManagerInput,
+  Message,
+} from "../../src/generated/graphql";
+import {
+  LIST_MANAGERS,
+  REGISTER_MANAGER,
+  LOGIN_MANAGER,
+  LOGOUT_MANAGER,
+  FIND_MANAGER_BY_ID,
+  DELETE_MANAGER,
   UPDATE_MANAGER,
-  TOGGLE_GLOBAL_ACCESS_MANAGER
- } from "../../src/queries/manager.query"
-
-const managerTypeDefs = loadFilesSync(path.join(__dirname, "../../src/typeDefs/manager.gql"), {
-  extensions: ["gql"],
-});
-
-const serviceTypeDefs = loadFilesSync(path.join(__dirname, "../../src/typeDefs/service.gql"), {
-  extensions: ["gql"],
-});
-const combinedTypeDefs = [...managerTypeDefs, ...serviceTypeDefs];
+  TOGGLE_GLOBAL_ACCESS_MANAGER,
+} from "../../src/queries/manager.query";
+import typeDefs from "../../src/typeDefs";
 
 type StatusResponse = {
   message: string;
@@ -38,111 +49,151 @@ type ResponseCreateManager = {
 type ResponseLoginManager = {
   manager: Manager;
   token: string;
-}
+};
 
 type ReponseDisconnectManager = {
-  logout: StatusResponse
-}
+  logout: StatusResponse;
+};
 
 type ResponseGetManager = {
   manager: Manager;
-}
+};
 
 type ResponseDeleteManager = {
   deleteManager: StatusResponse;
-}
+};
 
 type ResponseUpdateManager = {
   updateManager: Manager;
-}
+};
 
 type ResponseAssociateManagerFromService = {
-  associateManagerFromService: StatusResponse
-}
+  associateManagerFromService: StatusResponse;
+};
 
 type ResponseDissociateManagerFromService = {
-  dissociateManagerFromService: StatusResponse
-}
+  dissociateManagerFromService: StatusResponse;
+};
 
 type ResponseToggleGlobalManager = {
   toggleGlobalAccessManager: {
-    is_globally_active: boolean;
-  }
-}
+    isGloballyActive: boolean;
+  };
+};
 
-const listManagers = [
-  { 
-    id: "1", 
-    email: "jean@example.com",
-    is_globally_active: false,
-  },
-  { 
-    id: "2", 
-    email: "jean1@example.com",
-    is_globally_active: false,
-  },
-];
+const fakeCompany: Company = {
+  id: "f363fd0e-cb52-4089-bc25-75c72112d045",
+  name: "Jambonneau CORPORATION",
+  address: "38, Rue de la saucisse",
+  postalCode: "31000",
+  city: "TOULOUSE",
+  siret: "362 521 879 00034",
+  email: "jambo.no@gmail.com",
+  phone: "0123456789",
+  createdAt: "2025-07-04T10:46:23.954Z",
+  updatedAt: "2025-07-04T10:46:23.954Z",
+  services: [],
+};
 
-
-const createManagerExample = {
-  first_name: "Jean",
-  last_name: "Dupont",
+const createManagerExample: InputRegister = {
+  firstName: "Jean",
+  lastName: "Dupont",
   email: "jean@example.com",
   password: "motdepasse",
   role: ManagerRole.Admin,
-  is_globally_active: true,
+  isGloballyActive: true,
+  companyId: "f363fd0e-cb52-4089-bc25-75c72112d045",
 };
 
-const mockManager = {
+const mockManager: ManagerWithoutPassword = {
   id: "1",
-  first_name: "Jean",
-  last_name: "Dupont",
+  firstName: "Jean",
+  lastName: "Dupont",
   email: "jean@example.com",
   role: ManagerRole.Admin,
-  is_globally_active: true,
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
+  isGloballyActive: true,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  authorizations: [],
+  company: fakeCompany,
 };
 
-const manager = {
+const manager: ManagerWithoutPassword = {
   id: "1",
-  first_name: "Jean",
-  last_name: "Dupont",
+  firstName: "Jean",
+  lastName: "Dupont",
   email: "jean@example.com",
   role: ManagerRole.Admin,
-  is_globally_active: true,
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-}
+  isGloballyActive: true,
+  authorizations: [],
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  company: fakeCompany,
+};
+
+const fakeService: Service = {
+  name: "Accueil",
+  id: "aa953a24-7b28-4104-924a-d0dcda78131f",
+  createdAt: "2025-07-04T10:46:24.023Z",
+  updatedAt: "2025-07-04T10:46:24.023Z",
+  company: fakeCompany,
+  isGloballyActive: true,
+};
+
+const listManagers: Partial<Manager>[] = [
+  {
+    id: "1",
+    email: "jean@example.com",
+    isGloballyActive: false,
+    authorizations: [],
+  },
+  {
+    id: "2",
+    email: "jean1@example.com",
+    isGloballyActive: false,
+    authorizations: [],
+  },
+];
 
 let server: ApolloServer;
 
 const schema = makeExecutableSchema({
-  typeDefs: combinedTypeDefs,
+  typeDefs,
 });
 
-const store = createMockStore({schema})
+const store = createMockStore({ schema });
 
 beforeAll(async () => {
+  store.set("Query", "ROOT", "managers", listManagers);
+  store.set("Manager", "1", manager);
+
   const mockResolvers = (store: IMockStore) => ({
     Query: {
-      managers: () => 
-        store.get("Query", "ROOT", "managers"),
-      manager: (_: any, { id }: { id: string }) => 
-        store.get("Manager", id),
+      managers: () => store.get("Query", "ROOT", "managers"),
+      manager: (_: any, { id }: { id: string }) => store.get("Manager", id),
       login: (_: any, { infos }: { infos: InputLogin }) => {
-        if (infos.email === "jean@example.com" && infos.password === "motdepasse") {
+        if (
+          infos.email === "jean@example.com" &&
+          infos.password === "motdepasse"
+        ) {
           return { manager: mockManager, token: "mocked-token-123" };
         }
       },
-      logout: (_: any, __: any) => 
-        ({ message: "Vous êtes déconnecté", success: true }),
+      logout: (_: any, __: any) => {
+        const message: Message = {
+          message: "Vous êtes déconnecté",
+          success: true,
+        };
+        return message;
+      },
     },
     Mutation: {
       createManager: (_: any, { infos }: { infos: InputRegister }) => {
-        store.set("Manager", "3", infos);
-        const { password, ...result } = store.get("Manager", "3") as Manager;
-        return result;
+        const { companyId, ...rest } = infos;
+        store.set("Manager", "3", rest);
+        const manager = store.get("Manager", "3") as Manager;
+        const { password, company, ...result } = manager;
+        return { ...result, id: 3 };
       },
       deleteManager: (_: null, { id }: { id: string }) => {
         store.get("Manager", id);
@@ -155,11 +206,11 @@ beforeAll(async () => {
         return store.get("Manager", "1");
       },
       toggleGlobalAccessManager: (_: any, args: { id: string }) => {
-        const manager = listManagers.find(s => s.id === args.id);
+        const manager = listManagers.find((s) => s.id === args.id);
         if (!manager) throw new Error("Manager not found.");
-        manager.is_globally_active = !manager.is_globally_active;
+        manager.isGloballyActive = !manager.isGloballyActive;
         return { success: true, message: "Manager updated successfully." };
-      }
+      },
     },
   });
 
@@ -167,11 +218,9 @@ beforeAll(async () => {
     schema: addMocksToSchema({
       schema,
       resolvers: mockResolvers,
-      store
+      store,
     }),
   });
-  store.set("Query", "ROOT", "managers", listManagers);
-  store.set("Manager", "1", manager);
 });
 
 describe("Test sur les managers", () => {
@@ -185,16 +234,19 @@ describe("Test sur les managers", () => {
     });
   });
 
-
   it("Inscription d'un manager", async () => {
-    const response = await server.executeOperation<ResponseCreateManager>({
+    const response = await server.executeOperation<
+      ResponseCreateManager,
+      MutationCreateManagerArgs
+    >({
       query: REGISTER_MANAGER,
       variables: {
         infos: createManagerExample,
       },
     });
     assert(response.body.kind === "single");
-    const { password, ...managerWithoutPassword } = createManagerExample;
+    const { password, companyId, ...managerWithoutPassword } =
+      createManagerExample;
     expect(response.body.singleResult.data).toEqual({
       createManager: { id: "3", ...managerWithoutPassword },
     });
@@ -211,22 +263,25 @@ describe("Test sur les managers", () => {
       },
     });
     assert(response.body.kind === "single");
+    const { authorizations, company, ...rest } = mockManager;
     expect(response.body.singleResult.data).toEqual({
       login: {
-        manager: mockManager,
+        manager: rest,
         token: "mocked-token-123",
       },
     });
   });
 
   it("Déconnexion du manager connecté", async () => {
-    const response = await server.executeOperation<ReponseDisconnectManager>({ 
-      query: LOGOUT_MANAGER },
+    const response = await server.executeOperation<ReponseDisconnectManager>(
       {
-        contextValue: {
-          manager: mockManager,
-        },
+        query: LOGOUT_MANAGER,
       }
+      // {
+      //   contextValue: {
+      //     manager: mockManager,
+      //   },
+      // }
     );
     assert(response.body.kind === "single");
     expect(response.body.singleResult.data).toEqual({
@@ -244,10 +299,11 @@ describe("Test sur les managers", () => {
     });
 
     assert(response.body.kind === "single");
+    const { authorizations, company, ...rest } = manager;
     expect(response.body.singleResult.data).toEqual({
-      manager: manager
+      manager: rest,
     });
-  })
+  });
 
   it("Suppression d'un manager", async () => {
     const response = await server.executeOperation<ResponseDeleteManager>({
@@ -259,19 +315,22 @@ describe("Test sur les managers", () => {
     expect(response.body.singleResult.data).toEqual({
       deleteManager: { message: "Manager deleted", success: true },
     });
-  })
+  });
 
   it("Mise à jour d'un manager", async () => {
     const updatedFirstName = "Jean-Michel";
     const updatedLastName = "Durand";
 
-    const response = await server.executeOperation<ResponseUpdateManager>({
+    const response = await server.executeOperation<
+      ResponseUpdateManager,
+      MutationUpdateManagerArgs
+    >({
       query: UPDATE_MANAGER,
       variables: {
-        updateManagerId: "1",
+        id: "1",
         data: {
-          first_name: updatedFirstName,
-          last_name: updatedLastName,
+          firstName: updatedFirstName,
+          lastName: updatedLastName,
         },
       },
     });
@@ -279,30 +338,33 @@ describe("Test sur les managers", () => {
     const result = response.body.singleResult.data?.updateManager;
     expect(result).toEqual({
       id: "1",
-      first_name: updatedFirstName,
-      last_name: updatedLastName,
+      firstName: updatedFirstName,
+      lastName: updatedLastName,
       email: mockManager.email,
       role: mockManager.role,
-      is_globally_active: mockManager.is_globally_active,
-      created_at: mockManager.created_at,
-      updated_at: mockManager.updated_at,
+      isGloballyActive: mockManager.isGloballyActive,
+      createdAt: mockManager.createdAt,
+      updatedAt: mockManager.updatedAt,
     });
   });
 
   it("bascule l'accès global d'un Manager", async () => {
-    const response = await server.executeOperation<ResponseToggleGlobalManager>({
-      query: TOGGLE_GLOBAL_ACCESS_MANAGER,
-      variables: { toggleGlobalAccessManagerId: '1' },
-    }, {
-      contextValue: {
-        manager: { id: 'mgr-99', role: 'ADMIN' }, 
+    const response = await server.executeOperation<ResponseToggleGlobalManager>(
+      {
+        query: TOGGLE_GLOBAL_ACCESS_MANAGER,
+        variables: { toggleGlobalAccessManagerId: "1" },
       },
-    });
-    assert(response.body.kind === 'single');
+      {
+        contextValue: {
+          manager: { id: "mgr-99", role: "ADMIN" },
+        },
+      }
+    );
+    assert(response.body.kind === "single");
     const result = response.body.singleResult.data?.toggleGlobalAccessManager;
     expect(result).toEqual({
       success: true,
       message: "Manager updated successfully.",
     });
-  })
-})
+  });
+});

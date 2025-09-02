@@ -1,27 +1,27 @@
 scalar DateTime
 
 type Ticket {
-  id: ID
-  code: String
+  id: ID!
+  code: String!
   firstName: String
   lastName: String
-  email: String
+  email: String!
   phone: String
   status: Status
-  #service: Service
+  service: Service!
   createdAt: DateTime
   updatedAt: DateTime
 }
 
 type Query {
-  getTickets: [Ticket!]
-  getTicket(id: ID!): Ticket
+  tickets: [Ticket!]
+  ticket(id: ID!): Ticket
 }
 
 type Mutation {
   generateTicket(data: GenerateTicketInput!): Ticket!
   deleteTicket(id: ID!): DeletedTicketResponse!
-  updateTicket(data: UpdateTicketInput!): Ticket!
+  updateTicket(data: UpdateTicketInput!): Ticket
   updateTicketStatus(data: UpdateStatusTicketInput!): Ticket!
 }
 
@@ -31,13 +31,13 @@ input UpdateStatusTicketInput {
 }
 
 input GenerateTicketInput {
-  code: String
+  code: String!
   firstName: String
   lastName: String
-  email: String
+  email: String!
   phone: String
-  #status: Status
-  #serviceId: ID!
+  status: Status
+  serviceId: ID!
 }
 
 input UpdateTicketInput {
@@ -48,7 +48,7 @@ input UpdateTicketInput {
   email: String
   phone: String
   status: Status
-  #serviceId: ID
+  serviceId: ID
 }
 
   type DeletedTicketResponse {

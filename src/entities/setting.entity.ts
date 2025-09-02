@@ -4,8 +4,10 @@ import {
     PrimaryGeneratedColumn,
     CreateDateColumn,
     UpdateDateColumn,
+    ManyToOne,
 
   } from "typeorm";
+import CompanyEntity from "./Company.entity";
     
   @Entity({ name: "setting" })
   export default class SettingEntity {
@@ -15,6 +17,15 @@ import {
 
     @Column()
     name: string
+
+    @Column()
+    value: string;
+
+    @Column({ type: "uuid"})
+    companyId: string;
+
+    @ManyToOne(() => CompanyEntity, (company: CompanyEntity) => company.id)
+    company: CompanyEntity
 
     @CreateDateColumn()
     createdAt: Date; 

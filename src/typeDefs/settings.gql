@@ -1,6 +1,8 @@
 type Setting {
   id: ID!
   name: String!
+  value: String!
+  Company: Company!
   createdAt: String
   updatedAt: String
 }
@@ -23,11 +25,14 @@ type Mutation {
 
 input CreateSettingInput {
   name: String!
+  value: String!
+  companyId: UUID!
 }
 
 input UpdateSettingInput {
   id: ID!
   name: String
+  value: String
 }
 
 

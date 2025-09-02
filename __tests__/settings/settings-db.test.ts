@@ -16,6 +16,8 @@ import {
   UPDATE_SETTING,
 } from "../../src/queries/setting.query";
 import {
+  Company,
+  CreateCompanyInput,
   DeleteResponse,
   MutationCreateSettingArgs,
   MutationDeleteSettingArgs,
@@ -25,6 +27,10 @@ import {
 } from "../../src/generated/graphql";
 import assert from "assert";
 import { validate } from "uuid";
+import CompanyEntity from "../../src/entities/Company.entity";
+import SettingEntity from "../../src/entities/setting.entity";
+import CompanyService from "../../src/services/company.service";
+import ManagerEntity from "../../src/entities/Manager.entity";
 
 let server: ApolloServer;
 const schema = makeExecutableSchema({ typeDefs, resolvers });
@@ -37,6 +43,17 @@ type TResponse = {
 };
 type TresponseDelete = {
   message: DeleteResponse;
+};
+
+
+const fakeCompany: CreateCompanyInput = {
+  name: "Jambonneau CORPORATION",
+  address: "38, Rue de la saucisse",
+  postalCode: "31000",
+  city: "TOULOUSE",
+  siret: "362 521 879 00034",
+  email: "jambo.no@gmail.com",
+  phone: "0123456789",
 };
 
 jest.mock("../../src/lib/datasource", () => {
@@ -55,7 +72,12 @@ beforeAll(async () => {
     if (!testDataSource.isInitialized) {
       await testDataSource.initialize();
     }
-    await testDataSource.query("TRUNCATE TABLE setting CASCADE");
+
+    // await testDataSource.query("TRUNCATE TABLE setting, company CASCADE");
+    // await testDataSource.getRepository(SettingEntity).delete({});
+    // await testDataSource.getRepository(CompanyEntity).delete({});
+    // await testDataSource.getRepository(ManagerEntity).delete({})
+    await testDataSource.synchronize(true)
   } catch (error) {
     console.error("Error initializing test database:", error);
     throw error;
@@ -64,15 +86,27 @@ beforeAll(async () => {
 
 afterAll(async () => {
   if (testDataSource.isInitialized) {
-    await testDataSource.destroy();     //MERCI COLINE 👍
   }
+  // await testDataSource.synchronize(true)
+
+  // await testDataSource.dropDatabase();
+  await testDataSource.destroy(); //MERCI COLINE 👍
+
   jest.clearAllMocks();
 });
 
 describe("TEST SETTINGS DANS LA DB", () => {
-  let baseId: string;
+  let companyId: string;
+  let createdSetting: Setting;
 
   it("CREATION D'UN SETTING", async () => {
+
+    //CREATION D'UNE COMPANY
+    const company: CompanyEntity = await CompanyService.getService().createOne(
+      fakeCompany
+    );
+    companyId = company.id;
+
     const response = await server.executeOperation<
       TResponse,
       MutationCreateSettingArgs
@@ -81,6 +115,8 @@ describe("TEST SETTINGS DANS LA DB", () => {
       variables: {
         data: {
           name: "Mon zoli setting",
+          companyId,
+          value: "jambon",
         },
       },
     });
@@ -89,11 +125,9 @@ describe("TEST SETTINGS DANS LA DB", () => {
     const { errors, data } = response.body.singleResult;
     expect(errors).toBeUndefined();
     expect(data).not.toBeNull();
-
-    const { id, name } = data?.setting!;
-    baseId = id;
-    expect(validate(id)).toBeTruthy();
-    expect(name).toMatch("Mon zoli setting");
+    createdSetting = data?.setting!;
+    expect(validate(createdSetting.id)).toBeTruthy();
+    expect(createdSetting.name).toMatch("Mon zoli setting");
   });
 
   it("UPDATE DU SETTING", async () => {
@@ -104,7 +138,7 @@ describe("TEST SETTINGS DANS LA DB", () => {
       query: UPDATE_SETTING,
       variables: {
         data: {
-          id: baseId,
+          id: createdSetting.id,
           name: "Mon setting degueu",
         },
       },
@@ -118,6 +152,9 @@ describe("TEST SETTINGS DANS LA DB", () => {
     const { id, name } = data?.setting!;
     expect(validate(id)).toBeTruthy();
     expect(name).toMatch("Mon setting degueu");
+
+    //ON MET A JOUR LE NAME
+    createdSetting.name = name;
   });
 
   it("RECUPERATION DE L'ENSEMBLE DES SETTINGS", async () => {
@@ -129,12 +166,7 @@ describe("TEST SETTINGS DANS LA DB", () => {
     const { data, errors } = response.body.singleResult;
     expect(errors).toBeUndefined();
     expect(data).toEqual<TresponseALL>({
-      settings: [
-        {
-          id: baseId,
-          name: "Mon setting degueu",
-        },
-      ],
+      settings: [createdSetting],
     });
   });
 
@@ -145,7 +177,7 @@ describe("TEST SETTINGS DANS LA DB", () => {
     >({
       query: DELETE_SETTING,
       variables: {
-        id: baseId,
+        id: createdSetting.id,
       },
     });
 
@@ -165,7 +197,7 @@ describe("TEST SETTINGS DANS LA DB", () => {
       {
         query: SETTING,
         variables: {
-          id: baseId,
+          id: createdSetting.id,
         },
       }
     );

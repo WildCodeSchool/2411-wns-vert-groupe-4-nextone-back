@@ -1,30 +1,46 @@
 import TicketEntity from "@/entities/Ticket.entity";
-import { MutationGenerateTicketArgs, MutationUpdateTicketArgs, MutationUpdateTicketStatusArgs, UpdateStatusTicketInput } from "@/generated/graphql";
-import TicketRepository from "@/repositories/ticket.repository";
+import {
+  UpdateStatusTicketInput,
+} from "@/generated/graphql";
 import TicketLogService from "./ticketLogs.service";
 import TicketLogEntity from "@/entities/TicketLog.entity";
 import ManagerEntity from "@/entities/Manager.entity";
+import BaseService from "./base.service";
 
-export default class TicketService {
-  db: TicketRepository;
+export default class TicketService extends BaseService<TicketEntity> {
+  // db: TicketRepository;
 
-  constructor() {
-    this.db = new TicketRepository();
+  // constructor() {
+  //   this.db = new TicketRepository();
+  // }
+
+  private static instance: TicketService | null = null
+
+  private constructor() {
+    super(TicketEntity)
   }
 
-  async getAllTickets() {
-    return await this.db.find();
-  }
-
-  async getTicketById(id: string) {
-    const ticket = await this.db.findOne({
-      where: { id },
-    });
-    if (!ticket) {
-      throw new Error("No ticket found");
+  public static gettInstance(): TicketService {
+    if (this.instance === null) {
+      this.instance = new TicketService()
     }
-    return ticket;
+
+    return this.instance;
   }
+
+  // async getAllTickets() {
+  //   return await this.db.find();
+  // }
+
+  // async getTicketById(id: string) {
+  //   const ticket = await this.db.findOne({
+  //     where: { id },
+  //   });
+  //   if (!ticket) {
+  //     throw new Error("No ticket found");
+  //   }
+  //   return ticket;
+  // }
 
   // async getTicketsByServiceId(serviceId: string) {
   //   const tickets = await this.db.findBy({
@@ -36,43 +52,45 @@ export default class TicketService {
   //   return tickets;
   // }
 
-  async generateTicket({ ...ticket }: MutationGenerateTicketArgs["data"]) {
-    const newTicket = this.db.create(ticket);
-    const savedTicket = await this.db.save(newTicket);
-    return savedTicket;
-  }
+  // async generateTicket({ ...ticket }: GenerateTicketInput) {
+  //   const newTicket = this.db.create(ticket);
+  //   const savedTicket = await this.db.save(newTicket);
+  //   return savedTicket;
+  // }
 
-  async deleteTicket(id: string) {
-    const deletedTicket = await this.db.delete(id);
-    if (deletedTicket.affected === 0) {
-      return false
-    }
-    return true;
-  }
+  // async deleteTicket(id: string) {
+  //   const deletedTicket = await this.db.delete(id);
+  //   if (deletedTicket.affected === 0) {
+  //     return false;
+  //   }
+  //   return true;
+  // }
 
-  async updateTicket(id: string, { ...ticket }: MutationUpdateTicketArgs["data"]) {
-    const ticketFound = await this.getTicketById(id);
-    const ticketUpdated = this.db.merge(ticketFound, { ...ticket });
-    return await this.db.save(ticketUpdated);
-  }
+  // async updateTicket(id: string, { ...ticket }: UpdateTicketInput) {
+  //   const ticketFound = await this.getTicketById(id);
+  //   const ticketUpdated = this.db.merge(ticketFound, { ...ticket });
+  //   return await this.db.save(ticketUpdated);
+  // }
 
-  async updateTicketStatus({ id, status }: UpdateStatusTicketInput, manager: ManagerEntity): Promise<TicketEntity> {
-
-    const found = await this.getTicketById(id);
+  async updateTicketStatus(
+    { id, status }: UpdateStatusTicketInput,
+    manager: ManagerEntity
+  ): Promise<TicketEntity> {
+    const found = await this.findById(id);
 
     if (!found) {
-      throw new Error('No ticket with this id.');
+      throw new Error("No ticket with this id.");
     }
-    found.status = status
-    this.db.save(found)
+    found.status = status;
+    this.repo.save(found);
 
     //ON CREE UN TICKETLOG AVEC LE NOUVEAU STATUS
-    const ticketLog = new TicketLogEntity()
-    ticketLog.ticket = found
-    ticketLog.manager = manager
-    ticketLog.status = status
-    await TicketLogService.getInstance().createOne(ticketLog)
-    
-    return found
+    const ticketLog = new TicketLogEntity();
+    ticketLog.ticket = found;
+    ticketLog.manager = manager;
+    ticketLog.status = status;
+    await TicketLogService.getInstance().createOne(ticketLog);
+
+    return found;
   }
 }

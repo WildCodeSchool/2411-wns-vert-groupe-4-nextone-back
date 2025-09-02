@@ -3,7 +3,11 @@ export const LIST_MANAGERS = `#graphql
     managers {
       email
       id
-      is_globally_active
+      isGloballyActive
+      authorizations {
+        isActive
+        createdAt
+      }
     }
   }
 `;
@@ -12,10 +16,10 @@ export const REGISTER_MANAGER = `#graphql
   mutation createManager($infos: InputRegister!) {
     createManager(infos: $infos) {
       email
-      first_name
+      firstName
       id
-      is_globally_active
-      last_name
+      isGloballyActive
+      lastName
       role
     }
   }
@@ -26,13 +30,13 @@ export const LOGIN_MANAGER = `#graphql
     login(infos: $infos) {
       manager {
         id
-        first_name
-        last_name
+        firstName
+        lastName
         email
         role
-        is_globally_active
-        created_at
-        updated_at
+        isGloballyActive
+        createdAt
+        updatedAt
       }
       token
     }
@@ -52,13 +56,13 @@ export const FIND_MANAGER_BY_ID = `#graphql
   query manager($managerId: ID!) {
     manager(id: $managerId) {
       id
-      first_name
-      last_name
+      firstName
+      lastName
       email
       role
-      is_globally_active
-      created_at
-      updated_at
+      isGloballyActive
+      createdAt
+      updatedAt
     }
   }
 `
@@ -73,16 +77,16 @@ export const DELETE_MANAGER = `#graphql
 `
 
 export const UPDATE_MANAGER = `#graphql
-  mutation updateManager($updateManagerId: ID!, $data: UpdateManagerInput!) {
-    updateManager(id: $updateManagerId, data: $data) {
+  mutation updateManager($id: ID!, $data: UpdateManagerInput!) {
+    updateManager(id: $id, data: $data) {
       id
-      first_name
-      last_name
+      firstName
+      lastName
       email
       role
-      is_globally_active
-      created_at
-      updated_at
+      isGloballyActive
+      createdAt
+      updatedAt
     }
   }
 `

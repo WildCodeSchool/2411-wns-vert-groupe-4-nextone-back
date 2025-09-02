@@ -1,11 +1,22 @@
-import { BeforeInsert, Column, CreateDateColumn,
-  Entity, PrimaryGeneratedColumn, UpdateDateColumn, OneToMany} from "typeorm";
+import {
+  BeforeInsert,
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+  ManyToMany,
+  JoinTable,
+  ManyToOne,
+  OneToMany,
+} from "typeorm";
 import * as argon2 from "argon2";
 import { ManagerRole } from "@/generated/graphql";
 import { IsEmail, Length, IsString } from "class-validator";
 import AuthorizationEntity from "./Authorization.entity";
+import CompanyEntity from "./Company.entity";
 
-@Entity("managers")
+@Entity("manager")
 export default class ManagerEntity {
   @BeforeInsert()
   async hashPassword() {
@@ -18,19 +29,21 @@ export default class ManagerEntity {
   @Column()
   @IsString()
   @Length(2, 50, { message: "Le prénom est requis." })
-  first_name: string;
+  firstName: string;
 
   @Column()
   @IsString()
   @Length(2, 50, { message: "Le nom est requis." })
-  last_name: string;
+  lastName: string;
 
   @Column({ unique: true })
   @IsEmail({}, { message: "L'adresse email n'est pas valide." })
   email: string;
 
   @Column()
-  @Length(6, 50, { message: "Le mot de passe doit faire au moins 6 caractères." })
+  @Length(6, 50, {
+    message: "Le mot de passe doit faire au moins 6 caractères.",
+  })
   password: string;
 
   @Column({
@@ -44,25 +57,41 @@ export default class ManagerEntity {
   @Column({
     type: "boolean",
     nullable: true,
-    default: true, 
+    default: false,
   })
-  is_globally_active: boolean;
+  isGloballyActive: boolean;
+
+  // @ManyToMany(() => ServiceEntity, (service) => service.managers, {
+  //   cascade: true,
+  // })
+  // @JoinTable()
+  // services: ServiceEntity[];
 
   @OneToMany(() => AuthorizationEntity, (auth) => auth.manager)
   authorizations: AuthorizationEntity[];
 
+  @Column({ type: "uuid" })
+  companyId: string;
+
+  @ManyToOne(() => CompanyEntity, (company: CompanyEntity) => company.id, {
+    onDelete: "CASCADE",
+  })
+  company: CompanyEntity;
+
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  updated_at: Date;
+  updatedAt: Date;
 }
 
 export class LoginInput {
   @IsEmail({}, { message: "L'adresse email n'est pas valide." })
   email: string;
 
-  @Length(6, 50, { message: "Le mot de passe doit faire au moins 6 caractères." })
+  @Length(6, 50, {
+    message: "Le mot de passe doit faire au moins 6 caractères.",
+  })
   password: string;
 }
 

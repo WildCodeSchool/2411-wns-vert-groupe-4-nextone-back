@@ -1,6 +1,6 @@
 export const LIST_TICKETS = `#graphql
-    query getTickets {
-      getTickets {
+    query tickets {
+      tickets {
         id
         code
       }
@@ -21,8 +21,8 @@ export const GENERATE_TICKET = `#graphql
 `;
 
 export const FIND_TICKET_BY_ID = `#graphql
-    query getTicket($getTicketId: ID!) {
-      getTicket(id: $getTicketId) {
+    query ticket($getTicketId: ID!) {
+      ticket(id: $getTicketId) {
         code
       }
     }
