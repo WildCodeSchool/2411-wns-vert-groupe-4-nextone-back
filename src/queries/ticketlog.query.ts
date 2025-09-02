@@ -50,6 +50,7 @@ query TicketLogsByProperty($field: TicketLogPropertyInput!) {
       firstName
       lastName
     }
+    status
   }
 }
 `

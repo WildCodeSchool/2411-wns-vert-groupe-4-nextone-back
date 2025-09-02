@@ -20,17 +20,9 @@ export class TicketSubscriber implements EntitySubscriberInterface<TicketEntity>
   async afterUpdate(event: UpdateEvent<TicketEntity>) {
     const isStatusModified = event.updatedColumns.some(col => col.propertyName === "status")
 
-    console.log('AFTER UPDATE SUBSCRIBER : ', isStatusModified)
     if (!isStatusModified) return;
     
 
   }
 
-  // createTicketLog(ticket: TicketEntity): TicketLogEntity {
-  //   const ticketLog = new TicketLogEntity()
-  //   ticketLog.ticket = ticket
-  //   ticketLog.status = ticket.status
-    
-  //   return ticketLog
-  // }
 }
