@@ -55,4 +55,5 @@ export default class ServicesService {
     await this.db.save(service);
     return service.isGloballyActive;
   }
+  
 }

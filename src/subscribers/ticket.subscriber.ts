@@ -55,6 +55,7 @@ export class TicketSubscriber
     event.entity.code = code;
   }
 
+
   async afterInsert({ entity, manager }: InsertEvent<TicketEntity>) {
     const ticketLog = new TicketLogEntity();
     ticketLog.ticket = entity;

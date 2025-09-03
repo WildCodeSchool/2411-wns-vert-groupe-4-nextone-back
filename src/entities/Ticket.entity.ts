@@ -8,6 +8,7 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
+  BeforeInsert,
 } from "typeorm";
 import { ServiceEntity } from "./Service.entity";
 import TicketLogEntity from "./TicketLog.entity";
@@ -30,7 +31,7 @@ export default class TicketEntity {
   @Column()
   email: string;
 
-  @Column()
+  @Column({ nullable: true})
   phone: string;
 
   @Column({
@@ -47,7 +48,7 @@ export default class TicketEntity {
   @JoinColumn()
   service: ServiceEntity;
 
-  @OneToMany(() => TicketLogEntity, (ticketLog: TicketLogEntity) => ticketLog.ticket,{ nullable: true})
+  @OneToMany(() => TicketLogEntity, (ticketLog: TicketLogEntity) => ticketLog.ticket, { nullable: true})
   ticketLogs: TicketLogEntity[]
 
   @CreateDateColumn({ name: "created_at"})
@@ -55,5 +56,7 @@ export default class TicketEntity {
 
   @UpdateDateColumn({ name: "updated_at"})
   updatedAt: Date;
+
+
 
 }

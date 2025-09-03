@@ -192,7 +192,7 @@ describe("Test sur les tickets", () => {
     });
 
     assert(response.body.kind === "single");
-    const { serviceId, ...rest } = generateTicketExample;
+    const { serviceId,  ...rest } = generateTicketExample;
     expect(response.body.singleResult.data).toEqual({
       generateTicket: {
         id: "3",
