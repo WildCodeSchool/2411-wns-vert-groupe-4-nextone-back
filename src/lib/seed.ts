@@ -3,6 +3,7 @@ import ManagerEntity from "@/entities/Manager.entity";
 import { ServiceEntity } from "@/entities/Service.entity";
 import TicketEntity from "@/entities/Ticket.entity";
 import {
+  CreateServiceInput,
   GenerateTicketInput,
   InputRegister,
   ManagerRole,
@@ -49,11 +50,15 @@ const createServices = async (
   ];
   const services = await Promise.all(
     serviceNames.map(async (name) => {
-      const service = new ServiceEntity();
-      service.name = name;
-      service.company = company;
+      // const service = new ServiceEntity();
+      // service.name = name;
+      // service.company = company;
       // service.companyId = company.id
-      const created = await new ServicesService().createService(service);
+      const data: CreateServiceInput = {
+        companyId: company.id,
+        name
+      }
+      const created = await new ServicesService().createService(data);
       return created;
     })
   );

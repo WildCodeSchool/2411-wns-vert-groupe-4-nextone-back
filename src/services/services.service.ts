@@ -4,6 +4,7 @@ import {
 } from "@/generated/graphql";
 import ServiceRepository from "@/repositories/Service.repository";
 import { ServiceEntity } from "@/entities/Service.entity";
+import CompanyService from "./company.service";
 
 export default class ServicesService {
   db: ServiceRepository;
@@ -24,7 +25,11 @@ export default class ServicesService {
   }
 
   async createService(data: CreateServiceInput): Promise<ServiceEntity> {
-    const service = this.db.create(data);
+    const company = await CompanyService.getService().findById(data.companyId)
+    if (!company) {
+      throw new Error("No Company with this id. Impossible to create service.")
+    }
+    const service = this.db.create({...data, company});
     return this.db.save(service);
   }
 

@@ -26,15 +26,22 @@ import assert from "assert";
 import { validate } from "uuid";
 import CompanyEntity from "../../src/entities/Company.entity";
 import CompanyService from "../../src/services/company.service";
-import { fakeCompanyInput, fakeManagerInput, fakeTicketInput, } from "../../src/utils/dataTest"
+import ServicesService from "../../src/services/services.service";
+import {
+  fakeCompanyInput,
+  fakeManagerInput,
+  fakeService,
+  fakeServiceInput,
+  fakeTicketInput,
+} from "../../src/utils/dataTest";
 
-type PartialTicketLog = Partial<Omit<TicketLog, "ticket">> & {ticket: Pick<Ticket, "id" | "firstName" | "lastName">}
+type PartialTicketLog = Partial<Omit<TicketLog, "ticket">> & {
+  ticket: Pick<Ticket, "id" | "firstName" | "lastName">;
+};
 
 type TResponse = {
   ticketLog: PartialTicketLog[] | null;
 };
-
-
 
 type TResponseDelete = {
   message: DeleteResponse;
@@ -43,14 +50,10 @@ type TResponseDelete = {
 let server: ApolloServer;
 const schema = makeExecutableSchema({ typeDefs, resolvers });
 
-
-
-
 beforeAll(async () => {
   server = new ApolloServer({
     schema,
   });
-
 
   try {
     if (!testDataSource.isInitialized) {
@@ -86,52 +89,60 @@ describe("TEST TICKETLOG DANS LA DB", () => {
   let baseTicketId: string;
   let baseManagerId: string;
   let baseCompanyId: string;
+  let baseServiceId: string;
 
   it("CREATION D'UN TICKETLOG", async () => {
+
     //CREATION D'UNE COMPANY
     const newCompany: CompanyEntity =
       await CompanyService.getService().createOne(fakeCompanyInput);
     baseCompanyId = newCompany.id;
 
+    //CREATION DU SERVICE
+    const newService = await new ServicesService().createService(
+      {...fakeServiceInput, companyId: baseCompanyId}
+
+    );
+    baseServiceId = newService.id
+
     //CREATION D'UN TICKET
     const newTicket: TicketEntity =
-      await TicketService.gettInstance().createOne(fakeTicketInput);
+      await TicketService.gettInstance().createOne({...fakeTicketInput, service: newService});
     baseTicketId = newTicket.id;
 
     // //ET ENFIN, ON RECUPERE LE TICKETLOG QUI A ETE CREE VIA
     // LE SUBSCRIBER SUR TICKETENTITY👍
-    const response = await server.executeOperation<TResponse, QueryTicketLogsByPropertyArgs>(
-      {
-        query: TICKETLOG_BY_PROPERTY,
-        variables: {
-          field: {
-            ticketId: baseTicketId
-          }
-        }
-      }
-    )
+    const response = await server.executeOperation<
+      TResponse,
+      QueryTicketLogsByPropertyArgs
+    >({
+      query: TICKETLOG_BY_PROPERTY,
+      variables: {
+        field: {
+          ticketId: baseTicketId,
+        },
+      },
+    });
     assert(response.body.kind === "single");
 
-    expect(response.body.singleResult.errors).toBeUndefined()
-    expect(response.body.singleResult.data).not.toBeNull()
-    expect(response.body.singleResult.data).not.toBeUndefined()
-    expect(response.body.singleResult.data?.ticketLog).toHaveLength(1)
-    const { id, ...rest } = response.body.singleResult.data?.ticketLog![0]!
-    expect(validate(id)).toBeTruthy
-    baseId = id!
+    expect(response.body.singleResult.errors).toBeUndefined();
+    expect(response.body.singleResult.data).not.toBeNull();
+    expect(response.body.singleResult.data).not.toBeUndefined();
+    expect(response.body.singleResult.data?.ticketLog).toHaveLength(1);
+    const { id, ...rest } = response.body.singleResult.data?.ticketLog![0]!;
+    expect(validate(id)).toBeTruthy;
+    baseId = id!;
     expect(rest).toEqual<PartialTicketLog>({
       ticket: {
         id: baseTicketId,
         firstName: fakeTicketInput.firstName,
-        lastName: fakeTicketInput.lastName
+        lastName: fakeTicketInput.lastName,
       },
-      status: Status.Created
-    })
+      status: Status.Created,
+    });
   });
 
-
   it("UPDATE DU TICKET CREE", async () => {
-
     //CREATION D'UN MANAGER POUR POUVOIR UPDATE LE TICKET
     fakeManagerInput.companyId = baseCompanyId;
     const newManager: ManagerEntity = await new ManagerService().create(
@@ -142,34 +153,40 @@ describe("TEST TICKETLOG DANS LA DB", () => {
     //ON MET A JOUR LE TICKET
     const updateData: UpdateStatusTicketInput = {
       id: baseTicketId,
-      status: Status.Pending
-    }
-    await TicketService.gettInstance().updateTicketStatus(updateData, newManager)
+      status: Status.Pending,
+    };
+    await TicketService.gettInstance().updateTicketStatus(
+      updateData,
+      newManager
+    );
 
     //ON RECUPERE LE TICKETLOG QUI A ETE CREE
-    const response = await server.executeOperation<TResponse, QueryTicketLogsByPropertyArgs>({
+    const response = await server.executeOperation<
+      TResponse,
+      QueryTicketLogsByPropertyArgs
+    >({
       query: TICKETLOG_BY_PROPERTY,
       variables: {
         field: {
-          ticketId: baseTicketId
-        }
-      }
-    })
+          ticketId: baseTicketId,
+        },
+      },
+    });
 
-    assert(response.body.kind === "single")
-    expect(response.body.singleResult.errors).toBeUndefined()
-    expect(response.body.singleResult.data?.ticketLog).toHaveLength(2)
-    const { id, ...rest } = response.body.singleResult.data?.ticketLog![0] as PartialTicketLog
-    expect(validate(id)).toBeTruthy()
+    assert(response.body.kind === "single");
+    expect(response.body.singleResult.errors).toBeUndefined();
+    expect(response.body.singleResult.data?.ticketLog).toHaveLength(2);
+    const { id, ...rest } = response.body.singleResult.data
+      ?.ticketLog![0] as PartialTicketLog;
+    expect(validate(id)).toBeTruthy();
     expect(rest).toEqual<PartialTicketLog>({
       ticket: {
         id: baseTicketId,
         firstName: fakeTicketInput.firstName,
-        lastName: fakeTicketInput.lastName
+        lastName: fakeTicketInput.lastName,
       },
-      status: Status.Pending
-    })
- 
+      status: Status.Pending,
+    });
   });
 
   it("DELETE DU TICKET CREE", async () => {

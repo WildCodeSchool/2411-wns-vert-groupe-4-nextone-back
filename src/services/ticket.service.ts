@@ -6,6 +6,7 @@ import TicketLogService from "./ticketLogs.service";
 import TicketLogEntity from "@/entities/TicketLog.entity";
 import ManagerEntity from "@/entities/Manager.entity";
 import BaseService from "./base.service";
+import { Between } from "typeorm";
 
 export default class TicketService extends BaseService<TicketEntity> {
 
@@ -44,5 +45,41 @@ export default class TicketService extends BaseService<TicketEntity> {
     await TicketLogService.getInstance().createOne(ticketLog);
 
     return found;
+  }
+
+  async TodayTicket(serviceId: string): Promise<number> {
+    const now = new Date();
+
+    const start = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      0,
+      0,
+      0,
+      0
+    );
+    const end = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      23,
+      59,
+      59,
+      999
+    );
+    try {
+      const totalTicket = await this.repo.count({
+        where: {
+          service: { id: serviceId},
+          createdAt: Between(start, end),
+        },
+      });
+
+      return totalTicket
+    } catch (error: any) {
+      console.log("ERROR : ", error?.message)
+      return 0
+    }
   }
 }

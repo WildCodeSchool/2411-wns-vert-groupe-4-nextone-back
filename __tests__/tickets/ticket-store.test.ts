@@ -98,7 +98,6 @@ const ticketsData: Ticket[] = [
 ];
 
 const generateTicketExample: GenerateTicketInput = {
-  code: "003",
   firstName: "Ticket",
   lastName: "Test",
   email: "ticket.test@gmail.com",
@@ -127,7 +126,7 @@ beforeAll(async () => {
     Mutation: {
       generateTicket: (_: null, { data }: { data: GenerateTicketInput }) => {
         const { serviceId, ...rest } = data;
-        store.set("Ticket", "3", { ...rest, ticketLogs: [] });
+        store.set("Ticket", "3", { ...rest, ticketLogs: [], code: "003" });
         return store.get("Ticket", "3");
       },
       deleteTicket: (_: null, { id }: { id: string }) => {
@@ -197,6 +196,7 @@ describe("Test sur les tickets", () => {
     expect(response.body.singleResult.data).toEqual({
       generateTicket: {
         id: "3",
+        code: "003",
         ...rest,
       },
     });
@@ -210,7 +210,7 @@ describe("Test sur les tickets", () => {
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.data).toEqual({
-      ticket: { code: generateTicketExample.code },
+      ticket: { code: "003" },
     });
   });
 
