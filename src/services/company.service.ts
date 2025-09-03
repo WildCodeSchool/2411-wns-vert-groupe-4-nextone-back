@@ -17,4 +17,20 @@ export default class CompanyService extends BaseService<CompanyEntity> {
     return this.instance;
   }
 
+  // public async findById(id: string) {
+  //   console.log("FIND COMPANY BY ID ")
+  //   const company = await this.repo.find({
+  //     where: {
+  //       id
+  //     },
+  //     relations: {
+  //       managers: true,
+  //       services: true
+  //     }
+      
+  //   })
+  //   console.log('COMPANY : ',company)
+  //   return company[0]
+  // }
+
 }

@@ -3,6 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -22,22 +23,32 @@ export default class TicketLogEntity {
   })
   status: Status;
 
+
+  //MANAGER RELATION
+
   @Column({ nullable: true, type: "uuid" })
   managerId: string;
 
-  @ManyToOne(() => ManagerEntity, (manager: ManagerEntity) => manager.id, {
+  @ManyToOne(() => ManagerEntity, (manager: ManagerEntity) => manager.ticketLogs, {
     eager: true,
     nullable: true,
   })
+  @JoinColumn()
   manager: ManagerEntity;
+
+
+  //TICKET RELATION
 
   @Column({ type: "uuid" })
   ticketId: string;
 
-  @ManyToOne(() => TicketEntity, (ticket: TicketEntity) => ticket.id, {
+  @ManyToOne(() => TicketEntity, (ticket: TicketEntity) => ticket.ticketLogs, {
     eager: true,
   })
+  @JoinColumn()
   ticket: TicketEntity;
+
+
 
   @CreateDateColumn()
   createdAt: Date;

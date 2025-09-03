@@ -21,30 +21,12 @@ import {
   QueryCompanyArgs,
 } from "../../src/generated/graphql";
 import { validate } from "uuid";
+import { fakeCompanyInput, fakeCompanyDataUpdateInput } from "../../src/utils/dataTest";
 
 
 let server: ApolloServer;
 const schema = makeExecutableSchema({ typeDefs, resolvers });
 
-const fakeCompanyData: CreateCompanyInput = {
- address: "Rue du jambon",
-  email: "jambonneau@gmail.com",
-  name: "JambonCorp",
-  phone: "0123456789",
-  siret: "362 521 879 00089",
-  city: "PARIS",
-  postalCode: "75000",
-};
-
-const fakeCompanyDataUpdate: CreateCompanyInput = {
-  address: "Rue du jambon UP",
-  email: "jambonneauUPDATE@gmail.com",
-  name: "JambonCorp",
-  phone: "0123456789",
-  siret: "362 521 879 00089",
-  city: "PARIS",
-  postalCode: "75000",
-};
 
 //ON MOCK LA DB AVEC CELLE DE TEST
 jest.mock("../../src/lib/datasource", () => {
@@ -74,11 +56,6 @@ beforeAll(async () => {
 
 afterAll(async () => {
   //ON VIDE LA DB DE TEST
-  // if (testDataSource.isInitialized) {
-  //   // await testDataSource.dropDatabase();
-  // }
-  // await testDataSource.synchronize(true)
-
   await testDataSource.destroy();
 
   jest.clearAllMocks();
@@ -106,7 +83,7 @@ describe("TEST COMPANY AVEC DB", () => {
     >({
       query: CREATE_COMPANY_DB,
       variables: {
-        data: fakeCompanyData,
+        data: fakeCompanyInput,
       },
     });
 
@@ -118,7 +95,7 @@ describe("TEST COMPANY AVEC DB", () => {
     baseId = id;
     expect(validate(id)).toBeTruthy();
     expect(rest).toEqual({
-      ...fakeCompanyData,
+      ...fakeCompanyInput,
     });
   });
 
@@ -130,7 +107,7 @@ describe("TEST COMPANY AVEC DB", () => {
       {
         query: UPDATE_COMPANY_DB,
         variables: {
-          data: { ...fakeCompanyDataUpdate, id: baseId },
+          data: { ...fakeCompanyDataUpdateInput, id: baseId },
         },
       },
       {
@@ -144,7 +121,7 @@ describe("TEST COMPANY AVEC DB", () => {
     expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data).toEqual({
       company: {
-        ...fakeCompanyDataUpdate,
+        ...fakeCompanyDataUpdateInput,
         id: baseId,
       },
     });
@@ -160,7 +137,7 @@ describe("TEST COMPANY AVEC DB", () => {
     expect(response.body.singleResult.data).toEqual<TResponseALL>({
       companies: [
         {
-          name: fakeCompanyDataUpdate.name,
+          name: fakeCompanyDataUpdateInput.name,
           id: baseId,
         },
       ],

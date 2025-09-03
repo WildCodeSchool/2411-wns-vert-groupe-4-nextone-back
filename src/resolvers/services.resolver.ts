@@ -31,7 +31,7 @@ export default {
       _: any,
       { id }: QueryServiceArgs,
       ctx: MyContext
-    ): Promise<Service | null> => {
+    ): Promise<ServiceEntity | null> => {
       const service = await servicesService.getServiceById(id);
       console.log("SERVICXE : ", service)
       // if (service ) {
