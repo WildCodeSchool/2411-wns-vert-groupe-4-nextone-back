@@ -6,8 +6,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  OneToMany,
+  JoinColumn,
 } from "typeorm";
 import { ServiceEntity } from "./Service.entity";
+import TicketLogEntity from "./TicketLog.entity";
 
 @Entity({ name: "ticket" })
 export default class TicketEntity {
@@ -40,8 +43,12 @@ export default class TicketEntity {
   // @Column({ type: "uuid", nullable: true})
   // ServiceId: string;
 
-  @ManyToOne(() => ServiceEntity, (service: ServiceEntity) => service.id, { eager: true})
+  @ManyToOne(() => ServiceEntity, (service: ServiceEntity) => service.tickets, { eager: true })
+  @JoinColumn()
   service: ServiceEntity;
+
+  @OneToMany(() => TicketLogEntity, (ticketLog: TicketLogEntity) => ticketLog.ticket)
+  ticketLogs: TicketLogEntity[]
 
   @CreateDateColumn({ name: "created_at"})
   createdAt: Date;

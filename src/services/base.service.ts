@@ -6,13 +6,31 @@ import {
   Repository,
 } from "typeorm";
 import AppDataSource from "../lib/datasource";
-import { CreateCompanyInput } from "@/generated/graphql";
 
 export default abstract class BaseService<T extends ObjectLiteral> {
   protected repo: Repository<T>;
 
   constructor(entity: EntityTarget<T>) {
     this.repo = AppDataSource.getRepository(entity);
+  }
+
+  private getRelations(): string[] {
+    const relations: string[] = [];
+    //MANY TO MANY
+    this.repo.metadata.manyToManyRelations.forEach((rel) =>
+      relations.push(rel.propertyName)
+    );
+    //MANY TO ONE
+    this.repo.metadata.manyToOneRelations.forEach((rel) =>
+      relations.push(rel.propertyName)
+    );
+    //ONE TO MANY
+    this.repo.metadata.oneToManyRelations.forEach((rel) =>
+      relations.push(rel.propertyName)
+    );
+    // this.repo.metadata.relationsWithJoinColumns.forEach(rel => relations.push(rel.propertyPath))
+
+    return relations;
   }
 
   //CREER UNE INSTANCE DE T
@@ -29,17 +47,21 @@ export default abstract class BaseService<T extends ObjectLiteral> {
 
   //RECUPERER TOUTES LES INSTANCES
   public async findAll() {
-    const list = await this.repo.find({ relations: {}});
+    const relations = this.getRelations();
+    const list = await this.repo.find({ relations });
     return list;
   }
 
   //RECUPERER UNE INSTANCE VIA SON ID
   public async findById(id: string) {
+    const relations = this.getRelations();
     const ad = await this.repo.findOne({
       where: {
         id,
       } as any,
+      relations,
     });
+
     return ad;
   }
 
@@ -73,11 +95,12 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     name: string;
   }): Promise<T[]> {
     const { start, end, name } = data;
-    
+
     const result = await this.repo
       .createQueryBuilder(name)
       .where(`${name}.createdAt >= :start`, { start: new Date(start) })
-      .andWhere(`${name}.createdAt <= :end`, { end: new Date(end) }).getMany();
+      .andWhere(`${name}.createdAt <= :end`, { end: new Date(end) })
+      .getMany();
 
     return result;
   }
@@ -93,7 +116,6 @@ export default abstract class BaseService<T extends ObjectLiteral> {
 
   //UPDATE
   public async updateOne(id: string, entity: Partial<T>): Promise<T | null> {
-
     const updated = await this.repo.update(id, entity);
     if (!updated) {
       throw new Error("Nothing affected.");
@@ -101,8 +123,8 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     const updatedEntity = await this.findById(id);
 
     if (!updatedEntity) {
-    throw new Error("Entity not found after update");
-  }
+      throw new Error("Entity not found after update");
+    }
     return updatedEntity;
   }
 }

@@ -4,13 +4,11 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  ManyToMany,
   OneToMany,
   ManyToOne,
   JoinColumn,
 } from "typeorm";
 import AuthorizationEntity from "./Authorization.entity";
-import ManagerEntity from "./Manager.entity";
 import TicketEntity from "./Ticket.entity";
 import CompanyEntity from "./Company.entity";
 
@@ -42,13 +40,11 @@ export class ServiceEntity {
   authorizations: AuthorizationEntity[];
 
   //TICKETS
-  @OneToMany(() => TicketEntity, (ticket) => ticket.id)
+  @OneToMany(() => TicketEntity, (ticket) => ticket.service)
   tickets: TicketEntity[];
 
   //COMPANY
-  @Column({ type: "uuid", name: "company_id" })
-  companyId: string;
-
-  @ManyToOne(() => CompanyEntity, (company) => company.id)
+  @ManyToOne(() => CompanyEntity, (company) => company.services)
+  @JoinColumn()
   company: CompanyEntity;
 }

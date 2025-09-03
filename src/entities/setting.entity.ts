@@ -24,7 +24,7 @@ import CompanyEntity from "./Company.entity";
     @Column({ type: "uuid"})
     companyId: string;
 
-    @ManyToOne(() => CompanyEntity, (company: CompanyEntity) => company.id)
+    @ManyToOne(() => CompanyEntity, (company: CompanyEntity) => company.settings)
     company: CompanyEntity
 
     @CreateDateColumn()

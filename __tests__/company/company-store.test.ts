@@ -11,7 +11,6 @@ import CompanyEntity from "../../src/entities/Company.entity";
 import assert from "assert";
 import {
   Company,
-  CreateCompanyInput,
   DeleteResponseCompany,
   MutationCreateCompanyArgs,
   MutationDeleteCompanyArgs,
@@ -25,6 +24,8 @@ import {
   DELETE_COMPANY,
   UPDATE_COMPANY,
 } from "../../src/queries/company.query";
+import { fakeCompanyInput } from "../../src/utils/dataTest";
+
 
 const fakeCompanies: Partial<CompanyEntity>[] = [
   {
@@ -48,15 +49,7 @@ type TResponseDelete = {
   message: DeleteResponseCompany;
 };
 
-const fakeCreationData: CreateCompanyInput = {
-  name: "test",
-  address: "test",
-  siret: "test",
-  email: "test",
-  phone: "test",
-  city: "test",
-  postalCode: "test"
-};
+;
 
 let server: ApolloServer;
 const schema = makeExecutableSchema({ typeDefs, resolvers });
@@ -131,7 +124,7 @@ describe("TEST DES COMPANIES DANS LE STORE", () => {
     const response = await server.executeOperation<TResponseCreate, MutationCreateCompanyArgs>({
       query: CREATE_COMPANY,
       variables: {
-        data: fakeCreationData,
+        data: fakeCompanyInput,
       },
     });
 
@@ -140,7 +133,7 @@ describe("TEST DES COMPANIES DANS LE STORE", () => {
     expect(response.body.singleResult.data).toEqual({
       company: {
         id: "3",
-        name: "test",
+        name: fakeCompanyInput.name,
       },
     });
   });

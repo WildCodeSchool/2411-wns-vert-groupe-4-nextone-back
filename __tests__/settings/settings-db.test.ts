@@ -1,9 +1,4 @@
 import { ApolloServer } from "@apollo/server";
-import {
-  createMockStore,
-  addMocksToSchema,
-  IMockStore,
-} from "@graphql-tools/mock";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import typeDefs from "../../src/typeDefs";
 import resolvers from "../../src/resolvers";
@@ -16,8 +11,6 @@ import {
   UPDATE_SETTING,
 } from "../../src/queries/setting.query";
 import {
-  Company,
-  CreateCompanyInput,
   DeleteResponse,
   MutationCreateSettingArgs,
   MutationDeleteSettingArgs,
@@ -28,9 +21,8 @@ import {
 import assert from "assert";
 import { validate } from "uuid";
 import CompanyEntity from "../../src/entities/Company.entity";
-import SettingEntity from "../../src/entities/setting.entity";
 import CompanyService from "../../src/services/company.service";
-import ManagerEntity from "../../src/entities/Manager.entity";
+import { fakeCompanyInput } from "../../src/utils/dataTest";
 
 let server: ApolloServer;
 const schema = makeExecutableSchema({ typeDefs, resolvers });
@@ -46,15 +38,6 @@ type TresponseDelete = {
 };
 
 
-const fakeCompany: CreateCompanyInput = {
-  name: "Jambonneau CORPORATION",
-  address: "38, Rue de la saucisse",
-  postalCode: "31000",
-  city: "TOULOUSE",
-  siret: "362 521 879 00034",
-  email: "jambo.no@gmail.com",
-  phone: "0123456789",
-};
 
 jest.mock("../../src/lib/datasource", () => {
   return {
@@ -72,11 +55,6 @@ beforeAll(async () => {
     if (!testDataSource.isInitialized) {
       await testDataSource.initialize();
     }
-
-    // await testDataSource.query("TRUNCATE TABLE setting, company CASCADE");
-    // await testDataSource.getRepository(SettingEntity).delete({});
-    // await testDataSource.getRepository(CompanyEntity).delete({});
-    // await testDataSource.getRepository(ManagerEntity).delete({})
     await testDataSource.synchronize(true)
   } catch (error) {
     console.error("Error initializing test database:", error);
@@ -87,9 +65,6 @@ beforeAll(async () => {
 afterAll(async () => {
   if (testDataSource.isInitialized) {
   }
-  // await testDataSource.synchronize(true)
-
-  // await testDataSource.dropDatabase();
   await testDataSource.destroy(); //MERCI COLINE 👍
 
   jest.clearAllMocks();
@@ -103,7 +78,7 @@ describe("TEST SETTINGS DANS LA DB", () => {
 
     //CREATION D'UNE COMPANY
     const company: CompanyEntity = await CompanyService.getService().createOne(
-      fakeCompany
+      fakeCompanyInput
     );
     companyId = company.id;
 

@@ -5,12 +5,8 @@ import resolvers from "../../src/resolvers";
 import testDataSource from "../../src/lib/datasource_test";
 import {
   Counter,
-  CreateCompanyInput,
-  CreateCounterInput,
   DeleteResponse,
-  InputRegister,
   Manager,
-  ManagerRole,
   MutationAddManagerOnCounterArgs,
   MutationCreateCounterArgs,
   MutationDeleteCounterArgs,
@@ -18,7 +14,6 @@ import {
   MutationUpdateCounterArgs,
   MutationUpdateServiceOnCounterArgs,
   QueryCounterArgs,
-  QueryTicketLogArgs,
   Service,
 } from "../../src/generated/graphql";
 import ManagerEntity from "../../src/entities/Manager.entity";
@@ -38,6 +33,7 @@ import CompanyEntity from "../../src/entities/Company.entity";
 import CompanyService from "../../src/services/company.service";
 import { ServiceEntity } from "../../src/entities/Service.entity";
 import ServiceService from "../../src/services/services.service";
+import { fakeCompanyInput, fakeCounterInput, fakeManagerInput } from "../../src/utils/dataTest";
 
 type TResponse = {
   counter: Partial<Counter> | null;
@@ -70,29 +66,6 @@ type TResponseDelete = {
 let server: ApolloServer;
 const schema = makeExecutableSchema({ typeDefs, resolvers });
 
-const fakeCompany: CreateCompanyInput = {
-  address: "Rue du chateau",
-  email: "google@gmail.com",
-  name: "Google",
-  phone: "0404040404",
-  siret: "362 521 879 00034",
-  city: "TOULOUSE",
-  postalCode: "31000",
-};
-
-const fakeManager: InputRegister = {
-  password: "test",
-  email: "jeanmichel@gmail.com",
-  role: ManagerRole.Admin,
-  firstName: "jean",
-  lastName: "MICHEL",
-  companyId: "",
-};
-const fakeCounter: CreateCounterInput = {
-  name: "fake counter",
-  serviceIdS: [],
-  isAvailable: true,
-};
 
 beforeAll(async () => {
   server = new ApolloServer({
@@ -137,14 +110,14 @@ describe("TEST COUTER DANS LA DB", () => {
   it("CREATION D'UN COUNTER", async () => {
     //CREATION D'UNE COMPANY
     const newCompany: CompanyEntity =
-      await CompanyService.getService().createOne(fakeCompany);
+      await CompanyService.getService().createOne(fakeCompanyInput);
     baseCompanyId = newCompany.id;
     BaseCompany = newCompany;
 
     //CREATION D'UN MANAGER
-    fakeManager.companyId = baseCompanyId;
+    fakeManagerInput.companyId = baseCompanyId;
     const newManager: ManagerEntity = await new ManagerService().create(
-      fakeManager
+      fakeManagerInput
     );
     baseManagerId = newManager.id;
 
@@ -152,13 +125,13 @@ describe("TEST COUTER DANS LA DB", () => {
     const service = new ServiceEntity();
     service.name = "service TEST";
     service.company = newCompany;
-    service.companyId = newCompany.id;
+    // service.companyId = newCompany.id;
     const newService: ServiceEntity = await new ServiceService().createService(
       service
     );
     baseServiceId = newService.id;
 
-    fakeCounter.serviceIdS.push(baseServiceId);
+    fakeCounterInput.serviceIdS.push(baseServiceId);
 
     //CREATION DU COUNTER
     const response = await server.executeOperation<
@@ -168,7 +141,7 @@ describe("TEST COUTER DANS LA DB", () => {
       query: CREATE_COUNTER,
       variables: {
         data: {
-          ...fakeCounter,
+          ...fakeCounterInput,
         },
       },
     });
@@ -197,7 +170,7 @@ describe("TEST COUTER DANS LA DB", () => {
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.errors).toBeUndefined();
-    const { serviceIdS, ...result } = fakeCounter;
+    const { serviceIdS, ...result } = fakeCounterInput;
     expect(response.body.singleResult.data).toEqual<TResponse>({
       counter: {
         ...result,
@@ -226,7 +199,7 @@ describe("TEST COUTER DANS LA DB", () => {
     expect(response.body.singleResult.data).toEqual<TResponseAdd>({
       counter: {
         id: baseId,
-        name: fakeCounter.name,
+        name: fakeCounterInput.name,
         isAvailable: false,
         manager: {
           id: baseManagerId,
@@ -251,7 +224,7 @@ describe("TEST COUTER DANS LA DB", () => {
     expect(response.body.singleResult.data).toEqual<TResponseAdd>({
       counter: {
         id: baseId,
-        name: fakeCounter.name,
+        name: fakeCounterInput.name,
         isAvailable: false,
         manager: null,
       },
@@ -262,7 +235,7 @@ describe("TEST COUTER DANS LA DB", () => {
 
     //CREATION DUN SECOND SERVICE
     const serv = new ServiceEntity()
-    serv.companyId = baseCompanyId
+    // serv.companyId = baseCompanyId
     serv.company = BaseCompany
     serv.name = "second service"
     const newService: ServiceEntity = await new ServiceService().createService(
@@ -285,7 +258,7 @@ describe("TEST COUTER DANS LA DB", () => {
     expect(response.body.singleResult.data).toEqual<TResponseServices>({
       counter: {
         id: baseId,
-        name: fakeCounter.name,
+        name: fakeCounterInput.name,
         isAvailable: false,
         services: [
           {

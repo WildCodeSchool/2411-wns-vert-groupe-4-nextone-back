@@ -10,7 +10,6 @@ import resolvers from "../../src/resolvers";
 import {
   Company,
   DeleteResponse,
-  MutationCreateServiceArgs,
   MutationCreateSettingArgs,
   MutationDeleteSettingArgs,
   MutationUpdateSettingArgs,

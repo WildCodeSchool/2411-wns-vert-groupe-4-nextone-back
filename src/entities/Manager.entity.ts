@@ -5,8 +5,6 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-  ManyToMany,
-  JoinTable,
   ManyToOne,
   OneToMany,
 } from "typeorm";
@@ -15,6 +13,8 @@ import { ManagerRole } from "@/generated/graphql";
 import { IsEmail, Length, IsString } from "class-validator";
 import AuthorizationEntity from "./Authorization.entity";
 import CompanyEntity from "./Company.entity";
+import ConnectionLogEntity from "./ConnectionLog.entity";
+import TicketLogEntity from "./TicketLog.entity";
 
 @Entity("manager")
 export default class ManagerEntity {
@@ -61,23 +61,24 @@ export default class ManagerEntity {
   })
   isGloballyActive: boolean;
 
-  // @ManyToMany(() => ServiceEntity, (service) => service.managers, {
-  //   cascade: true,
-  // })
-  // @JoinTable()
-  // services: ServiceEntity[];
-
+  //AUTHRORIZATION
   @OneToMany(() => AuthorizationEntity, (auth) => auth.manager)
   authorizations: AuthorizationEntity[];
 
-  @Column({ type: "uuid" })
-  companyId: string;
-
-  @ManyToOne(() => CompanyEntity, (company: CompanyEntity) => company.id, {
+  //COMPANY
+  @ManyToOne(() => CompanyEntity, (company: CompanyEntity) => company.managers, {
     onDelete: "CASCADE",
   })
   company: CompanyEntity;
 
+  //CONNECTIONLOG
+  @OneToMany(() => ConnectionLogEntity, (connectionLog) => connectionLog.manager)
+  connectionLogs: ConnectionLogEntity[]
+
+  //TICKETLOG
+  @OneToMany(() => TicketLogEntity, (ticketLog) => ticketLog.manager)
+  ticketLogs: TicketLogEntity[]
+    
   @CreateDateColumn()
   createdAt: Date;
 

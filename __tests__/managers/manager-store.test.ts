@@ -7,18 +7,12 @@ import {
   IMockStore,
 } from "@graphql-tools/mock";
 
-// import Manager from "../../src/entities/Manager.entity";
 import {
   InputRegister,
-  ManagerRole,
   InputLogin,
   MutationUpdateManagerArgs,
   MutationCreateManagerArgs,
-  ManagerWithoutPassword,
-  Company,
-  Service,
   Manager,
-  UpdateManagerInput,
   Message,
 } from "../../src/generated/graphql";
 import {
@@ -32,6 +26,10 @@ import {
   TOGGLE_GLOBAL_ACCESS_MANAGER,
 } from "../../src/queries/manager.query";
 import typeDefs from "../../src/typeDefs";
+import {
+  fakeManagerInput,
+  fakeManagerWithoutPassword,
+} from "../../src/utils/dataTest";
 
 type StatusResponse = {
   message: string;
@@ -47,7 +45,7 @@ type ResponseCreateManager = {
 };
 
 type ResponseLoginManager = {
-  manager: Manager;
+  manager: Omit<Manager, "connectionLogs">;
   token: string;
 };
 
@@ -81,65 +79,6 @@ type ResponseToggleGlobalManager = {
   };
 };
 
-const fakeCompany: Company = {
-  id: "f363fd0e-cb52-4089-bc25-75c72112d045",
-  name: "Jambonneau CORPORATION",
-  address: "38, Rue de la saucisse",
-  postalCode: "31000",
-  city: "TOULOUSE",
-  siret: "362 521 879 00034",
-  email: "jambo.no@gmail.com",
-  phone: "0123456789",
-  createdAt: "2025-07-04T10:46:23.954Z",
-  updatedAt: "2025-07-04T10:46:23.954Z",
-  services: [],
-};
-
-const createManagerExample: InputRegister = {
-  firstName: "Jean",
-  lastName: "Dupont",
-  email: "jean@example.com",
-  password: "motdepasse",
-  role: ManagerRole.Admin,
-  isGloballyActive: true,
-  companyId: "f363fd0e-cb52-4089-bc25-75c72112d045",
-};
-
-const mockManager: ManagerWithoutPassword = {
-  id: "1",
-  firstName: "Jean",
-  lastName: "Dupont",
-  email: "jean@example.com",
-  role: ManagerRole.Admin,
-  isGloballyActive: true,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  authorizations: [],
-  company: fakeCompany,
-};
-
-const manager: ManagerWithoutPassword = {
-  id: "1",
-  firstName: "Jean",
-  lastName: "Dupont",
-  email: "jean@example.com",
-  role: ManagerRole.Admin,
-  isGloballyActive: true,
-  authorizations: [],
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  company: fakeCompany,
-};
-
-const fakeService: Service = {
-  name: "Accueil",
-  id: "aa953a24-7b28-4104-924a-d0dcda78131f",
-  createdAt: "2025-07-04T10:46:24.023Z",
-  updatedAt: "2025-07-04T10:46:24.023Z",
-  company: fakeCompany,
-  isGloballyActive: true,
-};
-
 const listManagers: Partial<Manager>[] = [
   {
     id: "1",
@@ -165,7 +104,7 @@ const store = createMockStore({ schema });
 
 beforeAll(async () => {
   store.set("Query", "ROOT", "managers", listManagers);
-  store.set("Manager", "1", manager);
+  store.set("Manager", "1", fakeManagerWithoutPassword);
 
   const mockResolvers = (store: IMockStore) => ({
     Query: {
@@ -176,7 +115,10 @@ beforeAll(async () => {
           infos.email === "jean@example.com" &&
           infos.password === "motdepasse"
         ) {
-          return { manager: mockManager, token: "mocked-token-123" };
+          return {
+            manager: fakeManagerWithoutPassword,
+            token: "mocked-token-123",
+          };
         }
       },
       logout: (_: any, __: any) => {
@@ -202,7 +144,7 @@ beforeAll(async () => {
         return { message: "Manager deleted", success: true };
       },
       updateManager: (_: null, { data }: MutationUpdateManagerArgs) => {
-        store.set("Manager", "1", { ...mockManager, ...data });
+        store.set("Manager", "1", { ...fakeManagerWithoutPassword, ...data });
         return store.get("Manager", "1");
       },
       toggleGlobalAccessManager: (_: any, args: { id: string }) => {
@@ -241,14 +183,17 @@ describe("Test sur les managers", () => {
     >({
       query: REGISTER_MANAGER,
       variables: {
-        infos: createManagerExample,
+        infos: { ...fakeManagerInput, isGloballyActive: true },
       },
     });
     assert(response.body.kind === "single");
-    const { password, companyId, ...managerWithoutPassword } =
-      createManagerExample;
+    const { password, companyId, ...managerWithoutPassword } = fakeManagerInput;
     expect(response.body.singleResult.data).toEqual({
-      createManager: { id: "3", ...managerWithoutPassword },
+      createManager: {
+        id: "3",
+        ...managerWithoutPassword,
+        isGloballyActive: true,
+      },
     });
   });
 
@@ -263,7 +208,7 @@ describe("Test sur les managers", () => {
       },
     });
     assert(response.body.kind === "single");
-    const { authorizations, company, ...rest } = mockManager;
+    const { authorizations, company,connectionLogs, ...rest } = fakeManagerWithoutPassword;
     expect(response.body.singleResult.data).toEqual({
       login: {
         manager: rest,
@@ -279,7 +224,7 @@ describe("Test sur les managers", () => {
       }
       // {
       //   contextValue: {
-      //     manager: mockManager,
+      //     manager: manager,
       //   },
       // }
     );
@@ -299,7 +244,8 @@ describe("Test sur les managers", () => {
     });
 
     assert(response.body.kind === "single");
-    const { authorizations, company, ...rest } = manager;
+    const { authorizations, company, connectionLogs, ...rest } =
+      fakeManagerWithoutPassword;
     expect(response.body.singleResult.data).toEqual({
       manager: rest,
     });
@@ -340,11 +286,11 @@ describe("Test sur les managers", () => {
       id: "1",
       firstName: updatedFirstName,
       lastName: updatedLastName,
-      email: mockManager.email,
-      role: mockManager.role,
-      isGloballyActive: mockManager.isGloballyActive,
-      createdAt: mockManager.createdAt,
-      updatedAt: mockManager.updatedAt,
+      email: fakeManagerWithoutPassword.email,
+      role: fakeManagerWithoutPassword.role,
+      isGloballyActive: fakeManagerWithoutPassword.isGloballyActive,
+      createdAt: fakeManagerWithoutPassword.createdAt,
+      updatedAt: fakeManagerWithoutPassword.updatedAt,
     });
   });
 

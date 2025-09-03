@@ -1,3 +1,5 @@
+scalar DateTime
+
 enum ConnectionEnum {
   Login
   Logout
@@ -6,8 +8,8 @@ enum ConnectionEnum {
 type ConnectionLog {
   id: ID!
   type: ConnectionEnum!
-  managerId: String!
-  createdAt: String!
+  manager: ManagerWithoutPassword!
+  createdAt: DateTime!
 }
 
  type Query {
@@ -18,5 +20,5 @@ type ConnectionLog {
 }
 
  type Mutation {
-  createConnectionLog(type: ConnectionEnum!, managerId: String!): ConnectionLog!
+  createConnectionLog(type: ConnectionEnum!, managerId: UUID!): ConnectionLog!
 }
