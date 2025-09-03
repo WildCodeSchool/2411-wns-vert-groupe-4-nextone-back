@@ -1,3 +1,12 @@
+
+//ON MOCK LA DB AVEC CELLE DE TEST
+jest.mock("../../src/lib/datasource", () => {
+  return {
+    __esModule: true,
+    default: jest.requireActual("../../src/lib/datasource_test").default,
+  };
+});
+
 import { ApolloServer } from "@apollo/server";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import typeDefs from "../../src/typeDefs";
@@ -84,13 +93,6 @@ beforeAll(async () => {
   }
 });
 
-//ON MOCK LA DB AVEC CELLE DE TEST
-jest.mock("../../src/lib/datasource", () => {
-  return {
-    __esModule: true,
-    default: jest.requireActual("../../src/lib/datasource_test").default,
-  };
-});
 
 afterAll(async () => {
   //ON VIDE LA DB DE TEST

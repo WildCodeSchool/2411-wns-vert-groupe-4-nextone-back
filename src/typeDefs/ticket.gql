@@ -32,7 +32,6 @@ input UpdateStatusTicketInput {
 }
 
 input GenerateTicketInput {
-  code: String!
   firstName: String
   lastName: String
   email: String!

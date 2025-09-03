@@ -3,12 +3,21 @@ import TicketLogEntity from "@/entities/TicketLog.entity";
 import { EntitySubscriberInterface, EventSubscriber, InsertEvent, UpdateEvent } from "typeorm";
 import { MyContext } from "..";
 import { Status } from "@/generated/graphql";
+import TicketService from "@/services/ticket.service";
 
 @EventSubscriber()
 export class TicketSubscriber implements EntitySubscriberInterface<TicketEntity> {
 
   listenTo() {
     return TicketEntity
+  }
+
+  async beforeInsert(event: InsertEvent<TicketEntity>): Promise<void> {
+    const { name, id } = event.entity.service
+    const totalTicket = await TicketService.gettInstance().TodayTicket(id) 
+    const code = `${name.substring(0, 3).toUpperCase()}-${(totalTicket + 1).toString().padStart(3, "0")}`  
+
+    event.entity.code = code
   }
 
   async afterInsert({ entity, manager }: InsertEvent<TicketEntity>) {

@@ -1,3 +1,11 @@
+//ON MOCK LA DB AVEC CELLE DE TEST
+jest.mock("../../src/lib/datasource", () => {
+  return {
+    __esModule: true,
+    default: jest.requireActual("../../src/lib/datasource_test").default,
+  };
+});
+
 import { ApolloServer } from "@apollo/server";
 import typeDefs from "../../src/typeDefs";
 import resolvers from "../../src/resolvers";
@@ -21,20 +29,14 @@ import {
   QueryCompanyArgs,
 } from "../../src/generated/graphql";
 import { validate } from "uuid";
-import { fakeCompanyInput, fakeCompanyDataUpdateInput } from "../../src/utils/dataTest";
-
+import {
+  fakeCompanyInput,
+  fakeCompanyDataUpdateInput,
+} from "../../src/utils/dataTest";
 
 let server: ApolloServer;
 const schema = makeExecutableSchema({ typeDefs, resolvers });
 
-
-//ON MOCK LA DB AVEC CELLE DE TEST
-jest.mock("../../src/lib/datasource", () => {
-  return {
-    __esModule: true,
-    default: jest.requireActual("../../src/lib/datasource_test").default,
-  };
-});
 
 beforeAll(async () => {
   server = new ApolloServer({
@@ -47,7 +49,6 @@ beforeAll(async () => {
     }
 
     await testDataSource.synchronize(true);
-
   } catch (error) {
     console.error("Error initializing test database:", error);
     throw error;

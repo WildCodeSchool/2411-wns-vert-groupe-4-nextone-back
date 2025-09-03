@@ -1,12 +1,25 @@
-import { GenerateTicketInput, CreateCompanyInput, InputRegister, ManagerRole, CreateCounterInput, Manager, Authorization, Company, Service, ManagerWithoutPassword, Status, TicketLog, Ticket } from "@/generated/graphql";
+import {
+  GenerateTicketInput,
+  CreateCompanyInput,
+  InputRegister,
+  ManagerRole,
+  CreateCounterInput,
+  Manager,
+  Authorization,
+  Company,
+  Service,
+  ManagerWithoutPassword,
+  Status,
+  TicketLog,
+  Ticket,
+} from "@/generated/graphql";
 
 export const fakeTicketInput: GenerateTicketInput = {
-  code: "001",
   firstName: "Corentin",
   lastName: "Tournier",
   email: "corentin.tournier@gmail.com",
   phone: "0606060606",
-  serviceId: ""
+  serviceId: "",
 };
 
 export const fakeCompanyInput: CreateCompanyInput = {
@@ -76,7 +89,7 @@ export const fakeManager: Manager = {
   role: ManagerRole.Operator,
   isGloballyActive: false,
   company: fakeCompany,
-  connectionLogs:[],
+  connectionLogs: [],
   authorizations: [],
   createdAt: new Date(),
   updatedAt: new Date(),
@@ -98,13 +111,13 @@ export const fakeManagerWithoutPassword: ManagerWithoutPassword = {
   role: ManagerRole.Admin,
   isGloballyActive: true,
   authorizations: [],
-  connectionLogs:[],
+  connectionLogs: [],
   createdAt: new Date(),
   updatedAt: new Date(),
   company: fakeCompany,
 };
 
-export const  fakeTickets: Ticket[] = [
+export const fakeTickets: Ticket[] = [
   {
     id: "a78324f0-3f44-4f7e-943a-a09466def978",
     code: "999",
@@ -114,7 +127,7 @@ export const  fakeTickets: Ticket[] = [
     phone: "0606060606",
     status: Status.Pending,
     service: fakeService,
-    ticketLogs:[]
+    ticketLogs: [],
   },
   {
     id: "00eec0d2-0082-4067-8e83-d13a47b55525",
@@ -125,7 +138,7 @@ export const  fakeTickets: Ticket[] = [
     phone: "0606060606",
     status: Status.Created,
     service: fakeService,
-    ticketLogs:[]
+    ticketLogs: [],
   },
   {
     id: "12a75dd6-c9af-403a-a537-b4634424c85d",
@@ -136,7 +149,7 @@ export const  fakeTickets: Ticket[] = [
     phone: "0606060606",
     status: Status.Done,
     service: fakeService,
-    ticketLogs:[]
+    ticketLogs: [],
   },
 ];
 

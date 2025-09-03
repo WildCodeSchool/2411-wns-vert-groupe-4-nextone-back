@@ -4,6 +4,7 @@ import {
 } from "@/generated/graphql";
 import ServiceRepository from "@/repositories/Service.repository";
 import { ServiceEntity } from "@/entities/Service.entity";
+import { Between } from "typeorm/find-options/operator/Between";
 
 export default class ServicesService {
   db: ServiceRepository;
@@ -50,4 +51,5 @@ export default class ServicesService {
     await this.db.save(service);
     return service.isGloballyActive;
   }
+  
 }

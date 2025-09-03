@@ -1,3 +1,9 @@
+jest.mock("../../src/lib/datasource", () => {
+  return {
+    __esModule: true,
+    default: jest.requireActual("../../src/lib/datasource_test").default,
+  };
+});
 import { ApolloServer } from "@apollo/server";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import typeDefs from "../../src/typeDefs";
@@ -39,12 +45,7 @@ type TresponseDelete = {
 
 
 
-jest.mock("../../src/lib/datasource", () => {
-  return {
-    __esModule: true,
-    default: jest.requireActual("../../src/lib/datasource_test").default,
-  };
-});
+
 
 beforeAll(async () => {
   server = new ApolloServer({
