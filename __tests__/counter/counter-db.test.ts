@@ -1,3 +1,12 @@
+
+//ON MOCK LA DB AVEC CELLE DE TEST
+jest.mock("../../src/lib/datasource", () => {
+  return {
+    __esModule: true,
+    default: jest.requireActual("../../src/lib/datasource_test").default,
+  };
+});
+
 import { ApolloServer } from "@apollo/server";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import typeDefs from "../../src/typeDefs";
@@ -5,6 +14,7 @@ import resolvers from "../../src/resolvers";
 import testDataSource from "../../src/lib/datasource_test";
 import {
   Counter,
+  CreateServiceInput,
   DeleteResponse,
   Manager,
   MutationAddManagerOnCounterArgs,
@@ -84,13 +94,6 @@ beforeAll(async () => {
   }
 });
 
-//ON MOCK LA DB AVEC CELLE DE TEST
-jest.mock("../../src/lib/datasource", () => {
-  return {
-    __esModule: true,
-    default: jest.requireActual("../../src/lib/datasource_test").default,
-  };
-});
 
 afterAll(async () => {
   //ON VIDE LA DB DE TEST
@@ -122,12 +125,17 @@ describe("TEST COUTER DANS LA DB", () => {
     baseManagerId = newManager.id;
 
     //CREATION D'UN SERVICE
-    const service = new ServiceEntity();
-    service.name = "service TEST";
-    service.company = newCompany;
+    // const service = new ServiceEntity();
+    // service.name = "service TEST";
+    // service.company = newCompany;
+    const data: CreateServiceInput = {
+      companyId: newCompany.id,
+      name: "service TEST",
+
+    }
     // service.companyId = newCompany.id;
     const newService: ServiceEntity = await new ServiceService().createService(
-      service
+      data
     );
     baseServiceId = newService.id;
 
@@ -234,12 +242,17 @@ describe("TEST COUTER DANS LA DB", () => {
   it("UPDATE DES SERVICES", async () => {
 
     //CREATION DUN SECOND SERVICE
-    const serv = new ServiceEntity()
-    // serv.companyId = baseCompanyId
-    serv.company = BaseCompany
-    serv.name = "second service"
+    // const serv = new ServiceEntity()
+    // // serv.companyId = baseCompanyId
+    // serv.company = BaseCompany
+    // serv.name = "second service"
+    const data: CreateServiceInput = {
+      companyId: BaseCompany.id,
+      name: "second service",
+
+    }
     const newService: ServiceEntity = await new ServiceService().createService(
-      serv
+      data
     );
 
     const response = await server.executeOperation<TResponseServices, MutationUpdateServiceOnCounterArgs>({

@@ -7,6 +7,7 @@ import { LIST_SERVICES, FIND_SERVICE_BY_ID,
   TOGGLE_GLOBAL_ACCESS_SERVICE
 } from "../../src/queries/service.query"
 import typeDefs from '../../src/typeDefs';
+import { MutationCreateServiceArgs } from '../../src/generated/graphql';
 
 
 type Service = {
@@ -140,9 +141,9 @@ describe('ServicesResolver (mocked)', () => {
   });
 
   it('crée un nouveau service', async () => {
-    const response = await server.executeOperation<ResponseCreateServiceData>({
+    const response = await server.executeOperation<ResponseCreateServiceData, MutationCreateServiceArgs>({
       query: CREATE_SERVICE,
-      variables: { data: { name: 'Dermatologie' } },
+      variables: { data: { name: 'Dermatologie', companyId: "" } },
     });
     assert(response.body.kind === 'single');
     const created = response.body.singleResult.data?.createService;

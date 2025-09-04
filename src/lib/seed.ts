@@ -3,6 +3,7 @@ import ManagerEntity from "@/entities/Manager.entity";
 import { ServiceEntity } from "@/entities/Service.entity";
 import TicketEntity from "@/entities/Ticket.entity";
 import {
+  CreateServiceInput,
   GenerateTicketInput,
   InputRegister,
   ManagerRole,
@@ -49,11 +50,15 @@ const createServices = async (
   ];
   const services = await Promise.all(
     serviceNames.map(async (name) => {
-      const service = new ServiceEntity();
-      service.name = name;
-      service.company = company;
+      // const service = new ServiceEntity();
+      // service.name = name;
+      // service.company = company;
       // service.companyId = company.id
-      const created = await new ServicesService().createService(service);
+      const data: CreateServiceInput = {
+        companyId: company.id,
+        name
+      }
+      const created = await new ServicesService().createService(data);
       return created;
     })
   );
@@ -126,7 +131,7 @@ const createTicket = async (
     const service = services[randomIndex];
     // console.log('SERVICEID : ', serviceId)
     const randomTicket: DeepPartial<TicketEntity> = {
-      code: faker.number.int({ max: 999 }).toString().padStart(3, "0"),
+      // code: faker.number.int({ max: 999 }).toString().padStart(3, "0"),
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
       email: faker.internet.email(),
@@ -140,58 +145,63 @@ const createTicket = async (
     count: 50,
   });
 
-  const tickets = await Promise.all(
-    randomTickets.map(async (ticket) => {
-      return await TicketService.gettInstance().createOne(ticket);
-    })
-  );
+  const tickets: TicketEntity[] = [];
+  for (let i = 0; i < randomTickets.length; i++){
+    const ticket = await TicketService.gettInstance().createOne(randomTickets[i])
+    tickets.push(ticket)
+  }
+  // const tickets = await Promise.all(
+  //   randomTickets.map(async (ticket) => {
+  //     return await TicketService.gettInstance().createOne(ticket);
+  //   })
+  // );
 
   return tickets;
 };
 
-const createCounter = async (
-  services: ServiceEntity[]
-): Promise<CounterEntity[]> => {
-  console.log("🙈 --> CREATION DES GUICHETS...");
+// const createCounter = async (
+//   services: ServiceEntity[]
+// ): Promise<CounterEntity[]> => {
+//   console.log("🙈 --> CREATION DES GUICHETS...");
 
-  const createRandomCounter = async () => {
-    const service = services[Math.floor(Math.random() * services.length)];
-    console.log("SERVICE : ", service, service.id);
-    const authservice = new AuthorizationService();
-    const managers = await authservice.getByService(service.id);
-    console.log("MANAGERS : ", managers);
-    const managerId =
-      managers[Math.floor(Math.random() * managers.length)].managerId;
-    console.log("MANAGERID : ", managerId);
-    const manager = await new ManagerService().getManagerById(managerId);
-    console.log("MANAGER : ", manager);
+//   const createRandomCounter = async () => {
+//     const service = services[Math.floor(Math.random() * services.length)];
+//     console.log("SERVICE : ", service, service.id);
+//     const authservice = new AuthorizationService();
+//     const managers = await authservice.getByService(service.id);
+//     console.log("MANAGERS : ", managers);
+//     const managerId =
+//       managers[Math.floor(Math.random() * managers.length)].managerId;
+//     console.log("MANAGERID : ", managerId);
+//     const manager = await new ManagerService().getManagerById(managerId);
+//     console.log("MANAGER : ", manager);
 
-    const randomCounter: DeepPartial<CounterEntity> = {
-      name: faker.commerce.isbn(),
-      services: [service],
-      manager,
-      isAvailable: Math.random() > 0.5,
-    };
+//     const randomCounter: DeepPartial<CounterEntity> = {
+//       name: faker.commerce.isbn(),
+//       services: [service],
+//       manager,
+//       isAvailable: Math.random() > 0.5,
+//     };
 
-    return randomCounter;
-  };
+//     return randomCounter;
+//   };
 
-  // const randomCounters =  faker.helpers.multiple(createRandomCounter, { count: 50 })
-  const randomCounters: DeepPartial<CounterEntity>[] = [];
+//   // const randomCounters =  faker.helpers.multiple(createRandomCounter, { count: 50 })
+//   const randomCounters: DeepPartial<CounterEntity>[] = [];
 
-  for (let i = 0; i < 50; i++) {
-    const rc = await createRandomCounter();
-    randomCounters.push(rc);
-  }
+//   for (let i = 0; i < 50; i++) {
+//     const rc = await createRandomCounter();
+//     randomCounters.push(rc);
+//   }
 
-  const counters = await Promise.all(
-    randomCounters.map(async (counter) => {
-      return await CounterService.getService().createOne(counter);
-    })
-  );
+//   const counters = await Promise.all(
+//     randomCounters.map(async (counter) => {
+//       return await CounterService.getService().createOne(counter);
+//     })
+//   );
 
-  return counters;
-};
+//   return counters;
+// };
 
 const updateTicketStatus = async (
   managers: ManagerEntity[],

@@ -14,18 +14,6 @@ type Service {
   updatedAt: DateTime!
 }
 
-# type ServiceWithoutManagers {
-#   id: UUID!
-#   name: String!
-#   createdAt: DateTime!
-#   updatedAt: DateTime!
-# }
-
-# type Manager {
-#   id: ID!
-#   email: String!
-# }
-
 type Query {
   services: [Service!]!
   service(id: UUID!): Service
@@ -46,6 +34,8 @@ type ServiceResponse {
 ### Input
 input CreateServiceInput {
   name: String!
+  companyId: UUID!
+  isGloballyActive: Boolean
 }
 
 input UpdateServiceInput {
