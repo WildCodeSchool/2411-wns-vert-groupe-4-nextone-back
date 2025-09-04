@@ -33,13 +33,13 @@ const fakeSettings: Setting[] = [
   {
     id: "1",
     name: "setting 1",
-    Company: {} as Company,
+    company: {} as Company,
     value: "test 1",
   },
   {
     id: "2",
     name: "setting 2",
-    Company: {} as Company,
+    company: {} as Company,
     value: "test 2",
   },
 ];
@@ -109,7 +109,7 @@ describe("TESTS SETTINGS DANS UN STORE", () => {
     expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data).toEqual<TresponseALL>({
       settings: fakeSettings.map((setting) => {
-        const { Company, ...rest } = setting;
+        const { company, ...rest } = setting;
         return rest;
       }),
     });

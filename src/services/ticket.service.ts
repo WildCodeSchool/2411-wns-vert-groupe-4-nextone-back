@@ -43,38 +43,5 @@ export default class TicketService extends BaseService<TicketEntity> {
     return found;
   }
 
-  async TodayTicket(serviceId: string): Promise<number> {
-    const now = new Date();
 
-    const start = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-      0,
-      0,
-      0,
-      0
-    );
-    const end = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-      23,
-      59,
-      59,
-      999
-    );
-    try {
-      const totalTicket = await this.repo.count({
-        where: {
-          service: { id: serviceId},
-          createdAt: Between(start, end),
-        },
-      });
-      return totalTicket
-    } catch (error: any) {
-      console.log("ERROR : ", error?.message)
-      return 0
-    }
-  }
 }

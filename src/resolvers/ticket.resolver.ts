@@ -10,6 +10,7 @@ import {
 import { MyContext } from "..";
 import { buildResponse } from "@/utils/authorization";
 import ServicesService from "@/services/services.service";
+import TicketLogService from "@/services/ticketLogs.service";
 
 type TicketDeleted = {
   message: string;
@@ -90,4 +91,20 @@ export default {
       return updated;
     },
   },
+  Ticket: {
+    service: async (ticket: TicketEntity) => {
+      const service = await new ServicesService().db.findOneBy({
+        id: ticket.serviceId
+      })
+      return service
+    },
+    ticketLogs: async (ticket: TicketEntity) => {
+      const ticketLogs = await TicketLogService.getInstance().findByProperties({
+        ticket: {
+          id: ticket.id
+        }
+      })
+      return ticketLogs
+    }
+  }
 };

@@ -1,3 +1,4 @@
+
 //ON MOCK LA DB AVEC CELLE DE TEST
 jest.mock("../../src/lib/datasource", () => {
   return {
@@ -5,6 +6,7 @@ jest.mock("../../src/lib/datasource", () => {
     default: jest.requireActual("../../src/lib/datasource_test").default,
   };
 });
+
 import { ApolloServer } from "@apollo/server";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import typeDefs from "../../src/typeDefs";
@@ -178,7 +180,7 @@ describe("TEST TICKETLOG DANS LA DB", () => {
     expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data?.ticketLog).toHaveLength(2);
     const { id, ...rest } = response.body.singleResult.data
-      ?.ticketLog![0] as PartialTicketLog;
+      ?.ticketLog![1] as PartialTicketLog;
     expect(validate(id)).toBeTruthy();
     expect(rest).toEqual<PartialTicketLog>({
       ticket: {

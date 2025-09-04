@@ -41,8 +41,8 @@ export default class TicketEntity {
   })
   status: Status;
 
-  // @Column({ type: "uuid", nullable: true})
-  // ServiceId: string;
+  @Column({ type: "uuid", nullable: true})
+  serviceId: string;
 
   @ManyToOne(() => ServiceEntity, (service: ServiceEntity) => service.tickets, { eager: true })
   @JoinColumn()

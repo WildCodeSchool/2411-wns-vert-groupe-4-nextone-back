@@ -10,6 +10,7 @@ import {
 import { MyContext } from "..";
 import { Status } from "@/generated/graphql";
 import TicketService from "@/services/ticket.service";
+import ManagerEntity from "@/entities/Manager.entity";
 
 @EventSubscriber()
 export class TicketSubscriber
@@ -63,11 +64,15 @@ export class TicketSubscriber
     await manager.save(ticketLog);
   }
 
-  async afterUpdate(event: UpdateEvent<TicketEntity>) {
-    const isStatusModified = event.updatedColumns.some(
-      (col) => col.propertyName === "status"
-    );
+  // async afterUpdate(event: UpdateEvent<TicketEntity>) {
+  //   const isStatusModified = event.updatedColumns.some(
+  //     (col) => col.propertyName === "status"
+  //   );
 
-    if (!isStatusModified) return;
-  }
+  //   if (!isStatusModified) return;
+
+  //   event.entity
+  //   //ON RECUPERE LE MANAGER
+  //   const manager = await event.manager.getRepository(ManagerEntity).findOneBy({id: '"test'})
+  // }
 }

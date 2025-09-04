@@ -31,7 +31,7 @@ export default class AuthorizationService {
   async getByManager(managerId: string): Promise<AuthorizationEntity[]> {
     return this.db.find({
       where: { manager: { id: managerId } },
-      relations: ["manager", "service"],
+      // relations: ["manager", "service"],
     });
   }
 

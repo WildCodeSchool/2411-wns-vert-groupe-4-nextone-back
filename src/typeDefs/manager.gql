@@ -20,6 +20,7 @@ type Manager {
   authorizations: [Authorization!]!
   company: Company!
   connectionLogs:  [ConnectionLog!]!
+  ticketLogs: [TicketLog!]!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -33,6 +34,7 @@ type ManagerWithoutPassword {
   isGloballyActive: Boolean!
   authorizations: [Authorization!]!
   connectionLogs:  [ConnectionLog!]!
+  ticketLogs: [TicketLog!]!
   company: Company!
   createdAt: DateTime!
   updatedAt: DateTime!
