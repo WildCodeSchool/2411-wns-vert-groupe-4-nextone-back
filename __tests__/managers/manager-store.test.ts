@@ -28,7 +28,7 @@ import {
 import typeDefs from "../../src/typeDefs";
 import {
   fakeManagerInput,
-  fakeManagerWithoutPassword,
+  fakeManagerStore,
 } from "../../src/utils/dataTest";
 
 type StatusResponse = {
@@ -104,7 +104,7 @@ const store = createMockStore({ schema });
 
 beforeAll(async () => {
   store.set("Query", "ROOT", "managers", listManagers);
-  store.set("Manager", "1", fakeManagerWithoutPassword);
+  store.set("Manager", "1", fakeManagerStore);
 
   const mockResolvers = (store: IMockStore) => ({
     Query: {
@@ -116,7 +116,7 @@ beforeAll(async () => {
           infos.password === "motdepasse"
         ) {
           return {
-            manager: fakeManagerWithoutPassword,
+            manager: fakeManagerStore,
             token: "mocked-token-123",
           };
         }
@@ -131,10 +131,10 @@ beforeAll(async () => {
     },
     Mutation: {
       createManager: (_: any, { infos }: { infos: InputRegister }) => {
-        const { companyId, ...rest } = infos;
+        const { companyId,password, ...rest } = infos;
         store.set("Manager", "3", rest);
         const manager = store.get("Manager", "3") as Manager;
-        const { password, company, ...result } = manager;
+        const {  company, ...result } = manager;
         return { ...result, id: 3 };
       },
       deleteManager: (_: null, { id }: { id: string }) => {
@@ -144,7 +144,7 @@ beforeAll(async () => {
         return { message: "Manager deleted", success: true };
       },
       updateManager: (_: null, { data }: MutationUpdateManagerArgs) => {
-        store.set("Manager", "1", { ...fakeManagerWithoutPassword, ...data });
+        store.set("Manager", "1", { ...fakeManagerStore, ...data });
         return store.get("Manager", "1");
       },
       toggleGlobalAccessManager: (_: any, args: { id: string }) => {
@@ -187,6 +187,7 @@ describe("Test sur les managers", () => {
       },
     });
     assert(response.body.kind === "single");
+    expect(response.body.singleResult.errors).toBeUndefined()
     const { password, companyId, ...managerWithoutPassword } = fakeManagerInput;
     expect(response.body.singleResult.data).toEqual({
       createManager: {
@@ -208,7 +209,7 @@ describe("Test sur les managers", () => {
       },
     });
     assert(response.body.kind === "single");
-    const { authorizations, company,connectionLogs, ticketLogs, ...rest } = fakeManagerWithoutPassword;
+    const { authorizations, company,connectionLogs,ticketLogs, ...rest } = fakeManagerStore;
     expect(response.body.singleResult.data).toEqual({
       login: {
         manager: rest,
@@ -245,7 +246,7 @@ describe("Test sur les managers", () => {
 
     assert(response.body.kind === "single");
     const { authorizations, company, connectionLogs,ticketLogs, ...rest } =
-      fakeManagerWithoutPassword;
+      fakeManagerStore;
     expect(response.body.singleResult.data).toEqual({
       manager: rest,
     });
@@ -286,11 +287,11 @@ describe("Test sur les managers", () => {
       id: "1",
       firstName: updatedFirstName,
       lastName: updatedLastName,
-      email: fakeManagerWithoutPassword.email,
-      role: fakeManagerWithoutPassword.role,
-      isGloballyActive: fakeManagerWithoutPassword.isGloballyActive,
-      createdAt: fakeManagerWithoutPassword.createdAt,
-      updatedAt: fakeManagerWithoutPassword.updatedAt,
+      email: fakeManagerStore.email,
+      role: fakeManagerStore.role,
+      isGloballyActive: fakeManagerStore.isGloballyActive,
+      createdAt: fakeManagerStore.createdAt,
+      updatedAt: fakeManagerStore.updatedAt,
     });
   });
 

@@ -13,7 +13,7 @@ enum Status {
 type TicketLog {
   id: UUID!
   ticket: Ticket!
-  manager: ManagerWithoutPassword
+  manager: Manager
   status: Status!
   createdAt: DateTime!
   updatedAt: DateTime!

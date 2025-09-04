@@ -7,41 +7,23 @@ enum ManagerRole {
   SUPER_ADMIN
 }
 
-
-
 type Manager {
   id: ID!
   firstName: String!
   lastName: String!
   email: String!
-  password: String!
   role: ManagerRole!
   isGloballyActive: Boolean!
   authorizations: [Authorization!]!
   company: Company!
   connectionLogs:  [ConnectionLog!]!
   ticketLogs: [TicketLog!]!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type ManagerWithoutPassword {
-  id: ID!
-  firstName: String!
-  lastName: String!
-  email: String!
-  role: ManagerRole!
-  isGloballyActive: Boolean!
-  authorizations: [Authorization!]!
-  connectionLogs:  [ConnectionLog!]!
-  ticketLogs: [TicketLog!]!
-  company: Company!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
 
 type Auth {
-  manager: ManagerWithoutPassword
+  manager: Manager
   token: String
 }
 
@@ -51,8 +33,8 @@ type Message {
 }
 
 type Query {
-  managers: [ManagerWithoutPassword!]
-  manager(id: ID!): ManagerWithoutPassword!
+  managers: [Manager!]
+  manager(id: ID!): Manager!
   login(infos: InputLogin!): Auth
   logout: Message!
 }
@@ -60,7 +42,7 @@ type Query {
 type Mutation {
   createManager(infos: InputRegister!): Manager!
   deleteManager(id: ID!): Message!
-  updateManager(id: ID!, data: UpdateManagerInput!): ManagerWithoutPassword!
+  updateManager(id: ID!, data: UpdateManagerInput!): Manager!
   # associateManagerAtService(managerId: ID!, serviceId: ID!): Message!
   # dissociateManagerFromService(managerId: ID!, serviceId: ID!): Message!
   toggleGlobalAccessManager(id: UUID!): Message!
