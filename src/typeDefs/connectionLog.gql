@@ -8,7 +8,7 @@ enum ConnectionEnum {
 type ConnectionLog {
   id: ID!
   type: ConnectionEnum!
-  manager: ManagerWithoutPassword!
+  manager: Manager!
   createdAt: DateTime!
 }
 
