@@ -22,6 +22,11 @@ import {
   verifyCreatorPermission,
 } from "@/utils/manager";
 import { buildResponse } from "@/utils/authorization";
+import AuthorizationService from "@/services/authorization.service";
+import { ServiceEntity } from "@/entities/Service.entity";
+import CompanyService from "@/services/company.service";
+import ConnectionLogService from "@/services/connectionLog.service";
+import TicketLogService from "@/services/ticketLogs.service";
 
 const managerService = new ManagerService();
 
@@ -60,8 +65,9 @@ export default {
       const loginInfos = plainToInstance(LoginInput, infos);
       await validateOrThrow(loginInfos);
       const { manager, token } = await managerService.login(infos);
+      const { password, ...rest } = manager;
       ctx.res.cookie("token", token, { httpOnly: true });
-      return { manager, token };
+      return { manager: rest, token };
     },
 
     logout: async (_: any, __: any, ctx: MyContext): Promise<Message> => {
@@ -150,7 +156,7 @@ export default {
       _: any,
       { id }: MutationToggleGlobalAccessManagerArgs,
       ctx: MyContext
-    ):Promise<Message> => {
+    ): Promise<Message> => {
       const { manager } = ctx;
       if (!manager) {
         throw new Error("Manager non authentifié");
@@ -168,6 +174,23 @@ export default {
         "Manager is active.",
         "Manager is not active."
       );
+    },
+  },
+  Manager: {
+    authorizations: async ({ id }: { id: string }) => {
+      const auth = new AuthorizationService().getByManager(id);
+      return auth
+    },
+    company: async (manager: ManagerEntity) => {
+      return await CompanyService.getService().findById(manager.companyId);
+    },
+    connectionLogs: async ({ id }: { id: string }) => {
+      return await new ConnectionLogService().getConnectionLogsByEmployee(id);
+    },
+    ticketLogs: async ({ id }: { id: string }) => {
+      return await TicketLogService.getInstance().findByProperties({
+        managerId: id
+      })
     },
   },
 };

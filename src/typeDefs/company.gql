@@ -10,6 +10,8 @@ type Company {
   email: String!
   phone: String!
   services: [Service!]!
+  managers: [Manager!]!
+  settings: [Setting!]!
   createdAt: DateTime!
   updatedAt: DateTime!
 }

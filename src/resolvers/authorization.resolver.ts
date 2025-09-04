@@ -9,6 +9,9 @@ import {
 } from "@/generated/graphql";
 import { MyContext } from "..";
 import { buildResponse } from "@/utils/authorization";
+import ServicesService from "@/services/services.service";
+import AuthorizationEntity from "@/entities/Authorization.entity";
+import ManagerService from "@/services/manager.service";
 
 const authorizationService = new AuthorizationService();
 
@@ -87,6 +90,20 @@ export default {
         "Authorization deleted successfully.",
         "Authorization not found or already deleted."
       );
+    },
+  },
+  Authorization: {
+    service: async (parent: AuthorizationEntity) => {
+      const service = await new ServicesService().getServiceById(
+        parent.serviceId
+      );
+      return service;
+    },
+    manager: async (parent: AuthorizationEntity) => {
+      const manager = await new ManagerService().getManagerById(
+        parent.managerId
+      );
+      return manager;
     },
   },
 };

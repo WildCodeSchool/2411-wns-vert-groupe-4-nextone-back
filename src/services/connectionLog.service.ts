@@ -17,6 +17,7 @@ export default class ConnectionLogService {
     return this.db.find({ where: { managerId }, order: { createdAt: "DESC" } });
   }
 
+
   createConnectionLog(args: Partial<ConnectionLogEntity>): Promise<ConnectionLogEntity> {
     const newLog = this.db.create(args);
     return this.db.save(newLog);

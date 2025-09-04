@@ -17,10 +17,11 @@ export default class ServicesService {
     const services = await this.db.find();
     return services;
   }
-
+  
   async getServiceById(id: string): Promise<ServiceEntity | null> {
     return this.db.findOne({
       where: { id },
+
     });
   }
 

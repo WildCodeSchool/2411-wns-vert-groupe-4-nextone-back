@@ -65,6 +65,9 @@ export default class ManagerEntity {
   @OneToMany(() => AuthorizationEntity, (auth) => auth.manager)
   authorizations: AuthorizationEntity[];
 
+  @Column({ type: "uuid" })
+  companyId: string
+
   //COMPANY
   @ManyToOne(() => CompanyEntity, (company: CompanyEntity) => company.managers, {
     onDelete: "CASCADE",

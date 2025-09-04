@@ -14,24 +14,24 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     this.repo = AppDataSource.getRepository(entity);
   }
 
-  private getRelations(): string[] {
-    const relations: string[] = [];
-    //MANY TO MANY
-    this.repo.metadata.manyToManyRelations.forEach((rel) =>
-      relations.push(rel.propertyName)
-    );
-    //MANY TO ONE
-    this.repo.metadata.manyToOneRelations.forEach((rel) =>
-      relations.push(rel.propertyName)
-    );
-    //ONE TO MANY
-    this.repo.metadata.oneToManyRelations.forEach((rel) =>
-      relations.push(rel.propertyName)
-    );
-    // this.repo.metadata.relationsWithJoinColumns.forEach(rel => relations.push(rel.propertyPath))
+  // private getRelations(): string[] {
+  //   const relations: string[] = [];
+  //   //MANY TO MANY
+  //   this.repo.metadata.manyToManyRelations.forEach((rel) =>
+  //     relations.push(rel.propertyName)
+  //   );
+  //   //MANY TO ONE
+  //   this.repo.metadata.manyToOneRelations.forEach((rel) =>
+  //     relations.push(rel.propertyName)
+  //   );
+  //   //ONE TO MANY
+  //   this.repo.metadata.oneToManyRelations.forEach((rel) =>
+  //     relations.push(rel.propertyName)
+  //   );
+  //   // this.repo.metadata.relationsWithJoinColumns.forEach(rel => relations.push(rel.propertyPath))
 
-    return relations;
-  }
+  //   return relations;
+  // }
 
   //CREER UNE INSTANCE DE T
   public async createOne(entity: DeepPartial<T>) {
@@ -47,19 +47,16 @@ export default abstract class BaseService<T extends ObjectLiteral> {
 
   //RECUPERER TOUTES LES INSTANCES
   public async findAll() {
-    const relations = this.getRelations();
-    const list = await this.repo.find({ relations });
+    const list = await this.repo.find();
     return list;
   }
 
   //RECUPERER UNE INSTANCE VIA SON ID
   public async findById(id: string) {
-    const relations = this.getRelations();
     const ad = await this.repo.findOne({
       where: {
         id,
       } as any,
-      relations,
     });
 
     return ad;

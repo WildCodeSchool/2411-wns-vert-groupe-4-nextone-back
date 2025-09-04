@@ -10,6 +10,9 @@ import CompanyService from "@/services/company.service";
 import CompanyEntity from "@/entities/Company.entity";
 import { checkStrictRole } from "@/utils/manager";
 import { buildResponse } from "@/utils/authorization";
+import ServicesService from "@/services/services.service";
+import ManagerService from "@/services/manager.service";
+import SettingService from "@/services/setting.service";
 
 const companyService = CompanyService.getService();
 
@@ -61,6 +64,31 @@ export default {
         partialCompany
       );
       return updatedCompany;
+    },
+  },
+  Company: {
+    services: async ({ id }: { id: string }) => {
+      const services = await new ServicesService().db.findBy({
+        company: {
+          id,
+        },
+      });
+      return services;
+    },
+    managers: async ({ id }: { id: string }) => {
+      const managers = await new ManagerService().db.findBy({
+        company: {
+          id,
+        },
+      });
+      return managers;
+    },
+    settings: async ({ id }: { id: string }) => {
+      const settings = await SettingService.getService().findByProperty(
+        "companyId",
+        id
+      );
+      return settings;
     },
   },
 };

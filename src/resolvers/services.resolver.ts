@@ -13,6 +13,8 @@ import { canAccessAuthorization, checkStrictRole } from "@/utils/manager";
 import { buildResponse } from "@/utils/authorization";
 import AuthorizationService from "@/services/authorization.service";
 import { ServiceEntity } from "@/entities/Service.entity";
+import TicketService from "@/services/ticket.service";
+import CompanyService from "@/services/company.service";
 
 const servicesService = new ServicesService();
 
@@ -23,6 +25,7 @@ export default {
       __: any,
       ctx: MyContext
     ): Promise<ServiceEntity[]> => {
+      console.log("RESOLVER 1");
       const services = await new ServicesService().getAllServices();
       return services;
     },
@@ -33,15 +36,7 @@ export default {
       ctx: MyContext
     ): Promise<ServiceEntity | null> => {
       const service = await servicesService.getServiceById(id);
-      console.log("SERVICXE : ", service)
-      // if (service ) {
-      //   const tickets = await service.tickets
-      //   console.log('TICKET : ', tickets)
-      //   const res: Service | null = { ...service, tickets: tickets }
-      //   return res
-        
-      // }
-      return service
+      return service;
     },
   },
 
@@ -103,6 +98,31 @@ export default {
         "Service is active.",
         "Service is not active."
       );
+    },
+  },
+  Service: {
+    authorizations: async ({ id }: { id: string }) => {
+      const authorizations = await new AuthorizationService().getByService(id);
+      return authorizations;
+    },
+    tickets: async ({ id }: { id: string }) => {
+      const tickets = await TicketService.gettInstance().findByProperties({
+        service: {
+          id,
+        },
+      });
+      return tickets;
+    },
+    company: async ({ id }: { id: string }) => {
+      const service = await new ServicesService().getServiceById(id);
+      console.log("RESOLVER 2: ", service);
+      if (!service) {
+        throw new Error("No service with this id.");
+      }
+      const company = await CompanyService.getService().findById(
+        service.companyId
+      );
+      return company;
     },
   },
 };
