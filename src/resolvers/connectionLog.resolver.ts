@@ -2,6 +2,7 @@ import ConnectionLogEntity from "@/entities/ConnectionLog.entity";
 import { ConnectionEnum } from "@/generated/graphql";
 import ConnectionLogService from "@/services/connectionLog.service";
 import ManagerService from "@/services/manager.service";
+import { MyContext } from "..";
 
 const connectionLogService = new ConnectionLogService() 
 
@@ -27,8 +28,8 @@ export default {
     }
   },
   ConnectionLog: {
-    manager: async (parent: ConnectionLogEntity) => {
-      return await new ManagerService().getManagerById(parent.managerId)
+    manager: async (parent: ConnectionLogEntity,_: any, { loaders: { managerLoader }}: MyContext) => {
+      return await managerLoader.load(parent.managerId)
     }
   }
 }

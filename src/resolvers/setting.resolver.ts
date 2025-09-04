@@ -3,6 +3,7 @@ import { DeleteResponse, DeleteResponseSetting, MutationCreateServiceArgs, Mutat
 import CompanyService from "@/services/company.service";
 import SettingsSystemService from "@/services/setting.service";
 import { buildResponse } from "@/utils/authorization";
+import { MyContext } from "..";
 
 const SettingService = SettingsSystemService.getService()
 
@@ -33,8 +34,8 @@ export default {
     }
   },
   Setting: {
-    company: async (parent: SettingEntity) => {
-      return await CompanyService.getService().findById(parent.companyId)
+    company: async (parent: SettingEntity,_: any, { loaders: { companyLoader }}: MyContext) => {
+      return await companyLoader.load(parent.companyId)
     }
   }
 } 

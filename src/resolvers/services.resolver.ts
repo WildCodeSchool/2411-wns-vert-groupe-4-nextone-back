@@ -101,21 +101,22 @@ export default {
     },
   },
   Service: {
-    authorizations: async ({ id }: { id: string }) => {
-      const authorizations = await new AuthorizationService().getByService(id);
-      return authorizations;
+    authorizations: async (
+      { id }: { id: string },
+      _: any,
+      { loaders: { authsByServiceIdLoader } }: MyContext
+    ) => {
+      return await authsByServiceIdLoader.load(id);
     },
-    tickets: async ({ id }: { id: string }) => {
-      const tickets = await TicketService.gettInstance().findByProperties({
-        service: {
-          id,
-        },
-      });
-      return tickets;
+    tickets: async (
+      { id }: { id: string },
+      _: any,
+      { loaders: { ticketByServiceIdLoader } }: MyContext
+    ) => {
+      return await ticketByServiceIdLoader.load(id);
     },
     company: async ({ id }: { id: string }) => {
       const service = await new ServicesService().getServiceById(id);
-      console.log("RESOLVER 2: ", service);
       if (!service) {
         throw new Error("No service with this id.");
       }

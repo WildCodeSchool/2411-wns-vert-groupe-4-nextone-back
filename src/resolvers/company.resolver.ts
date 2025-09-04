@@ -67,28 +67,26 @@ export default {
     },
   },
   Company: {
-    services: async ({ id }: { id: string }) => {
-      const services = await new ServicesService().db.findBy({
-        company: {
-          id,
-        },
-      });
-      return services;
+    services: async (
+      { id }: { id: string },
+      _: any,
+      { loaders: { serviceByCompanyIdLoader } }: MyContext
+    ) => {
+      return await serviceByCompanyIdLoader.load(id);
     },
-    managers: async ({ id }: { id: string }) => {
-      const managers = await new ManagerService().db.findBy({
-        company: {
-          id,
-        },
-      });
-      return managers;
+    managers: async (
+      { id }: { id: string },
+      _: any,
+      { loaders: { managerByCompanyIdLoader } }: MyContext
+    ) => {
+      return await managerByCompanyIdLoader.load(id);
     },
-    settings: async ({ id }: { id: string }) => {
-      const settings = await SettingService.getService().findByProperty(
-        "companyId",
-        id
-      );
-      return settings;
+    settings: async (
+      { id }: { id: string },
+      _: any,
+      { loaders: { settingByCompanbyIdLoader } }: MyContext
+    ) => {
+      return await settingByCompanbyIdLoader.load(id);
     },
   },
 };

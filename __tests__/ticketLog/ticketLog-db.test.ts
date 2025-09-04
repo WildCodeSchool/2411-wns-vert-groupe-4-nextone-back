@@ -113,6 +113,7 @@ describe("TEST TICKETLOG DANS LA DB", () => {
       await TicketService.gettInstance().createOne({...fakeTicketInput, service: newService});
     baseTicketId = newTicket.id;
 
+    console.log("BASETICKETID : ", baseTicketId)
     // //ET ENFIN, ON RECUPERE LE TICKETLOG QUI A ETE CREE VIA
     // LE SUBSCRIBER SUR TICKETENTITY👍
     const response = await server.executeOperation<

@@ -12,11 +12,15 @@ import typeDefs from "./typeDefs";
 import resolvers from "./resolvers";
 import ManagerEntity from "./entities/Manager.entity";
 import { authContext } from "./lib/authContext";
+import type {
+  Loaders
+} from "./lib/dataLoaderContext";
 
 export interface MyContext {
   req: Request;
   res: Response;
   manager: ManagerEntity | null;
+  loaders: Loaders
 }
 
 const app = express();
