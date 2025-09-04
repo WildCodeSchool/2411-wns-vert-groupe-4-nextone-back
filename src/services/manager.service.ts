@@ -3,6 +3,7 @@ import { MutationCreateManagerArgs, QueryLoginArgs } from "@/generated/graphql";
 import * as argon2 from "argon2";
 import { SignJWT } from "jose";
 import ManagerEntity from "@/entities/Manager.entity";
+import CompanyService from "./company.service";
 
 export default class ManagerService {
     db: ManagerRepository;
@@ -34,8 +35,12 @@ export default class ManagerService {
         return manager;
     }
 
-    async create(manager : MutationCreateManagerArgs["infos"]) {
-        const newManager = this.db.create({...manager});
+    async create(manager: MutationCreateManagerArgs["infos"]) {
+        const company = await CompanyService.getService().findById(manager.companyId)
+        if (!company) {
+            throw new Error("Impossible to create manager : Company with this id not found.")
+        }
+        const newManager = this.db.create({...manager, company});
         const savedManager = await this.db.save(newManager);
         return savedManager;
     }
