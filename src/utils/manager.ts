@@ -40,7 +40,9 @@ export function verifyCreatorPermission(currentRole: string) {
 }
 
 // Vérifie si le rôle actuel peut gérer un utilisateur avec le rôle cible.
-export function checkRoleInHierarchy(currentRole: string, targetRole: string) {
+export function checkRoleInHierarchy(
+  currentRole: string, 
+  targetRole: string) {
   const roleHierarchy: Record<string, string[]> = {
     SUPER_ADMIN: ["ADMIN", "OPERATOR"],
     ADMIN: ["OPERATOR"],
@@ -54,7 +56,9 @@ export function checkRoleInHierarchy(currentRole: string, targetRole: string) {
 }
 
 //Check si le role est bien celui d'un super_admin ou d'un admin faisant parti du service en question
-export const canAccessAuthorization = async (manager: MyContext["manager"], targetServiceId: string, authorizationService: AuthorizationService) => {
+export const canAccessAuthorization = async (manager: MyContext["manager"], 
+  targetServiceId: string, 
+  authorizationService: AuthorizationService) => {
   assertAuthenticated(manager);
   const { role } = manager;
   if (role === "SUPER_ADMIN") return;
