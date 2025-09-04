@@ -8,7 +8,6 @@ import {
   Authorization,
   Company,
   Service,
-  ManagerWithoutPassword,
   Status,
   TicketLog,
   Ticket,
@@ -94,7 +93,6 @@ export const fakeManager: Manager = {
   email: "michelito@gmail.com",
   firstName: "michel",
   lastName: "dedroite",
-  password: "testpass",
   role: ManagerRole.Operator,
   isGloballyActive: false,
   company: fakeCompany,
@@ -113,13 +111,13 @@ export const fakeAuthorization: Authorization = {
   updatedAt: new Date(),
 };
 
-export const fakeManagerWithoutPassword: ManagerWithoutPassword = {
+export const fakeManagerStore: Manager = {
   id: "1",
   firstName: "Jean",
   lastName: "Dupont",
   email: "jean@example.com",
   role: ManagerRole.Admin,
-  isGloballyActive: true,
+  isGloballyActive: false,
   authorizations: [],
   connectionLogs: [],
   ticketLogs: [],
@@ -169,7 +167,7 @@ export const fakeTicketLog: TicketLog = {
   createdAt: "2025-06-25T14:28:03.726Z",
   status: Status.Pending,
   updatedAt: "2025-06-25T14:41:40.023Z",
-  manager: fakeManagerWithoutPassword,
+  manager: fakeManager,
   ticket: fakeTickets[0],
 };
 
@@ -177,19 +175,19 @@ export const fakeData: Partial<TicketLog>[] = [
   {
     id: "f6f368bf-1e98-49d8-92cb-2f2a2d9b33b8",
     status: Status.Created,
-    manager: fakeManagerWithoutPassword,
+    manager: fakeManager,
     ticket: fakeTickets[0],
   },
   {
     id: "f5dfa9d0-e5d9-4f9b-99aa-438c517c8390",
     status: Status.Created,
-    manager: fakeManagerWithoutPassword,
+    manager: fakeManager,
     ticket: fakeTickets[1],
   },
   {
     id: "2b43610f-8e88-4201-859e-928a3fb8cb73",
     status: Status.Created,
-    manager: fakeManagerWithoutPassword,
+    manager: fakeManager,
     ticket: fakeTickets[0],
   },
 ];
