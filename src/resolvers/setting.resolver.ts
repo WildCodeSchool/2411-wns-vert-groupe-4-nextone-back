@@ -1,5 +1,6 @@
 import SettingEntity from "@/entities/setting.entity";
 import { DeleteResponse, DeleteResponseSetting, MutationCreateServiceArgs, MutationUpdateSettingArgs } from "@/generated/graphql";
+import CompanyService from "@/services/company.service";
 import SettingsSystemService from "@/services/setting.service";
 import { buildResponse } from "@/utils/authorization";
 
@@ -29,6 +30,11 @@ export default {
       const { id } = args.data;
       const updated = await SettingService.updateOne(id, args.data)
       return updated
+    }
+  },
+  Setting: {
+    company: async (parent: SettingEntity) => {
+      return await CompanyService.getService().findById(parent.companyId)
     }
   }
 } 

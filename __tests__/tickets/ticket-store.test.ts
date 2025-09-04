@@ -26,6 +26,7 @@ import {
   UPDATE_TICKET,
 } from "../../src/queries/ticket.query";
 import typeDefs from "../../src/typeDefs";
+import { fakeService } from "../../src/utils/dataTest"
 
 type ResponseData = {
   tickets: Ticket[];
@@ -35,42 +36,42 @@ type ResponseDataCreate = {
   generateTicket: Ticket;
 };
 
-const fakeCompany: Company = {
-  id: "f363fd0e-cb52-4089-bc25-75c72112d045",
-  name: "Jambonneau CORPORATION",
-  address: "38, Rue de la saucisse",
-  postalCode: "31000",
-  city: "TOULOUSE",
-  siret: "362 521 879 00034",
-  email: "jambo.no@gmail.com",
-  phone: "0123456789",
-  createdAt: "2025-07-04T10:46:23.954Z",
-  updatedAt: "2025-07-04T10:46:23.954Z",
-  services: [],
-};
+// const fakeCompany: Company = {
+//   id: "f363fd0e-cb52-4089-bc25-75c72112d045",
+//   name: "Jambonneau CORPORATION",
+//   address: "38, Rue de la saucisse",
+//   postalCode: "31000",
+//   city: "TOULOUSE",
+//   siret: "362 521 879 00034",
+//   email: "jambo.no@gmail.com",
+//   phone: "0123456789",
+//   createdAt: "2025-07-04T10:46:23.954Z",
+//   updatedAt: "2025-07-04T10:46:23.954Z",
+//   services: [],
+// };
 
-const fakeService: Service = {
-  name: "Radiologie",
-  id: "8d106e86-5ffb-4e97-bb3a-cba9a329bbef",
-  createdAt: "2025-07-04T10:46:24.023Z",
-  updatedAt: "2025-07-04T10:46:24.023Z",
-  company: fakeCompany,
-  isGloballyActive: true,
-};
+// const fakeService: Service = {
+//   name: "Radiologie",
+//   id: "8d106e86-5ffb-4e97-bb3a-cba9a329bbef",
+//   createdAt: "2025-07-04T10:46:24.023Z",
+//   updatedAt: "2025-07-04T10:46:24.023Z",
+//   company: fakeCompany,
+//   isGloballyActive: true,
+// };
 
-const fakeManager: ManagerWithoutPassword = {
-  id: "1f50e0ca-ad6d-461d-b888-9d08c2ad6ff0",
-  email: "michelito@gmail.com",
-  firstName: "michel",
-  lastName: "dedroite",
-  role: ManagerRole.Operator,
-  isGloballyActive: false,
-  company: fakeCompany,
-  authorizations: [],
-  connectionLogs: [],
-  createdAt: new Date(),
-  updatedAt: new Date(),
-};
+// const fakeManager: ManagerWithoutPassword = {
+//   id: "1f50e0ca-ad6d-461d-b888-9d08c2ad6ff0",
+//   email: "michelito@gmail.com",
+//   firstName: "michel",
+//   lastName: "dedroite",
+//   role: ManagerRole.Operator,
+//   isGloballyActive: false,
+//   company: fakeCompany,
+//   authorizations: [],
+//   connectionLogs: [],
+//   createdAt: new Date(),
+//   updatedAt: new Date(),
+// };
 
 const ticketsData: Ticket[] = [
   {

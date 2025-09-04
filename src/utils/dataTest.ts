@@ -1,4 +1,19 @@
-import { GenerateTicketInput, CreateCompanyInput, InputRegister, ManagerRole, CreateCounterInput, Manager, Authorization, Company, Service, ManagerWithoutPassword, Status, TicketLog, Ticket, CreateServiceInput } from "@/generated/graphql";
+import {
+  GenerateTicketInput,
+  CreateCompanyInput,
+  InputRegister,
+  ManagerRole,
+  CreateCounterInput,
+  Manager,
+  Authorization,
+  Company,
+  Service,
+  ManagerWithoutPassword,
+  Status,
+  TicketLog,
+  Ticket,
+  CreateServiceInput,
+} from "@/generated/graphql";
 
 export const fakeTicketInput: GenerateTicketInput = {
   firstName: "Corentin",
@@ -55,13 +70,15 @@ export const fakeCompany: Company = {
   createdAt: "2025-07-04T10:46:23.954Z",
   updatedAt: "2025-07-04T10:46:23.954Z",
   services: [],
+  managers: [],
+  settings: [],
 };
 
 export const fakeServiceInput: CreateServiceInput = {
   name: "CHARCUTERIE",
   companyId: "",
   isGloballyActive: true,
-}
+};
 
 export const fakeService: Service = {
   name: "Radiologie",
@@ -83,6 +100,7 @@ export const fakeManager: Manager = {
   company: fakeCompany,
   connectionLogs: [],
   authorizations: [],
+  ticketLogs: [],
   createdAt: new Date(),
   updatedAt: new Date(),
 };
@@ -104,6 +122,7 @@ export const fakeManagerWithoutPassword: ManagerWithoutPassword = {
   isGloballyActive: true,
   authorizations: [],
   connectionLogs: [],
+  ticketLogs: [],
   createdAt: new Date(),
   updatedAt: new Date(),
   company: fakeCompany,

@@ -30,7 +30,6 @@ export default class TicketLogEntity {
   managerId: string;
 
   @ManyToOne(() => ManagerEntity, (manager: ManagerEntity) => manager.ticketLogs, {
-    eager: true,
     nullable: true,
   })
   @JoinColumn()
@@ -39,11 +38,11 @@ export default class TicketLogEntity {
 
   //TICKET RELATION
 
-  @Column({ type: "uuid" })
+  @Column({ type: "uuid", nullable: true })
   ticketId: string;
 
   @ManyToOne(() => TicketEntity, (ticket: TicketEntity) => ticket.ticketLogs, {
-    eager: true,
+    nullable: true
   })
   @JoinColumn()
   ticket: TicketEntity;

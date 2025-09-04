@@ -43,6 +43,9 @@ export class ServiceEntity {
   @OneToMany(() => TicketEntity, (ticket) => ticket.service)
   tickets: TicketEntity[];
 
+  @Column({ type: "uuid"})
+  companyId: string
+
   //COMPANY
   @ManyToOne(() => CompanyEntity, (company) => company.services)
   @JoinColumn()

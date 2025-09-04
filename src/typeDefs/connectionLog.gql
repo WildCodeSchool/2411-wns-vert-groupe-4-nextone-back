@@ -13,10 +13,10 @@ type ConnectionLog {
 }
 
  type Query {
-  getConnectionLogs: [ConnectionLog!]!
-  getLoginLogs: [ConnectionLog!]!
-  getLogoutLogs: [ConnectionLog!]!
-  getEmployeeConnectionLogs(managerId: String!): [ConnectionLog!]!
+  connectionLogs: [ConnectionLog!]!
+  loginLogs: [ConnectionLog!]!
+  logoutLogs: [ConnectionLog!]!
+  employeeConnectionLogs(managerId: String!): [ConnectionLog!]!
 }
 
  type Mutation {

@@ -20,7 +20,7 @@ export default class ConnectionLogEntity {
   })
   type: ConnectionEnum;
 
-  @Column()
+  @Column({ type: "uuid" })
   managerId: string;
 
   @CreateDateColumn()

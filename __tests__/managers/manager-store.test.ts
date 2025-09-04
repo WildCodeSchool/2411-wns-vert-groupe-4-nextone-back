@@ -208,7 +208,7 @@ describe("Test sur les managers", () => {
       },
     });
     assert(response.body.kind === "single");
-    const { authorizations, company,connectionLogs, ...rest } = fakeManagerWithoutPassword;
+    const { authorizations, company,connectionLogs, ticketLogs, ...rest } = fakeManagerWithoutPassword;
     expect(response.body.singleResult.data).toEqual({
       login: {
         manager: rest,
@@ -244,7 +244,7 @@ describe("Test sur les managers", () => {
     });
 
     assert(response.body.kind === "single");
-    const { authorizations, company, connectionLogs, ...rest } =
+    const { authorizations, company, connectionLogs,ticketLogs, ...rest } =
       fakeManagerWithoutPassword;
     expect(response.body.singleResult.data).toEqual({
       manager: rest,

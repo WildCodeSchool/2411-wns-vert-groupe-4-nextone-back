@@ -1,10 +1,13 @@
+scalar DateTime
+
+
 type Setting {
   id: ID!
   name: String!
   value: String!
-  Company: Company!
-  createdAt: String
-  updatedAt: String
+  company: Company!
+  createdAt: DateTime
+  updatedAt: DateTime
 }
 
 type Query {

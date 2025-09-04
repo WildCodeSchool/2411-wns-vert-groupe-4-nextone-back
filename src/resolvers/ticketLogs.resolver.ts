@@ -9,6 +9,8 @@ import {
   QueryTicketLogsByPropertiesArgs,
   QueryTicketLogsByPropertyArgs,
 } from "@/generated/graphql";
+import ManagerService from "@/services/manager.service";
+import TicketService from "@/services/ticket.service";
 import TicketLogService from "@/services/ticketLogs.service";
 import { buildResponse } from "@/utils/authorization";
 
@@ -75,4 +77,13 @@ export default {
       return buildResponse(deleted, `Ticket log ${id} deleted.`, `failed to delete ticket log ${id}`)
     },
   },
+  TicketLog: {
+    manager: async (parent: TicketLogEntity) => {
+      const manager = await new ManagerService().getManagerById(parent.managerId)
+      return manager
+    },
+    ticket: async (parent: TicketLogEntity) => {
+      return await TicketService.gettInstance().findById(parent.ticketId)
+    }
+  }
 };

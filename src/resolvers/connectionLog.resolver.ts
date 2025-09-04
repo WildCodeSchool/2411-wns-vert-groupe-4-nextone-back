@@ -1,42 +1,34 @@
-import {
-  Resolver,
-  Query,
-  Arg,
-  Mutation,
-} from "type-graphql";
 import ConnectionLogEntity from "@/entities/ConnectionLog.entity";
-import ConnectionLogService from "@/services/connectionLog.service";
 import { ConnectionEnum } from "@/generated/graphql";
+import ConnectionLogService from "@/services/connectionLog.service";
+import ManagerService from "@/services/manager.service";
 
-@Resolver(() => ConnectionLogEntity)
-export default class ConnectionLogResolver {
-  private service = new ConnectionLogService();
+const connectionLogService = new ConnectionLogService() 
 
-  @Query(() => [ConnectionLogEntity])
-  getConnectionLogs() {
-    return this.service.getAllConnectionLogs();
-  }
-
-  @Query(() => [ConnectionLogEntity])
-  getLoginLogs() {
-    return this.service.getConnectionLogsByType(ConnectionEnum.Login);
-  }
-
-  @Query(() => [ConnectionLogEntity])
-  getLogoutLogs() {
-    return this.service.getConnectionLogsByType(ConnectionEnum.Logout);
-  }
-
-  @Query(() => [ConnectionLogEntity])
-  getEmployeeConnectionLogs(@Arg("managerId") managerId: string) {
-    return this.service.getConnectionLogsByEmployee(managerId);
-  }
-
-  @Mutation(() => ConnectionLogEntity)
-  createConnectionLog(
-    @Arg("type", () => ConnectionEnum) type: ConnectionEnum,
-    @Arg("managerId") managerId: string
-  ) {
-    return this.service.createConnectionLog({ type, managerId });
+export default {
+  Query: {
+    connectionLogs:async () => {
+      return await connectionLogService.getAllConnectionLogs()
+    },
+    loginLogs: async () => {
+      return await connectionLogService.getConnectionLogsByType(ConnectionEnum.Login)
+    },
+    logoutLogs: async () => {
+      return await connectionLogService.getConnectionLogsByType(ConnectionEnum.Logout)
+    },
+    employeeConnectionLogs: async (_: any, managerId: string) => {
+      return await connectionLogService.getConnectionLogsByEmployee(managerId)
+    }
+  },
+  Mutation: {
+    createConnectionLog: async (type: ConnectionEnum, managerId: string) => {
+      const connectionLog = await connectionLogService.createConnectionLog({ type, managerId })
+      return connectionLog
+    }
+  },
+  ConnectionLog: {
+    manager: async (parent: ConnectionLogEntity) => {
+      return await new ManagerService().getManagerById(parent.managerId)
+    }
   }
 }
