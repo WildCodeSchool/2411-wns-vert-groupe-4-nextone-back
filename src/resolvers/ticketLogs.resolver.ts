@@ -34,8 +34,8 @@ export default {
     async ticketLogsByProperty(_: any, args: QueryTicketLogsByPropertyArgs) {
       let key = Object.keys(args.field)[0] as keyof typeof args.field;
       const value = args.field[key];
-      console.log("RESOLVER TICKET LOG : ", value)
-      return await ticketLogService.findByProperty(key, value);
+      const tl = await ticketLogService.findByProperty(key, value);
+      return tl
     },
 
     async ticketLogsByProperties(
@@ -83,10 +83,10 @@ export default {
     },
   },
   TicketLog: {
-    manager: async (parent: TicketLogEntity, _: any, { loaders: { managerLoader} }: MyContext) => {
+    manager: async (parent: TicketLogEntity, _: any, { loaders: { managerLoader } }: MyContext) => {
       return await managerLoader.load(parent.managerId || "");
     },
-    ticket: async (parent: TicketLogEntity, _: any, {loaders: { ticketLoader}}: MyContext) => {
+    ticket: async (parent: TicketLogEntity, _: any, { loaders: { ticketLoader } }: MyContext) => {
       return await ticketLoader.load(parent.ticketId);
     },
   },

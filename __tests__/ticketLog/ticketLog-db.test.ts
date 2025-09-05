@@ -1,11 +1,4 @@
 
-//ON MOCK LA DB AVEC CELLE DE TEST
-jest.mock("../../src/lib/datasource", () => {
-  return {
-    __esModule: true,
-    default: jest.requireActual("../../src/lib/datasource_test").default,
-  };
-});
 
 import { ApolloServer } from "@apollo/server";
 import { makeExecutableSchema } from "@graphql-tools/schema";
@@ -43,26 +36,42 @@ import {
   fakeServiceInput,
   fakeTicketInput,
 } from "../../src/utils/dataTest";
+import loaders, { Loaders } from "../../src/lib/dataLoaderContext";
+
+
+//ON MOCK LA DB AVEC CELLE DE TEST
+jest.mock("../../src/lib/datasource", () => {
+  return {
+    __esModule: true,
+    default: jest.requireActual("../../src/lib/datasource_test").default,
+  };
+});
 
 type PartialTicketLog = Partial<Omit<TicketLog, "ticket">> & {
   ticket: Pick<Ticket, "id" | "firstName" | "lastName">;
 };
 
 type TResponse = {
-  ticketLog: PartialTicketLog[] | null;
+  ticketLogs: PartialTicketLog[] | null;
 };
 
 type TResponseDelete = {
   message: DeleteResponse;
 };
 
-let server: ApolloServer;
+type ContextTest = {
+  loaders: Loaders
+}
+
+let server: ApolloServer<ContextTest>;
 const schema = makeExecutableSchema({ typeDefs, resolvers });
 
 beforeAll(async () => {
   server = new ApolloServer({
     schema,
+
   });
+
 
   try {
     if (!testDataSource.isInitialized) {
@@ -88,6 +97,7 @@ afterAll(async () => {
 });
 
 describe("TEST TICKETLOG DANS LA DB", () => {
+  // let baseId: string = "0f5edef5-ec8c-4db6-9efe-83d3924c3191";
   let baseId: string;
   let baseTicketId: string;
   let baseManagerId: string;
@@ -101,6 +111,8 @@ describe("TEST TICKETLOG DANS LA DB", () => {
       await CompanyService.getService().createOne(fakeCompanyInput);
     baseCompanyId = newCompany.id;
 
+    // console.log("COMPANY DANS LE TEST : ", newCompany)
+
     //CREATION DU SERVICE
     const newService = await new ServicesService().createService(
       {...fakeServiceInput, companyId: baseCompanyId}
@@ -108,12 +120,15 @@ describe("TEST TICKETLOG DANS LA DB", () => {
     );
     baseServiceId = newService.id
 
+    // console.log("SERVICE DANS LE TEST : ", newService)
+
     //CREATION D'UN TICKET
     const newTicket: TicketEntity =
       await TicketService.gettInstance().createOne({...fakeTicketInput, service: newService});
     baseTicketId = newTicket.id;
 
-    console.log("BASETICKETID : ", baseTicketId)
+    // console.log("TICKET DANS LE TEST : ", newTicket)
+
     // //ET ENFIN, ON RECUPERE LE TICKETLOG QUI A ETE CREE VIA
     // LE SUBSCRIBER SUR TICKETENTITY👍
     const response = await server.executeOperation<
@@ -124,16 +139,22 @@ describe("TEST TICKETLOG DANS LA DB", () => {
       variables: {
         field: {
           ticketId: baseTicketId,
-        },
-      },
+        }
+      }
+    }, { 
+      contextValue: {
+        loaders
+      }
     });
     assert(response.body.kind === "single");
+
+
 
     expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data).not.toBeNull();
     expect(response.body.singleResult.data).not.toBeUndefined();
-    expect(response.body.singleResult.data?.ticketLog).toHaveLength(1);
-    const { id, ...rest } = response.body.singleResult.data?.ticketLog![0]!;
+    expect(response.body.singleResult.data?.ticketLogs).toHaveLength(1);
+    const { id, ...rest } = response.body.singleResult.data?.ticketLogs![0]!;
     expect(validate(id)).toBeTruthy;
     baseId = id!;
     expect(rest).toEqual<PartialTicketLog>({
@@ -175,13 +196,17 @@ describe("TEST TICKETLOG DANS LA DB", () => {
           ticketId: baseTicketId,
         },
       },
+    }, {
+      contextValue: {
+        loaders
+      }
     });
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.errors).toBeUndefined();
-    expect(response.body.singleResult.data?.ticketLog).toHaveLength(2);
+    expect(response.body.singleResult.data?.ticketLogs).toHaveLength(2);
     const { id, ...rest } = response.body.singleResult.data
-      ?.ticketLog![1] as PartialTicketLog;
+      ?.ticketLogs![1] as PartialTicketLog;
     expect(validate(id)).toBeTruthy();
     expect(rest).toEqual<PartialTicketLog>({
       ticket: {
@@ -202,7 +227,11 @@ describe("TEST TICKETLOG DANS LA DB", () => {
       variables: {
         id: baseId,
       },
-    });
+    },
+      {
+        contextValue: {
+      loaders
+    }});
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.errors).toBeUndefined();
@@ -220,11 +249,15 @@ describe("TEST TICKETLOG DANS LA DB", () => {
       variables: {
         id: baseId,
       },
+    }, {
+      contextValue: {
+        loaders
+      }
     });
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.errors).toBeUndefined();
-    expect(response.body.singleResult.data).toEqual<TResponse>({
+    expect(response.body.singleResult.data).toEqual({
       ticketLog: null,
     });
   });

@@ -188,7 +188,7 @@ const loaders = {
   companyLoader,
   serviceByCompanyIdLoader,
   managerByCompanyIdLoader,
-  settingByCompanbyIdLoader
+  settingByCompanbyIdLoader,
 };
 
 export type Loaders = typeof loaders;

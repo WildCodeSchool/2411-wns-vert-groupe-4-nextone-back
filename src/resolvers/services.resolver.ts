@@ -25,7 +25,6 @@ export default {
       __: any,
       ctx: MyContext
     ): Promise<ServiceEntity[]> => {
-      console.log("RESOLVER 1");
       const services = await new ServicesService().getAllServices();
       return services;
     },

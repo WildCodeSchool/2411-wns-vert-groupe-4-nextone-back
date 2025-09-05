@@ -38,22 +38,35 @@ query TicketLog($id: UUID!) {
     id
   }
 }
-`
+`;
 
+// export const TICKETLOGS_BY_PROPERTIES = `#graphql
+// query TicketLogsByProperties($fields: TicketLogPropertiesInput!) {
+//   ticketLogsByProperties(fields: $fields) {
+//     id
+//     ticket {
+//       id
+//       firstName
+//       lastName
+//     }
+//     status
+//   }
+// }
+// `;
 
 export const TICKETLOG_BY_PROPERTY = `#graphql
 query TicketLogsByProperty($field: TicketLogPropertyInput!) {
-  ticketLog: ticketLogsByProperty(field: $field) {
+  ticketLogs: ticketLogsByProperty(field: $field) {
     id
+    status
     ticket {
       id
       firstName
       lastName
     }
-    status
   }
 }
-`
+`;
 
 export const CREATE_TICKETLOG = `#graphql
 mutation CreateTicketLog($data: CreateTicketLogInput!) {
