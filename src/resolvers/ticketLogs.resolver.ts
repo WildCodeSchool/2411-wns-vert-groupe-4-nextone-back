@@ -13,6 +13,7 @@ import ManagerService from "@/services/manager.service";
 import TicketService from "@/services/ticket.service";
 import TicketLogService from "@/services/ticketLogs.service";
 import { buildResponse } from "@/utils/authorization";
+import { MyContext } from "..";
 
 const ticketLogService = TicketLogService.getInstance();
 
@@ -33,8 +34,8 @@ export default {
     async ticketLogsByProperty(_: any, args: QueryTicketLogsByPropertyArgs) {
       let key = Object.keys(args.field)[0] as keyof typeof args.field;
       const value = args.field[key];
-
-      return await ticketLogService.findByProperty(key, value);
+      const tl = await ticketLogService.findByProperty(key, value);
+      return tl
     },
 
     async ticketLogsByProperties(
@@ -74,16 +75,19 @@ export default {
       { id }: MutationDeleteTicketLogArgs
     ): Promise<DeleteResponse> {
       const deleted = await ticketLogService.deleteOne(id);
-      return buildResponse(deleted, `Ticket log ${id} deleted.`, `failed to delete ticket log ${id}`)
+      return buildResponse(
+        deleted,
+        `Ticket log ${id} deleted.`,
+        `failed to delete ticket log ${id}`
+      );
     },
   },
   TicketLog: {
-    manager: async (parent: TicketLogEntity) => {
-      const manager = await new ManagerService().getManagerById(parent.managerId)
-      return manager
+    manager: async (parent: TicketLogEntity, _: any, { loaders: { managerLoader } }: MyContext) => {
+      return await managerLoader.load(parent.managerId || "");
     },
-    ticket: async (parent: TicketLogEntity) => {
-      return await TicketService.gettInstance().findById(parent.ticketId)
-    }
-  }
+    ticket: async (parent: TicketLogEntity, _: any, { loaders: { ticketLoader } }: MyContext) => {
+      return await ticketLoader.load(parent.ticketId);
+    },
+  },
 };

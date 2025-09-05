@@ -92,19 +92,11 @@ export default {
     },
   },
   Ticket: {
-    service: async (ticket: TicketEntity) => {
-      const service = await new ServicesService().db.findOneBy({
-        id: ticket.serviceId
-      })
-      return service
+    service: async (ticket: TicketEntity, _: any, ctx: MyContext) => {
+      return await ctx.loaders.serviceLoader.load(ticket.id)
     },
-    ticketLogs: async (ticket: TicketEntity) => {
-      const ticketLogs = await TicketLogService.getInstance().findByProperties({
-        ticket: {
-          id: ticket.id
-        }
-      })
-      return ticketLogs
+    ticketLogs: async (ticket: TicketEntity, _: any, ctx: MyContext) => {
+      return await ctx.loaders.ticketLogByTicketIdLoader.load(ticket.id)
     }
   }
 };

@@ -38,7 +38,7 @@ export default class TicketLogEntity {
 
   //TICKET RELATION
 
-  @Column({ type: "uuid", nullable: true })
+  @Column({ type: "uuid"})
   ticketId: string;
 
   @ManyToOne(() => TicketEntity, (ticket: TicketEntity) => ticket.ticketLogs, {
