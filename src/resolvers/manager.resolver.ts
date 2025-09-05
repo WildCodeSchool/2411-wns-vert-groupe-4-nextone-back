@@ -177,20 +177,29 @@ export default {
     },
   },
   Manager: {
-    authorizations: async ({ id }: { id: string }) => {
-      const auth = new AuthorizationService().getByManager(id);
-      return auth
+    authorizations: async (
+      { id }: { id: string },
+      _: any,
+      { loaders: { authByManagerIdLoader } }: MyContext
+    ) => {
+      return await authByManagerIdLoader.load(id);
     },
     company: async (manager: ManagerEntity) => {
       return await CompanyService.getService().findById(manager.companyId);
     },
-    connectionLogs: async ({ id }: { id: string }) => {
-      return await new ConnectionLogService().getConnectionLogsByEmployee(id);
+    connectionLogs: async (
+      { id }: { id: string },
+      _: any,
+      { loaders: { connectionLogByManagerIdLoader } }: MyContext
+    ) => {
+      return await connectionLogByManagerIdLoader.load(id);
     },
-    ticketLogs: async ({ id }: { id: string }) => {
-      return await TicketLogService.getInstance().findByProperties({
-        managerId: id
-      })
+    ticketLogs: async (
+      { id }: { id: string },
+      _: any,
+      { loaders: { ticketLogsByManagerIdLoader } }: MyContext
+    ) => {
+      return await ticketLogsByManagerIdLoader.load(id);
     },
   },
 };

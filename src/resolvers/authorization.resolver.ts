@@ -93,17 +93,11 @@ export default {
     },
   },
   Authorization: {
-    service: async (parent: AuthorizationEntity) => {
-      const service = await new ServicesService().getServiceById(
-        parent.serviceId
-      );
-      return service;
+    service: async (parent: AuthorizationEntity,_: any, { loaders: { serviceLoader }}: MyContext) => {
+      return await serviceLoader.load(parent.serviceId)
     },
-    manager: async (parent: AuthorizationEntity) => {
-      const manager = await new ManagerService().getManagerById(
-        parent.managerId
-      );
-      return manager;
+    manager: async (parent: AuthorizationEntity,_: any, { loaders: { managerLoader }}: MyContext) => {
+      return await managerLoader.load(parent.managerId)
     },
   },
 };

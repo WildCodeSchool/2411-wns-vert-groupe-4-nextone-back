@@ -20,6 +20,7 @@ import datasource from "./datasource";
 import { DeepPartial } from "typeorm";
 import CounterEntity from "@/entities/Counter.entity";
 import CounterService from "@/services/counter.service";
+import { exit } from "process";
 
 const createCompanyAndSuperAdmin = async (): Promise<CompanyEntity> => {
   console.log("🏚️ --> CREATION DE LA COMPANY...");
@@ -263,13 +264,13 @@ export const seedDB = async (): Promise<boolean> => {
     await updateTicketStatus(managers, tickets);
 
     console.log("🥳 --> SEEDING OK.");
-    return true;
+    exit(1)
   } catch (error: any) {
     console.log("-------------------");
     console.log("😭 --> ERREUR DANS LE SEEDING...");
     console.log("-------------------");
     console.log("😡 L'ERREUR : ", error?.message);
-    return false;
+    exit(0)
   }
 };
 
