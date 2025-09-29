@@ -15,8 +15,9 @@ type Ticket {
 }
 
 type Query {
-  tickets: [Ticket!]
+  tickets(limit: Int, offset: Int): [Ticket!]
   ticket(id: ID!): Ticket
+  ticketsByProperties(fields: TicketPropertiesInput!): [Ticket!]!
 }
 
 type Mutation {
@@ -24,6 +25,17 @@ type Mutation {
   deleteTicket(id: ID!): DeletedTicketResponse!
   updateTicket(data: UpdateTicketInput!): Ticket
   updateTicketStatus(data: UpdateStatusTicketInput!): Ticket!
+}
+
+input TicketPropertiesInput {
+  firstName: String
+  lastName: String
+  email: String
+  phone: String
+  status: [Status!]
+  serviceId: ID
+  createdAt: DateTime
+  updatedAt: DateTime
 }
 
 input UpdateStatusTicketInput {
@@ -51,7 +63,7 @@ input UpdateTicketInput {
   serviceId: ID
 }
 
-  type DeletedTicketResponse {
+type DeletedTicketResponse {
   success: Boolean!
   message: String
 }

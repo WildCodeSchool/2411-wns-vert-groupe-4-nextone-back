@@ -1,16 +1,14 @@
 import TicketService from "@/services/ticket.service";
 import TicketEntity from "@/entities/Ticket.entity";
 import {
-  DeletedTicketResponse,
   MutationGenerateTicketArgs,
   MutationUpdateTicketArgs,
   MutationUpdateTicketStatusArgs,
   QueryTicketArgs,
+  QueryTicketsByPropertiesArgs,
 } from "@/generated/graphql";
 import { MyContext } from "..";
-import { buildResponse } from "@/utils/authorization";
 import ServicesService from "@/services/services.service";
-import TicketLogService from "@/services/ticketLogs.service";
 
 type TicketDeleted = {
   message: string;
@@ -33,6 +31,13 @@ export default {
       const ticket = await ticketService.findById(id);
       return ticket;
     },
+    ticketsByProperties: async (_: any, data: QueryTicketsByPropertiesArgs) => {
+      const { status, ...rest } = data.fields
+      if (status) {
+        return await ticketService.ticketsByStatus(rest,status)
+      }
+      return ticketService.findByProperties(rest)
+    }
   },
   Mutation: {
     generateTicket: async (
