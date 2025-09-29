@@ -61,13 +61,16 @@ const ticketLoader = new DataLoader(bachTicket);
 
 //SERVICE
 const batchService = async (ticketIds: Readonly<string[]>) => {
-  return await Promise.all(
+  const services =  await Promise.all(
     ticketIds.map(async (id) => {
       return await new ServicesService().db.findOneBy({
-        id,
+        tickets: {
+          id
+        }
       });
     })
   );
+  return services
 };
 
 const serviceLoader = new DataLoader(batchService);
