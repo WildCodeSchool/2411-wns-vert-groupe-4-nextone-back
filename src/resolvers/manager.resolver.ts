@@ -66,7 +66,13 @@ export default {
       await validateOrThrow(loginInfos);
       const { manager, token } = await managerService.login(infos);
       const { password, ...rest } = manager;
-      ctx.res.cookie("token", token, { httpOnly: true });
+      ctx.res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 24 * 60 * 60 * 1000,
+        path: "/",
+      });
       return { manager: rest, token };
     },
 
@@ -82,6 +88,17 @@ export default {
         "Vous êtes déconnecté",
         "Vous n'êtes pas déconnecté"
       );
+    },
+
+    checkToken: async (_: any, __: any, ctx: MyContext) => {
+      return ctx.manager
+        ? {
+            email: ctx.manager.email,
+            id: ctx.manager.id,
+            firstName: ctx.manager.firstName,
+            lastName: ctx.manager.lastName,
+          }
+        : null;
     },
   },
   Mutation: {
