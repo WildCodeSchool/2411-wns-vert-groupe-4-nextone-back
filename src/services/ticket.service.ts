@@ -4,7 +4,7 @@ import TicketLogService from "./ticketLogs.service";
 import TicketLogEntity from "@/entities/TicketLog.entity";
 import ManagerEntity from "@/entities/Manager.entity";
 import BaseService from "./base.service";
-import { Between } from "typeorm";
+import { Any, FindOptionsWhere, In } from "typeorm";
 
 export default class TicketService extends BaseService<TicketEntity> {
   private static instance: TicketService | null = null;
@@ -43,5 +43,15 @@ export default class TicketService extends BaseService<TicketEntity> {
     return found;
   }
 
-
+  async ticketsByStatus(
+    fields: FindOptionsWhere<TicketEntity>,
+    statusList: Status[]
+  ): Promise<TicketEntity[]> {
+    return await this.repo.find({
+      where: {
+        ...fields,
+        status: In(statusList)
+      }
+    });
+  }
 }

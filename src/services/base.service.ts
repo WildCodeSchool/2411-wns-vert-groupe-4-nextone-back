@@ -46,8 +46,11 @@ export default abstract class BaseService<T extends ObjectLiteral> {
   }
 
   //RECUPERER TOUTES LES INSTANCES
-  public async findAll() {
-    const list = await this.repo.find();
+  public async findAll(limit: number = 1, offset: number = 20) {
+    const list = await this.repo.find({
+      skip: offset * (limit - 1),
+      take: offset,
+    });
     return list;
   }
 
