@@ -5,6 +5,7 @@ import {
   MutationCreateTicketLogArgs,
   MutationDeleteTicketLogArgs,
   MutationUpdateTicketLogArgs,
+  QueryTicketLogsArgs,
   QueryTicketLogsByCreationSlotArgs,
   QueryTicketLogsByPropertiesArgs,
   QueryTicketLogsByPropertyArgs,
@@ -26,15 +27,15 @@ export default {
       return await ticketLogService.findById(id);
     },
 
-    async ticketLogs(): Promise<TicketLogEntity[]> {
-      const tickets = await ticketLogService.findAll();
+    async ticketLogs(_: any, { pagination }: QueryTicketLogsArgs): Promise<TicketLogEntity[]> {
+      const tickets = await ticketLogService.findAll(pagination);
       return tickets;
     },
 
     async ticketLogsByProperty(_: any, args: QueryTicketLogsByPropertyArgs) {
       let key = Object.keys(args.field)[0] as keyof typeof args.field;
       const value = args.field[key];
-      const tl = await ticketLogService.findByProperty(key, value);
+      const tl = await ticketLogService.findByProperty(key, value, args.pagination);
       return tl
     },
 
