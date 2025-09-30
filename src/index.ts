@@ -27,6 +27,7 @@ const httpServer = http.createServer(app);
 const authorizedCorsUrls = [
   "http://localhost:4000",
   "https://david4.wns.wilders.dev",
+  "https://staging.david4.wns.wilders.dev",
 ];
 
 const server = new ApolloServer<MyContext>({
