@@ -12,15 +12,13 @@ import typeDefs from "./typeDefs";
 import resolvers from "./resolvers";
 import ManagerEntity from "./entities/Manager.entity";
 import { authContext } from "./lib/authContext";
-import type {
-  Loaders
-} from "./lib/dataLoaderContext";
+import type { Loaders } from "./lib/dataLoaderContext";
 
 export interface MyContext {
   req: Request;
   res: Response;
   manager: ManagerEntity | null;
-  loaders: Loaders
+  loaders: Loaders;
 }
 
 const app = express();
@@ -42,8 +40,14 @@ async function main() {
   await server.start();
   console.log("🚀 Apollo Server démarré sur /graphql");
 
-  await datasource.initialize();
-  console.log("📦 Base de données initialisée");
+  await datasource
+    .initialize()
+    .then(() => {
+      console.log("📦 Base de données initialisée");
+    })
+    .catch((err) => {
+      console.error("❌ Échec de la connexion à la base de données :", err);
+    });
 
   app.use(
     "/graphql",
