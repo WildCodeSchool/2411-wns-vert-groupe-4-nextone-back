@@ -40,7 +40,6 @@ export default abstract class BaseService<T extends ObjectLiteral> {
   //RECUPERER TOUTES LES INSTANCES
   public async findAll(pag?: PaginationInput) {
     const { created, limit, order } = this.getPagination(pag);
-    console.log("ORDER : ", order)
     const list = await this.repo.find({
       where: {
         createdAt: Raw((alias) => `${alias} >= :created`, { created }),
