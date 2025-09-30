@@ -31,6 +31,7 @@ export default class TicketLogEntity {
 
   @ManyToOne(() => ManagerEntity, (manager: ManagerEntity) => manager.ticketLogs, {
     nullable: true,
+    onDelete: "CASCADE"
   })
   @JoinColumn()
   manager: ManagerEntity;
@@ -42,7 +43,8 @@ export default class TicketLogEntity {
   ticketId: string;
 
   @ManyToOne(() => TicketEntity, (ticket: TicketEntity) => ticket.ticketLogs, {
-    nullable: true
+    nullable: true,
+    onDelete: "CASCADE"
   })
   @JoinColumn()
   ticket: TicketEntity;

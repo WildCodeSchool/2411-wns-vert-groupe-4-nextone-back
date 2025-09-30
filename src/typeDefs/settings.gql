@@ -11,13 +11,23 @@ type Setting {
 }
 
 type Query {
-  settings: [Setting!]!
+  settings(pagination: PaginationInput): [Setting!]!
   setting(id: ID!): Setting
+  settingsByProperties(fields: SettingsByPropertiesInput!): [Setting!]!
 }
 
 type DeleteResponseSetting {
   message: String!
   success: Boolean!
+}
+
+input SettingsByPropertiesInput {
+  name: String
+  value: String
+  companyId: UUID
+  pagination: PaginationInput
+  createdAt: DateTime
+  updatedAt: DateTime
 }
 
 type Mutation {

@@ -9,7 +9,7 @@ import {
   Repository,
 } from "typeorm";
 import AppDataSource from "../lib/datasource";
-import { ByCreationSlotInput, PaginationInput, QueryTicketLogsByCreationSlotArgs } from "@/generated/graphql";
+import { ByCreationSlotInput, Order, PaginationInput, QueryTicketLogsByCreationSlotArgs } from "@/generated/graphql";
 
 export default abstract class BaseService<T extends ObjectLiteral> {
   protected repo: Repository<T>;
@@ -21,7 +21,8 @@ export default abstract class BaseService<T extends ObjectLiteral> {
   protected getPagination(pagination?: PaginationInput) {
     const created = pagination?.created ?? new Date(1970, 1, 1);
     const limit = pagination?.limit || 20;
-    return { created, limit };
+    const order: Order = pagination?.order || Order.Asc
+    return { created, limit, order };
   }
 
   //CREER UNE INSTANCE DE T
@@ -38,14 +39,14 @@ export default abstract class BaseService<T extends ObjectLiteral> {
 
   //RECUPERER TOUTES LES INSTANCES
   public async findAll(pag?: PaginationInput) {
-    const { created, limit } = this.getPagination(pag);
-
+    const { created, limit, order } = this.getPagination(pag);
+    console.log("ORDER : ", order)
     const list = await this.repo.find({
       where: {
         createdAt: Raw((alias) => `${alias} >= :created`, { created }),
       } as any,
       order: {
-        createdAt: "ASC",
+        createdAt: order,
       } as any,
       take: limit,
     });
@@ -71,12 +72,15 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     pag?: PaginationInput
   ): Promise<T[]> {
 
-    const { created, limit } = this.getPagination(pag)
+    const { created, limit, order } = this.getPagination(pag)
 
     const entities = await this.repo.find({
       where: {
         [fields]: value,
         createdAt: Raw((alias) => `${alias} >= :created`, { created }),
+      } as any,
+      order: {
+        createdAt: order
       } as any,
       take: limit
     });
@@ -89,7 +93,7 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     fields: FindOptionsWhere<T>,
     pag?: PaginationInput
   ): Promise<T[]> {
-    const { created, limit } = this.getPagination(pag);
+    const { created, limit, order } = this.getPagination(pag);
     return await this.repo.find({
       where: {
         ...fields,
@@ -97,7 +101,7 @@ export default abstract class BaseService<T extends ObjectLiteral> {
       } as any,
       take: limit,
       order: {
-        createdAt: "ASC",
+        createdAt: order,
       } as any,
     });
   }
@@ -112,7 +116,7 @@ export default abstract class BaseService<T extends ObjectLiteral> {
       .createQueryBuilder(name)
       .where(`${name}.createdAt >= :start`, { start: new Date(startDate) })
       .andWhere(`${name}.createdAt <= :end`, { end: new Date(end) })
-      .orderBy(`${name}.createdAt `, "ASC")
+      .orderBy(`${name}.createdAt `, pagination?.order || "ASC")
       .limit(pagination?.limit || 20)
       .getMany();
 

@@ -18,8 +18,9 @@ type Company {
 
 
 type Query {
-  companies: [Company!]!
+  companies(pagination: PaginationInput): [Company!]!
   company(id: ID!): Company
+  companiesByProperties(fields: CompanyByPropertiesInput!): [Company!]!
 }
 
 type Mutation {
@@ -31,6 +32,18 @@ type Mutation {
 type DeleteResponseCompany {
   message: String!
   success: Boolean!
+}
+input CompanyByPropertiesInput {
+  name: String
+  address: String
+  postalCode: String
+  city: String
+  siret: String
+  email: String
+  phone: String
+  pagination: PaginationInput
+  createdAt: DateTime
+  updatedAt: DateTime
 }
 
 input CreateCompanyInput {

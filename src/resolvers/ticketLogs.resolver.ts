@@ -1,6 +1,5 @@
 import TicketLogEntity from "@/entities/TicketLog.entity";
 import {
-  AuthorizationResponse,
   DeleteResponse,
   MutationCreateTicketLogArgs,
   MutationDeleteTicketLogArgs,
@@ -10,8 +9,6 @@ import {
   QueryTicketLogsByPropertiesArgs,
   QueryTicketLogsByPropertyArgs,
 } from "@/generated/graphql";
-import ManagerService from "@/services/manager.service";
-import TicketService from "@/services/ticket.service";
 import TicketLogService from "@/services/ticketLogs.service";
 import { buildResponse } from "@/utils/authorization";
 import { MyContext } from "..";
@@ -41,9 +38,10 @@ export default {
 
     async ticketLogsByProperties(
       _: any,
-      { fields }: QueryTicketLogsByPropertiesArgs
+      { fields, }: QueryTicketLogsByPropertiesArgs
     ) {
-      return await ticketLogService.findByProperties(fields);
+      const { pagination, ...rest} = fields
+      return await ticketLogService.findByProperties(rest, pagination);
     },
 
     async ticketLogsByCreationSlot(

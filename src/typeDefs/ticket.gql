@@ -27,9 +27,15 @@ type Mutation {
   updateTicketStatus(data: UpdateStatusTicketInput!): Ticket!
 }
 
+enum Order {
+  ASC
+  DESC
+}
+
 input PaginationInput {
   created: DateTime,
   limit: Int
+  order: Order
 }
 
 input TicketPropertiesInput {
