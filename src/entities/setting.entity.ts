@@ -24,7 +24,7 @@ import CompanyEntity from "./Company.entity";
     @Column({ type: "uuid"})
     companyId: string;
 
-    @ManyToOne(() => CompanyEntity, (company: CompanyEntity) => company.settings)
+    @ManyToOne(() => CompanyEntity, (company: CompanyEntity) => company.settings, { onDelete: "CASCADE"})
     company: CompanyEntity
 
     @CreateDateColumn()

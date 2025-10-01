@@ -1,5 +1,5 @@
 import TicketEntity from "@/entities/Ticket.entity";
-import { Status, UpdateStatusTicketInput } from "@/generated/graphql";
+import { PaginationInput, Status, UpdateStatusTicketInput } from "@/generated/graphql";
 import TicketLogService from "./ticketLogs.service";
 import TicketLogEntity from "@/entities/TicketLog.entity";
 import ManagerEntity from "@/entities/Manager.entity";
@@ -45,7 +45,8 @@ export default class TicketService extends BaseService<TicketEntity> {
 
   async ticketsByStatus(
     fields: FindOptionsWhere<TicketEntity>,
-    statusList: Status[]
+    statusList: Status[],
+    pag: PaginationInput | undefined
   ): Promise<TicketEntity[]> {
     return await this.repo.find({
       where: {

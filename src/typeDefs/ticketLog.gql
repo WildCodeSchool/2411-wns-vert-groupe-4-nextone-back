@@ -22,8 +22,8 @@ type TicketLog {
 
 type Query {
   ticketLog(id: UUID!): TicketLog
-  ticketLogs: [TicketLog!]!
-  ticketLogsByProperty(field: TicketLogPropertyInput!): [TicketLog!]!
+  ticketLogs(pagination: PaginationInput): [TicketLog!]!
+  ticketLogsByProperty(field: TicketLogPropertyInput!, pagination: PaginationInput): [TicketLog!]!
   ticketLogsByProperties(fields: TicketLogPropertiesInput!): [TicketLog!]!
   ticketLogsByCreationSlot(data: ByCreationSlotInput!): [TicketLog!]!
 }
@@ -38,6 +38,7 @@ input ByCreationSlotInput {
   start: DateTime!
   end: DateTime!
   name: String!
+  pagination: PaginationInput
 }
 
 input TicketLogPropertyInput @oneOf {
@@ -54,6 +55,7 @@ input TicketLogPropertiesInput  {
   status: Status
   createdAt: DateTime
   updatedAt: DateTime
+  pagination: PaginationInput
 }
 
 type DeleteResponse {

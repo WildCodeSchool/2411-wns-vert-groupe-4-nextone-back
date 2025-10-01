@@ -4,10 +4,11 @@ import { mergeResolvers } from "@graphql-tools/merge";
 import { resolvers as scalarResolvers } from "graphql-scalars";
 
 const resolversArray = loadFilesSync(path.join(__dirname, "."), {
-  extensions: [".resolver.ts"],
+  extensions: [".resolver.ts", ".resolver.js"],
   recursive: true,
 });
 
 resolversArray.push(scalarResolvers);
+
 
 export default mergeResolvers(resolversArray);

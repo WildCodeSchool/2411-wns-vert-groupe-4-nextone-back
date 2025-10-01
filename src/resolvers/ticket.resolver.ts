@@ -5,6 +5,7 @@ import {
   MutationUpdateTicketArgs,
   MutationUpdateTicketStatusArgs,
   QueryTicketArgs,
+  QueryTicketsArgs,
   QueryTicketsByPropertiesArgs,
 } from "@/generated/graphql";
 import { MyContext } from "..";
@@ -19,8 +20,14 @@ const ticketService = TicketService.gettInstance();
 
 export default {
   Query: {
-    tickets: async (_: any): Promise<TicketEntity[]> => {
-      const ticketsList = await ticketService.findAll();
+
+    tickets: async (
+      _: any,
+      { pagination }: QueryTicketsArgs
+    ): Promise<TicketEntity[]> => {
+      const ticketsList = await ticketService.findAll(
+        pagination
+      );
       return ticketsList;
     },
 
@@ -32,12 +39,12 @@ export default {
       return ticket;
     },
     ticketsByProperties: async (_: any, data: QueryTicketsByPropertiesArgs) => {
-      const { status, ...rest } = data.fields
+      const { status,pagination, ...rest } = data.fields;
       if (status) {
-        return await ticketService.ticketsByStatus(rest,status)
+        return await ticketService.ticketsByStatus(rest, status,pagination);
       }
-      return ticketService.findByProperties(rest)
-    }
+      return ticketService.findByProperties(rest,pagination);
+    },
   },
   Mutation: {
     generateTicket: async (
@@ -48,7 +55,7 @@ export default {
       const service = await new ServicesService().findOne({
         where: {
           id: data.serviceId,
-        }
+        },
       });
       if (!service) {
         throw new Error("No service with this id.");
@@ -98,10 +105,10 @@ export default {
   },
   Ticket: {
     service: async (ticket: TicketEntity, _: any, ctx: MyContext) => {
-      return await ctx.loaders.serviceLoader.load(ticket.id)
+      return await ctx.loaders.serviceLoader.load(ticket.id);
     },
     ticketLogs: async (ticket: TicketEntity, _: any, ctx: MyContext) => {
-      return await ctx.loaders.ticketLogByTicketIdLoader.load(ticket.id)
-    }
-  }
+      return await ctx.loaders.ticketLogByTicketIdLoader.load(ticket.id);
+    },
+  },
 };

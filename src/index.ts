@@ -12,15 +12,13 @@ import typeDefs from "./typeDefs";
 import resolvers from "./resolvers";
 import ManagerEntity from "./entities/Manager.entity";
 import { authContext } from "./lib/authContext";
-import type {
-  Loaders
-} from "./lib/dataLoaderContext";
+import type { Loaders } from "./lib/dataLoaderContext";
 
 export interface MyContext {
   req: Request;
   res: Response;
   manager: ManagerEntity | null;
-  loaders: Loaders
+  loaders: Loaders;
 }
 
 const app = express();
@@ -29,6 +27,7 @@ const httpServer = http.createServer(app);
 const authorizedCorsUrls = [
   "http://localhost:4000",
   "https://david4.wns.wilders.dev",
+  "https://staging.david4.wns.wilders.dev",
 ];
 
 const server = new ApolloServer<MyContext>({
@@ -42,9 +41,16 @@ async function main() {
   await server.start();
   console.log("🚀 Apollo Server démarré sur /graphql");
 
-  await datasource.initialize();
-  console.log("📦 Base de données initialisée");
+  await datasource
+    .initialize()
+    .then(() => {
+      console.log("📦 Base de données initialisée");
+    })
+    .catch((err) => {
+      console.error("❌ Échec de la connexion à la base de données :", err);
+    });
 
+  
   app.use(
     "/graphql",
     cors<cors.CorsRequest>({
