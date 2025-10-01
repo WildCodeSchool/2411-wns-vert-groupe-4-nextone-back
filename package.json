@@ -11,7 +11,7 @@
     "ci-test": "jest --ci --runInBand",
     "start:docker": "docker-compose pull && docker-compose up",
     "seed": "docker container exec 2411-wns-vert-groupe-4-nextone-back-backend-1 npx ts-node -r tsconfig-paths/register src/lib/seed.ts",
-    "seed:staging": "npx ts-node -r tsconfig-paths/register src/lib/seed.ts"
+    "seed:staging": "node dist/lib/seed.js"
   },
   "dependencies": {
     "@apollo/server": "^4.11.3",
