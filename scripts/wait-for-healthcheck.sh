@@ -2,8 +2,12 @@
 
 HEALTHCHECK_URL="http://localhost:4005/graphql?query=%7B__typename%7D"
 
+echo "Seeding..."
+npm run seed:script
+
 echo "Démarrage du serveur backend..."
 npm run start
+
 
 echo "Attente que le conteneur devienne healthy..."
 
@@ -18,3 +22,4 @@ while ! curl -fs $HEALTHCHECK_URL -H 'Apollo-Require-Preflight: true'; do
 done
 
 wait
+exec"$@"
