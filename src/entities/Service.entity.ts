@@ -47,7 +47,7 @@ export class ServiceEntity {
   companyId: string
 
   //COMPANY
-  @ManyToOne(() => CompanyEntity, (company) => company.services)
+  @ManyToOne(() => CompanyEntity, (company) => company.services, { onDelete: "CASCADE"})
   @JoinColumn()
   company: CompanyEntity;
 }

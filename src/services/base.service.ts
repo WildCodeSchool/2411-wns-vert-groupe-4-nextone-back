@@ -2,10 +2,14 @@ import {
   DeepPartial,
   EntityTarget,
   FindOptionsWhere,
+  MoreThan,
+  MoreThanOrEqual,
   ObjectLiteral,
+  Raw,
   Repository,
 } from "typeorm";
 import AppDataSource from "../lib/datasource";
+import { ByCreationSlotInput, Order, PaginationInput, QueryTicketLogsByCreationSlotArgs } from "@/generated/graphql";
 
 export default abstract class BaseService<T extends ObjectLiteral> {
   protected repo: Repository<T>;
@@ -14,24 +18,12 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     this.repo = AppDataSource.getRepository(entity);
   }
 
-  // private getRelations(): string[] {
-  //   const relations: string[] = [];
-  //   //MANY TO MANY
-  //   this.repo.metadata.manyToManyRelations.forEach((rel) =>
-  //     relations.push(rel.propertyName)
-  //   );
-  //   //MANY TO ONE
-  //   this.repo.metadata.manyToOneRelations.forEach((rel) =>
-  //     relations.push(rel.propertyName)
-  //   );
-  //   //ONE TO MANY
-  //   this.repo.metadata.oneToManyRelations.forEach((rel) =>
-  //     relations.push(rel.propertyName)
-  //   );
-  //   // this.repo.metadata.relationsWithJoinColumns.forEach(rel => relations.push(rel.propertyPath))
-
-  //   return relations;
-  // }
+  protected getPagination(pagination?: PaginationInput) {
+    const created = pagination?.created ?? new Date(1970, 1, 1);
+    const limit = pagination?.limit || 20;
+    const order: Order = pagination?.order || Order.Asc
+    return { created, limit, order };
+  }
 
   //CREER UNE INSTANCE DE T
   public async createOne(entity: DeepPartial<T>) {
@@ -46,11 +38,18 @@ export default abstract class BaseService<T extends ObjectLiteral> {
   }
 
   //RECUPERER TOUTES LES INSTANCES
-  public async findAll(limit: number = 1, offset: number = 20) {
+  public async findAll(pag?: PaginationInput) {
+    const { created, limit, order } = this.getPagination(pag);
     const list = await this.repo.find({
-      skip: offset * (limit - 1),
-      take: offset,
+      where: {
+        createdAt: Raw((alias) => `${alias} >= :created`, { created }),
+      } as any,
+      order: {
+        createdAt: order,
+      } as any,
+      take: limit,
     });
+
     return list;
   }
 
@@ -68,38 +67,56 @@ export default abstract class BaseService<T extends ObjectLiteral> {
   //RECUPERER VIA UNE SEULE PROPRIETE
   public async findByProperty<K extends keyof T>(
     fields: K,
-    value: T[K]
+    value: T[K],
+    pag?: PaginationInput
   ): Promise<T[]> {
+
+    const { created, limit, order } = this.getPagination(pag)
+
     const entities = await this.repo.find({
       where: {
         [fields]: value,
+        createdAt: Raw((alias) => `${alias} >= :created`, { created }),
       } as any,
+      order: {
+        createdAt: order
+      } as any,
+      take: limit
     });
 
     return entities;
   }
 
   //RECUPERER VIA PLUSIEURS PROPRIETES
-  public async findByProperties(fields: FindOptionsWhere<T>): Promise<T[]> {
+  public async findByProperties(
+    fields: FindOptionsWhere<T>,
+    pag?: PaginationInput
+  ): Promise<T[]> {
+    const { created, limit, order } = this.getPagination(pag);
     return await this.repo.find({
       where: {
         ...fields,
-      },
+        createdAt: Raw((alias) => `${alias} >= :created`, { created }),
+      } as any,
+      take: limit,
+      order: {
+        createdAt: order,
+      } as any,
     });
   }
 
   //RECUPERER ENTRE 2 DATES DE CREATION
-  public async findByCreationSlot(data: {
-    start: Date;
-    end: Date;
-    name: string;
-  }): Promise<T[]> {
-    const { start, end, name } = data;
+  public async findByCreationSlot(data: ByCreationSlotInput): Promise<T[]> {
+    const { start, end, name, pagination } = data;
+  
+    const startDate = pagination?.created || start
 
     const result = await this.repo
       .createQueryBuilder(name)
-      .where(`${name}.createdAt >= :start`, { start: new Date(start) })
+      .where(`${name}.createdAt >= :start`, { start: new Date(startDate) })
       .andWhere(`${name}.createdAt <= :end`, { end: new Date(end) })
+      .orderBy(`${name}.createdAt `, pagination?.order || "ASC")
+      .limit(pagination?.limit || 20)
       .getMany();
 
     return result;

@@ -44,7 +44,7 @@ export default class TicketEntity {
   @Column({ type: "uuid", nullable: true})
   serviceId: string;
 
-  @ManyToOne(() => ServiceEntity, (service: ServiceEntity) => service.tickets, { eager: true })
+  @ManyToOne(() => ServiceEntity, (service: ServiceEntity) => service.tickets, { eager: true, onDelete: "CASCADE" })
   @JoinColumn()
   service: ServiceEntity;
 

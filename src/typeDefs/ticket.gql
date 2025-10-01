@@ -15,7 +15,7 @@ type Ticket {
 }
 
 type Query {
-  tickets(limit: Int, offset: Int): [Ticket!]
+  tickets(pagination: PaginationInput): [Ticket!]
   ticket(id: ID!): Ticket
   ticketsByProperties(fields: TicketPropertiesInput!): [Ticket!]!
 }
@@ -27,6 +27,17 @@ type Mutation {
   updateTicketStatus(data: UpdateStatusTicketInput!): Ticket!
 }
 
+enum Order {
+  ASC
+  DESC
+}
+
+input PaginationInput {
+  created: DateTime,
+  limit: Int
+  order: Order
+}
+
 input TicketPropertiesInput {
   firstName: String
   lastName: String
@@ -36,6 +47,7 @@ input TicketPropertiesInput {
   serviceId: ID
   createdAt: DateTime
   updatedAt: DateTime
+  pagination: PaginationInput
 }
 
 input UpdateStatusTicketInput {
@@ -81,4 +93,5 @@ enum Status {
   PENDING
   ARCHIVED
   INPROGRESS
+  DELETED
 }
