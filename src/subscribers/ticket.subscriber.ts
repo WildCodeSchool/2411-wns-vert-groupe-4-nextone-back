@@ -64,6 +64,9 @@ export class TicketSubscriber
     await manager.save(ticketLog);
   }
 
+  // async afterUpdate(event: UpdateEvent<TicketEntity>): Promise<void> {
+  // }
+
   // async afterUpdate(event: UpdateEvent<TicketEntity>) {
   //   const isStatusModified = event.updatedColumns.some(
   //     (col) => col.propertyName === "status"

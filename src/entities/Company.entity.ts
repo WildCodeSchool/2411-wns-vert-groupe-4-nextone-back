@@ -48,12 +48,12 @@ import SettingEntity from "./setting.entity";
     @UpdateDateColumn()
     updatedAt: Date; 
 
-    @OneToMany(() => ServiceEntity, (service: ServiceEntity) => service.company)
+    @OneToMany(() => ServiceEntity, (service: ServiceEntity) => service.company,  { onDelete: "CASCADE"})
     services: ServiceEntity[]
 
     @OneToMany(() => ManagerEntity, (manager: ManagerEntity) => manager.company, { onDelete: "CASCADE" })
     managers: ManagerEntity[]
 
-    @OneToMany(() => SettingEntity, (setting) => setting.company)
+    @OneToMany(() => SettingEntity, (setting) => setting.company,  { onDelete: "CASCADE"})
     settings: SettingEntity[]
   }

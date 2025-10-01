@@ -50,6 +50,7 @@ async function main() {
       console.error("❌ Échec de la connexion à la base de données :", err);
     });
 
+  
   app.use(
     "/graphql",
     cors<cors.CorsRequest>({

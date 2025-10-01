@@ -79,7 +79,7 @@ export default class ManagerEntity {
   connectionLogs: ConnectionLogEntity[]
 
   //TICKETLOG
-  @OneToMany(() => TicketLogEntity, (ticketLog) => ticketLog.manager)
+  @OneToMany(() => TicketLogEntity, (ticketLog) => ticketLog.manager, { nullable: true})
   ticketLogs: TicketLogEntity[]
     
   @CreateDateColumn()

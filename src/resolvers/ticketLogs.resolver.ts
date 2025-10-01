@@ -1,16 +1,14 @@
 import TicketLogEntity from "@/entities/TicketLog.entity";
 import {
-  AuthorizationResponse,
   DeleteResponse,
   MutationCreateTicketLogArgs,
   MutationDeleteTicketLogArgs,
   MutationUpdateTicketLogArgs,
+  QueryTicketLogsArgs,
   QueryTicketLogsByCreationSlotArgs,
   QueryTicketLogsByPropertiesArgs,
   QueryTicketLogsByPropertyArgs,
 } from "@/generated/graphql";
-import ManagerService from "@/services/manager.service";
-import TicketService from "@/services/ticket.service";
 import TicketLogService from "@/services/ticketLogs.service";
 import { buildResponse } from "@/utils/authorization";
 import { MyContext } from "..";
@@ -26,23 +24,24 @@ export default {
       return await ticketLogService.findById(id);
     },
 
-    async ticketLogs(): Promise<TicketLogEntity[]> {
-      const tickets = await ticketLogService.findAll();
+    async ticketLogs(_: any, { pagination }: QueryTicketLogsArgs): Promise<TicketLogEntity[]> {
+      const tickets = await ticketLogService.findAll(pagination);
       return tickets;
     },
 
     async ticketLogsByProperty(_: any, args: QueryTicketLogsByPropertyArgs) {
       let key = Object.keys(args.field)[0] as keyof typeof args.field;
       const value = args.field[key];
-      const tl = await ticketLogService.findByProperty(key, value);
+      const tl = await ticketLogService.findByProperty(key, value, args.pagination);
       return tl
     },
 
     async ticketLogsByProperties(
       _: any,
-      { fields }: QueryTicketLogsByPropertiesArgs
+      { fields, }: QueryTicketLogsByPropertiesArgs
     ) {
-      return await ticketLogService.findByProperties(fields);
+      const { pagination, ...rest} = fields
+      return await ticketLogService.findByProperties(rest, pagination);
     },
 
     async ticketLogsByCreationSlot(

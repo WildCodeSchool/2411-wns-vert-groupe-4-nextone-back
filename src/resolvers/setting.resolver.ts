@@ -1,21 +1,29 @@
 import SettingEntity from "@/entities/setting.entity";
-import { DeleteResponse, DeleteResponseSetting, MutationCreateServiceArgs, MutationUpdateSettingArgs } from "@/generated/graphql";
+import { DeleteResponse, DeleteResponseSetting, MutationCreateServiceArgs, MutationUpdateSettingArgs, QuerySettingArgs, QuerySettingsArgs, QuerySettingsByPropertiesArgs, SettingsByPropertiesInput } from "@/generated/graphql";
 import CompanyService from "@/services/company.service";
 import SettingsSystemService from "@/services/setting.service";
 import { buildResponse } from "@/utils/authorization";
 import { MyContext } from "..";
+import { FindOptionsWhere } from "typeorm";
 
 const SettingService = SettingsSystemService.getService()
 
 export default {
   Query: {
-    settings: async (): Promise<SettingEntity[]> => {
-      const settings = await SettingService.findAll()
+    settings: async (_: any, { pagination }: QuerySettingsArgs): Promise<SettingEntity[]> => {
+      const settings = await SettingService.findAll(pagination)
       return settings
     },
     setting: async (_: any, args : { id: string}): Promise<SettingEntity | null> => {
       const setting = await SettingService.findById(args.id)
       return setting
+    },
+    settingsByProperties: async (_: any, { fields }: QuerySettingsByPropertiesArgs) => {
+      const { pagination, ...rest } = fields
+      // const mappedRest = Object.entries(rest).filter(([key, value]) => {
+      //   return value !== undefined 
+      // }) as FindOptionsWhere<SettingEntity>
+      return await SettingService.findByProperties(rest, pagination)
     }
   },
   Mutation: {

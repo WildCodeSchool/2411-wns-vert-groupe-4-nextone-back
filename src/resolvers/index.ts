@@ -10,4 +10,5 @@ const resolversArray = loadFilesSync(path.join(__dirname, "."), {
 
 resolversArray.push(scalarResolvers);
 
+
 export default mergeResolvers(resolversArray);

@@ -23,18 +23,21 @@ export default class TicketLogEntity {
   })
   status: Status;
 
-
   //MANAGER RELATION
 
   @Column({ nullable: true, type: "uuid" })
   managerId: string;
 
-  @ManyToOne(() => ManagerEntity, (manager: ManagerEntity) => manager.ticketLogs, {
-    nullable: true,
-  })
+  @ManyToOne(
+    () => ManagerEntity,
+    (manager: ManagerEntity) => manager.ticketLogs,
+    {
+      nullable: true,
+      onDelete: "SET NULL",
+    }
+  )
   @JoinColumn()
   manager: ManagerEntity;
-
 
   //TICKET RELATION
 
@@ -42,12 +45,11 @@ export default class TicketLogEntity {
   ticketId: string;
 
   @ManyToOne(() => TicketEntity, (ticket: TicketEntity) => ticket.ticketLogs, {
-    nullable: true
+    nullable: true,
+    onDelete: "CASCADE"
   })
   @JoinColumn()
   ticket: TicketEntity;
-
-
 
   @CreateDateColumn()
   createdAt: Date;
