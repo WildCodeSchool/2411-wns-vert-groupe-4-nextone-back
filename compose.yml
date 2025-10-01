@@ -20,9 +20,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: ["sh", "-c", "wait-for-healthcheck.sh"]
-    #command: ["sh", "-c", "tail -f /dev/null"]
-
+    entrypoint: ["sh", "-c", "wait-for-healthcheck.sh"]
     develop:
       watch:
         - action: sync+restart
