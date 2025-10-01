@@ -9,10 +9,13 @@
     "ci-codegen": "graphql-codegen --config codegen.ts",
     "test": "jest --watchAll --runInBand",
     "ci-test": "jest --ci --runInBand",
-    "start:docker": "docker-compose pull && docker-compose up"
+    "start:docker": "docker-compose pull && docker-compose up",
+    "seed": "docker container exec 2411-wns-vert-groupe-4-nextone-back-backend-1 npx ts-node -r tsconfig-paths/register src/lib/seed.ts",
+    "seed:staging": "npx ts-node -r tsconfig-paths/register src/lib/seed.ts"
   },
   "dependencies": {
     "@apollo/server": "^4.11.3",
+    "@faker-js/faker": "^10.0.0",
     "@graphql-codegen/typescript": "^4.1.2",
     "@graphql-codegen/typescript-resolvers": "^4.4.1",
     "@graphql-tools/load-files": "^7.0.1",
@@ -41,7 +44,6 @@
   "devDependencies": {
     "@babel/core": "^7.27.1",
     "@babel/preset-env": "^7.27.2",
-    "@faker-js/faker": "^9.9.0",
     "@graphql-codegen/cli": "^5.0.7",
     "@parcel/watcher": "^2.5.0",
     "@types/argon2": "^0.14.1",

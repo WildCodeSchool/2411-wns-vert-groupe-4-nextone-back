@@ -247,7 +247,8 @@ const initializeDataSource = async () => {
   );
 };
 
-export const seedDB = async (): Promise<boolean> => {
+export const seedDB = async (): Promise<void> => {
+  console.log("ENV : ", process.env.NODE_ENV)
   try {
     console.log("-------------------");
     console.log("🚀 DEBUT DU SEEDING ...");
@@ -264,13 +265,12 @@ export const seedDB = async (): Promise<boolean> => {
     await updateTicketStatus(managers, tickets);
 
     console.log("🥳 --> SEEDING OK.");
-    exit(1)
   } catch (error: any) {
     console.log("-------------------");
     console.log("😭 --> ERREUR DANS LE SEEDING...");
     console.log("-------------------");
     console.log("😡 L'ERREUR : ", error?.message);
-    exit(0)
+    // exit(0)
   }
 };
 
