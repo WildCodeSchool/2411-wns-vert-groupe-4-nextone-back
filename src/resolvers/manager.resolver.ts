@@ -211,7 +211,10 @@ export default {
       if (!manager?.role) {
         throw new Error("Le rôle du manager est manquant.");
       }
-      checkRoleInHierarchy(manager.role, targetManager.role);
+      const isManagerUpdatingSelf = manager.id === targetManager.id;
+      if (!isManagerUpdatingSelf) {
+        checkRoleInHierarchy(manager.role, targetManager.role);
+      }
       const updatedManager = plainToInstance(
         UpdateInput,
         { ...targetManager, ...data },

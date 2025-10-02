@@ -49,8 +49,8 @@ export function verifyCreatorPermission(currentRole: string) {
 // Vérifie si le rôle actuel peut gérer un utilisateur avec le rôle cible.
 export function checkRoleInHierarchy(currentRole: string, targetRole: string) {
   const roleHierarchy: Record<string, string[]> = {
-    SUPER_ADMIN: ["ADMIN", "OPERATOR", "SUPER_ADMIN"],
-    ADMIN: ["OPERATOR", "ADMIN"],
+    SUPER_ADMIN: ["ADMIN", "OPERATOR"],
+    ADMIN: ["OPERATOR"],
   };
   const allowedRoles = roleHierarchy[currentRole] || [];
   if (!allowedRoles.includes(targetRole)) {
