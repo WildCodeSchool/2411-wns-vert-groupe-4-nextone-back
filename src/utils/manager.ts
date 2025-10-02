@@ -71,11 +71,7 @@ export const canAccessAuthorization = async (
   if (role === "SUPER_ADMIN") return;
   const authorizations = await authorizationService.getByManager(manager.id);
   const hasAccess = authorizations.some(
-<<<<<<< HEAD
     (auth) => auth.service.id === targetServiceId
-=======
-    (auth) => auth.service.id === targetServiceId && auth.isActive
->>>>>>> 4599c1e (fix checkRoleInHierarchy function)
   );
   if (!hasAccess) {
     throw new Error(
