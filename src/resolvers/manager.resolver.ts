@@ -131,6 +131,8 @@ export default {
             id: ctx.manager.id,
             firstName: ctx.manager.firstName,
             lastName: ctx.manager.lastName,
+            role: ctx.manager.role,
+            companyId: ctx.manager.companyId,
           }
         : null;
     },
