@@ -7,10 +7,12 @@ enum ManagerRole {
 }
 
 type CheckToken {
-  email: String
   id: ID
+  email: String
   firstName: String
   lastName: String
+  role: ManagerRole
+  companyId: String
 }
 
 type Manager {
