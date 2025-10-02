@@ -25,11 +25,15 @@ import {
   DELETE_AUTHORIZATION,
 } from "../../src/queries/autorization.query";
 import typeDefs from "../../src/typeDefs";
-import { fakeAuthorization, fakeService, fakeManager } from "../../src/utils/dataTest";
+import {
+  fakeAuthorization,
+  fakeService,
+  fakeManager,
+} from "../../src/utils/dataTest";
 
 // Types de réponse
 type TMappedAuthorization = {
-  isActive: boolean;
+  isAdministrator: boolean;
   service: Partial<Service>;
   manager: Partial<Manager>;
 };
@@ -50,7 +54,6 @@ type ResponseDelete = {
   deleteAuthorization: AuthorizationResponse;
 };
 
-
 // Données simulées
 const authData: Authorization[] = [fakeAuthorization];
 const mappedService: Partial<Service> = {
@@ -65,7 +68,7 @@ const mappedManager: Partial<Manager> = {
 };
 
 const mappedAuthorization: TMappedAuthorization = {
-  isActive: fakeAuthorization.isActive,
+  isAdministrator: fakeAuthorization.isAdministrator,
   service: mappedService,
   manager: mappedManager,
 };
@@ -82,14 +85,16 @@ const fakeResolvers = (store: IMockStore) => ({
   },
   Mutation: {
     addAuthorization: (_: any, { input }: MutationAddAuthorizationArgs) => {
-      store.set("Authorization", "auth-1", { isActive: true });
+      store.set("Authorization", "auth-1", { isAdministrator: true });
       return { success: true, message: "Authorization successfully created." };
     },
     updateAuthorization: (
       _: any,
       { input }: MutationUpdateAuthorizationArgs
     ) => {
-      store.set("Authorization", "auth-1", {isActive:  input.isActive});
+      store.set("Authorization", "auth-1", {
+        isAdministrator: input.isAdministrator || false,
+      });
       return { success: true, message: "Authorization update failed." };
     },
     deleteAuthorization: (
@@ -132,11 +137,14 @@ describe("Tests sur les autorisations (depuis le store)", () => {
   };
 
   it("Récupère les autorisations par serviceId", async () => {
-    const response = await server.executeOperation<ResponseList, QueryGetServiceAuthorizationsArgs>({
+    const response = await server.executeOperation<
+      ResponseList,
+      QueryGetServiceAuthorizationsArgs
+    >({
       query: GET_SERVICE_AUTHORIZATIONS,
       variables: {
-        serviceId: fakeService.id
-      }
+        serviceId: fakeService.id,
+      },
     });
 
     assert(response.body.kind === "single");
@@ -146,11 +154,14 @@ describe("Tests sur les autorisations (depuis le store)", () => {
   });
 
   it("Récupère les autorisations par managerId", async () => {
-    const response = await server.executeOperation<ResponseList, QueryGetEmployeeAuthorizationsArgs>({
+    const response = await server.executeOperation<
+      ResponseList,
+      QueryGetEmployeeAuthorizationsArgs
+    >({
       query: GET_EMPLOYEE_AUTHORIZATIONS,
       variables: {
-        managerId: fakeManager.id
-      }
+        managerId: fakeManager.id,
+      },
     });
 
     assert(response.body.kind === "single");
