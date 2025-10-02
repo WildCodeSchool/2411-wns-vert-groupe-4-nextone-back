@@ -10,9 +10,6 @@ import CompanyService from "@/services/company.service";
 import CompanyEntity from "@/entities/Company.entity";
 import { checkStrictRole } from "@/utils/manager";
 import { buildResponse } from "@/utils/authorization";
-import ServicesService from "@/services/services.service";
-import ManagerService from "@/services/manager.service";
-import SettingService from "@/services/setting.service";
 
 const companyService = CompanyService.getService();
 
@@ -24,8 +21,14 @@ export default {
     },
     company: async (
       _: any,
-      { id }: QueryCompanyArgs
+      { id }: QueryCompanyArgs,
+      ctx: MyContext
     ): Promise<CompanyEntity | null> => {
+      const { manager } = ctx;
+      const isManagerOnAskedCompany = manager?.companyId === id;
+      if (!isManagerOnAskedCompany) {
+        throw new Error("Non autorisé.");
+      }
       const company = await companyService.findById(id);
       return company;
     },
