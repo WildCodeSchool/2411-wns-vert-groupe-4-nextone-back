@@ -71,7 +71,7 @@ export const canAccessAuthorization = async (
   if (role === "SUPER_ADMIN") return;
   const authorizations = await authorizationService.getByManager(manager.id);
   const hasAccess = authorizations.some(
-    (auth) => auth.service.id === targetServiceId && auth.isActive
+    (auth) => auth.service.id === targetServiceId
   );
   if (!hasAccess) {
     throw new Error(

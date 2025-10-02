@@ -19,7 +19,7 @@ export default class AuthorizationEntity {
   managerId: string;
 
   @Column({ default: true })
-  isActive: boolean;
+  isAdministrator: boolean;
 
   @CreateDateColumn()
   createdAt: Date;

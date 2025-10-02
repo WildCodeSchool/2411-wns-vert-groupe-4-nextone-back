@@ -1,13 +1,13 @@
 #authorization
 
 scalar DateTime
-scalar  UUID
+scalar UUID
 
 ####### Types
 type Authorization {
   service: Service!
   manager: Manager!
-  isActive: Boolean!
+  isAdministrator: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -32,12 +32,13 @@ type AuthorizationResponse {
 input NewAuthInput {
   serviceId: UUID!
   managerId: UUID!
+  isAdministrator: Boolean
 }
 
 input UpdateAuthInput {
   serviceId: UUID!
   managerId: UUID!
-  isActive: Boolean
+  isAdministrator: Boolean
 }
 
 input DeleteAuthInput {
