@@ -6,20 +6,27 @@ import AuthorizationService from "@/services/authorization.service";
 export async function validateOrThrow(entity: object) {
   const errors = await validate(entity);
   if (errors.length > 0) {
-    const messages = errors.flatMap(err => Object.values(err.constraints || {}));
+    const messages = errors.flatMap((err) =>
+      Object.values(err.constraints || {})
+    );
     throw new Error(messages.join(" | "));
   }
 }
 
 // Vérifie que le manager est bien authentifié (non nul).
-export function assertAuthenticated(manager: ManagerEntity | null): asserts manager is ManagerEntity {
+export function assertAuthenticated(
+  manager: ManagerEntity | null
+): asserts manager is ManagerEntity {
   if (!manager) {
     throw new Error("Non autorisé : veuillez vous connecter.");
   }
 }
 
 // Vérifie que le rôle actuel est strictement égal au rôle attendu.
-export function checkStrictRole(currentRole: string | undefined, strictRole: string) {
+export function checkStrictRole(
+  currentRole: string | undefined,
+  strictRole: string
+) {
   if (!currentRole) {
     throw new Error("Le rôle du manager est requis.");
   }
@@ -42,8 +49,8 @@ export function verifyCreatorPermission(currentRole: string) {
 // Vérifie si le rôle actuel peut gérer un utilisateur avec le rôle cible.
 export function checkRoleInHierarchy(currentRole: string, targetRole: string) {
   const roleHierarchy: Record<string, string[]> = {
-    SUPER_ADMIN: ["ADMIN", "OPERATOR"],
-    ADMIN: ["OPERATOR"],
+    SUPER_ADMIN: ["ADMIN", "OPERATOR", "SUPER_ADMIN"],
+    ADMIN: ["OPERATOR", "ADMIN"],
   };
   const allowedRoles = roleHierarchy[currentRole] || [];
   if (!allowedRoles.includes(targetRole)) {
@@ -54,13 +61,17 @@ export function checkRoleInHierarchy(currentRole: string, targetRole: string) {
 }
 
 //Check si le role est bien celui d'un super_admin ou d'un admin faisant parti du service en question
-export const canAccessAuthorization = async (manager: MyContext["manager"], targetServiceId: string, authorizationService: AuthorizationService) => {
+export const canAccessAuthorization = async (
+  manager: MyContext["manager"],
+  targetServiceId: string,
+  authorizationService: AuthorizationService
+) => {
   assertAuthenticated(manager);
   const { role } = manager;
   if (role === "SUPER_ADMIN") return;
   const authorizations = await authorizationService.getByManager(manager.id);
   const hasAccess = authorizations.some(
-    auth => auth.service.id === targetServiceId && auth.isActive
+    (auth) => auth.service.id === targetServiceId && auth.isActive
   );
   if (!hasAccess) {
     throw new Error(
