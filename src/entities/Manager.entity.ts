@@ -46,6 +46,12 @@ export default class ManagerEntity {
   })
   password: string;
 
+  @Column({ nullable: true})
+  resetToken?: string
+
+  @Column({ nullable: true })  
+  resetTokenExpiration?: Date
+
   @Column({
     type: "enum",
     enum: ManagerRole,

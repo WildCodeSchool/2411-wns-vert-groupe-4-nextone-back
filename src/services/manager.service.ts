@@ -1,9 +1,10 @@
 import ManagerRepository from "@/repositories/Manager.repository";
 import { MutationCreateManagerArgs, QueryLoginArgs } from "@/generated/graphql";
-import * as argon2 from "argon2";
 import { SignJWT } from "jose";
 import ManagerEntity from "@/entities/Manager.entity";
 import CompanyService from "./company.service";
+import crypto from "crypto"
+import * as argon2 from 'argon2'
 
 export default class ManagerService {
   db: ManagerRepository;
@@ -23,8 +24,6 @@ export default class ManagerService {
 
   async findByIdWithAuthorizations(managerId: string) {
     return this.db.findOne({
-      where: { id: managerId },
-      relations: ["authorizations", "authorizations.service"],
     });
   }
 
@@ -101,5 +100,21 @@ export default class ManagerService {
     manager.isGloballyActive = !manager.isGloballyActive;
     await this.db.save(manager);
     return manager.isGloballyActive;
+  }
+
+  async createResetToken(email: string): Promise<string | null> {
+
+    const user = await this.findManagerByEmail(email)
+    console.log("USER ; ", user, email)
+    if (!user) return null
+
+    const token = crypto.randomBytes(32).toString('hex')
+    const resetTokenExpiration = new Date(Date.now() + 15 * 60 * 1000)
+
+    console.log('TOKEN : ', token, "RESET EXPIRATION : ", resetTokenExpiration)
+
+    await this.db.save({ ...user, resetToken: token, resetTokenExpiration })
+    
+    return token
   }
 }

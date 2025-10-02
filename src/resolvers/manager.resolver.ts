@@ -7,6 +7,7 @@ import {
   MutationToggleGlobalAccessManagerArgs,
   Message,
   Auth,
+  MutationResetPasswordArgs,
 } from "@/generated/graphql";
 import { MyContext } from "..";
 import Cookies from "cookies";
@@ -27,6 +28,7 @@ import { ServiceEntity } from "@/entities/Service.entity";
 import CompanyService from "@/services/company.service";
 import ConnectionLogService from "@/services/connectionLog.service";
 import TicketLogService from "@/services/ticketLogs.service";
+import { sendMail } from "@/lib/mail";
 
 const managerService = new ManagerService();
 
@@ -192,6 +194,20 @@ export default {
         "Manager is not active."
       );
     },
+    askResetPassword: async (_: any, { email }: {email: string}): Promise<Message> => {
+      const token = await managerService.createResetToken(email)
+      if (token) {
+        sendMail(email, token)
+      }
+      return {
+        success: !!token,
+        message: "La demande a bien été traitée. Si un email correspondant a été trouvé, un email de récupération a été envoyé."
+      }
+    },
+    resetPassword: async (_: any, args: MutationResetPasswordArgs): Promise<Message> => {
+      
+      return {}
+    }
   },
   Manager: {
     authorizations: async (
