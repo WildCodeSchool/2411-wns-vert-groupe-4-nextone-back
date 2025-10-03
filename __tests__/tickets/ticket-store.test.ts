@@ -25,7 +25,10 @@ import typeDefs from "../../src/typeDefs";
 import { fakeService } from "../../src/utils/dataTest";
 
 type ResponseData = {
-  tickets: Ticket[];
+  tickets: {
+    items: Ticket[];
+    totalCount: number;
+  };  
 };
 
 type ResponseDataCreate = {
@@ -77,7 +80,10 @@ beforeAll(async () => {
   const resolvers = (store: IMockStore) => ({
     Query: {
       tickets: () => {
-        return store.get("Query", "ROOT", "tickets");
+    return store.get("Query", "ROOT", "tickets") || {
+      items: ticketsData,
+      totalCount: ticketsData.length,
+    };
       },
       ticket: (_: any, { id }: { id: string }) => {
         return store.get("Ticket", id);
@@ -96,7 +102,10 @@ beforeAll(async () => {
           return { message: "Ticket not found", success: false };
         }
         store.reset();
-        store.set("Query", "ROOT", "tickets", ticketsData);
+          store.set("Query", "ROOT", "tickets", {
+          items: ticketsData,
+          totalCount: ticketsData.length,
+        });
         return { message: "Ticket deleted", success: true };
       },
       updateTicket: (_: null, args: MutationUpdateTicketArgs) => {
@@ -120,21 +129,30 @@ beforeAll(async () => {
   });
 
   //remplissage du store
-  store.set("Query", "ROOT", "tickets", ticketsData);
+  store.set("Query", "ROOT", "tickets", {
+    items: ticketsData,
+    totalCount: ticketsData.length,
+  });
 });
 
 describe("Test sur les tickets", () => {
   it("Récupération des tickets depuis le store", async () => {
     const response = await server.executeOperation<ResponseData>({
       query: LIST_TICKETS,
+      variables: {
+        pagination: { limit: 2 },  
+      },
     });
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.data).toEqual({
-      tickets: [
-        { id: "1", code: "001" },
-        { id: "2", code: "002" },
-      ],
+      tickets: {
+        items: [
+          { id: "1", code: "001" },
+          { id: "2", code: "002" },
+        ],
+        totalCount: 2,  
+      },
     });
   });
 

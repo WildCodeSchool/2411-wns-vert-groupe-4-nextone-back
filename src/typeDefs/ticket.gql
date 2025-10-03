@@ -14,10 +14,15 @@ type Ticket {
   updatedAt: DateTime
 }
 
+type TicketsPaginatedResult {              
+  items: [Ticket!]!                       
+  totalCount: Int!                         
+}
+
 type Query {
-  tickets(pagination: PaginationInput): [Ticket!]
+  tickets(pagination: PaginationInput): TicketsPaginatedResult!
   ticket(id: ID!): Ticket
-  ticketsByProperties(fields: TicketPropertiesInput!): [Ticket!]!
+  ticketsByProperties(fields: TicketPropertiesInput, pagination: PaginationInput): TicketsPaginatedResult! 
 }
 
 type Mutation {
@@ -33,7 +38,7 @@ enum Order {
 }
 
 input PaginationInput {
-  created: DateTime,
+  cursor: DateTime 
   limit: Int
   order: Order
 }
@@ -47,7 +52,6 @@ input TicketPropertiesInput {
   serviceId: ID
   createdAt: DateTime
   updatedAt: DateTime
-  pagination: PaginationInput
 }
 
 input UpdateStatusTicketInput {
@@ -79,12 +83,6 @@ type DeletedTicketResponse {
   success: Boolean!
   message: String
 }
-
-# enum TicketStatus {
-#   PENDING
-#   CANCELED
-#   DONE
-# }
 
 enum Status {
   CREATED

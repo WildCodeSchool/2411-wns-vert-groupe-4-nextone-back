@@ -1,11 +1,15 @@
 export const LIST_TICKETS = `#graphql
-    query tickets {
-      tickets {
-        id
-        code
+      query tickets($pagination: PaginationInput) {
+        tickets(pagination: $pagination) {
+          items {
+            id
+            code
+          }
+          totalCount
+        }
       }
-    }
 `;
+
 
 export const GENERATE_TICKET = `#graphql
     mutation generateTicket($data: GenerateTicketInput!) {
@@ -49,4 +53,19 @@ export const UPDATE_TICKET = `#graphql
         status
       }
 }
+`;
+
+// PAGINATION
+export const TICKETS_BY_PROPERTIES = `#graphql
+    query ticketsByProperties($fields: TicketPropertiesInput, $pagination: PaginationInput) {
+      ticketsByProperties(fields: $fields, pagination: $pagination) {
+        items {
+          id
+          code
+          status
+          createdAt
+        }
+        totalCount
+      }
+    }
 `;
