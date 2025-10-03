@@ -42,8 +42,11 @@ export default {
       _: any,
       { fields, pagination }: QueryTicketsByPropertiesArgs
     ): Promise<{ items: TicketEntity[]; totalCount: number }> => { 
-      const { status, ...rest } = fields || {}; 
-      if (status && Array.isArray(status)) {
+      const { status, ...rest } = fields || {};
+      console.log("fields", fields);
+      console.log("rest", rest);
+      console.log("status", status); 
+      if (status) {
         return await ticketService.findByPropertiesAndCount(
           { ...rest, status: In(status) },
           pagination
