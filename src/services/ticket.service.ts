@@ -60,7 +60,9 @@ export default class TicketService extends BaseService<TicketEntity> {
     });
 
     const where: FindOptionsWhere<TicketEntity> = { ...fields };
-
+    console.log("fields", fields);
+    // console.log("where", where);
+    console.log("pagination", pagination); 
     if (pagination?.cursor) {
       where.createdAt = MoreThanOrEqual(new Date(pagination.cursor));
     }
