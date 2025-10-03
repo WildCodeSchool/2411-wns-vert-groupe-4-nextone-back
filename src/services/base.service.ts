@@ -65,7 +65,9 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     pag?: PaginationInput
   ): Promise<{ items: T[]; totalCount: number }> {
     const { cursor, limit, order } = this.getPagination(pag);
-
+    console.log("cursor", cursor);
+    console.log("limit", limit);
+    console.log("order", order); 
     const where: FindOptionsWhere<T> = { [fields]: value } as any;
     if (cursor) {
        (where as any).createdAt = LessThan(cursor);
@@ -86,7 +88,9 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     pag?: PaginationInput
   ): Promise<{ items: T[]; totalCount: number }> {
     const { cursor, limit, order } = this.getPagination(pag);
-
+    console.log("cursor", cursor);
+    console.log("limit", limit);
+    console.log("order", order); 
     const where: FindOptionsWhere<T> = { ...fields };
     if (cursor) {
        (where as any).createdAt = LessThan(cursor); 

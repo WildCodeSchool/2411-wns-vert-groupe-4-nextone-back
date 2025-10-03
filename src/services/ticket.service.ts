@@ -4,7 +4,7 @@ import TicketLogService from "./ticketLogs.service";
 import TicketLogEntity from "@/entities/TicketLog.entity";
 import ManagerEntity from "@/entities/Manager.entity";
 import BaseService from "./base.service";
-import { FindOptionsWhere, In, LessThan } from "typeorm"; 
+import { FindOptionsWhere, In, LessThan, MoreThan } from "typeorm"; 
 
 export default class TicketService extends BaseService<TicketEntity> {
   private static instance: TicketService | null = null;
@@ -48,9 +48,12 @@ export default class TicketService extends BaseService<TicketEntity> {
     pagination?: PaginationInput
   ): Promise<{ items: TicketEntity[]; totalCount: number }> { 
     const where: FindOptionsWhere<TicketEntity> = { ...fields };
-
+    console.log("fields", fields);
+    // console.log("where", where);
+    console.log("pagination", pagination); 
     if (pagination?.cursor) {
-      where.createdAt = LessThan(new Date(pagination.cursor)); 
+      where.createdAt = MoreThan(new Date(pagination.cursor));
+      // where.createdAt = LessThan(new Date(pagination.cursor)); 
     }
 
      if (fields.status && Array.isArray(fields.status)) {
@@ -69,7 +72,8 @@ export default class TicketService extends BaseService<TicketEntity> {
   public async countAll(pagination?: PaginationInput): Promise<number> {
     const where: FindOptionsWhere<TicketEntity> = {};
     if (pagination?.cursor) {
-      where.createdAt = LessThan(new Date(pagination.cursor)); 
+      // where.createdAt = LessThan(new Date(pagination.cursor)); 
+      where.createdAt = MoreThan(new Date(pagination.cursor));
     }
     return await this.repo.count({ where });
   }
