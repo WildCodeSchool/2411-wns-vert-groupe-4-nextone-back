@@ -5,28 +5,18 @@ module.exports = {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
   preset: "ts-jest",
-  
-  globals: {
-    "ts-jest": {
-      diagnostics: true,
-      useESM: true
-    },
+
+    transform: {
+    '^.+\\.(ts|tsx)$': ['ts-jest', {
+      tsconfig: 'tsconfig.json',
+      useESM: true,
+    }],
+    '^.+\\.js$': 'babel-jest',
   },
+  
   transformIgnorePatterns: [
     "/node_modules/(?!jose)/" 
   ],
-  transform: {
-    "^.+\.tsx?$": ["ts-jest", {}],
-    "^.+\.js$": "babel-jest",
-     '^.+\\.(ts|tsx)$': ['ts-jest', {
-    tsconfig: 'tsconfig.json',
-  }],
-  },
 
   extensionsToTreatAsEsm: ['.ts'],
-  globals: {
-    'ts-jest': {
-      useESM: true,
-    },
-  },
 };
