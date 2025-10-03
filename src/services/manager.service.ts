@@ -1,5 +1,5 @@
 import ManagerRepository from "@/repositories/Manager.repository";
-import { MutationCreateManagerArgs, QueryLoginArgs } from "@/generated/graphql";
+import { MutationCreateManagerArgs, QueryLoginArgs, MutationResetPasswordArgs, Message, ResetPasswordInput } from "@/generated/graphql";
 import { SignJWT } from "jose";
 import ManagerEntity from "@/entities/Manager.entity";
 import CompanyService from "./company.service";
@@ -116,5 +116,41 @@ export default class ManagerService {
     await this.db.save({ ...user, resetToken: token, resetTokenExpiration })
     
     return token
+  }
+
+  async resetPassword(args: ResetPasswordInput): Promise<Message> {
+
+    const user = await this.findManagerByEmail(args.email)
+
+    //VERIFICATION
+    if (!user || !user.resetToken || user.resetToken !== args.resetToken) {
+      return {
+        success: false,
+        message: "Impossible de mettre à jour le mot de passe"
+      }
+    }
+    if (user.resetTokenExpiration && new Date(user.resetTokenExpiration).getTime() < Date.now()) {
+      return {
+        success: false,
+        message: "La demande a expiré. Merci de la renouveller"
+      }
+    }
+    if (args.confirmNewPassword !== args.newPassword) {
+      return {
+        success: false,
+        message: "Le mot de passe ne correspond pas à sa confirmation."
+      }
+    }
+
+    //UPDATE DB
+    const hashedPassword = await argon2.hash(args.newPassword)
+    user.password = hashedPassword
+    user.resetToken = undefined
+    user.resetTokenExpiration = undefined
+    await this.db.save(user)
+    return {
+      success: true,
+      message: "Le mot de passe a été réinitialisé."
+    }
   }
 }

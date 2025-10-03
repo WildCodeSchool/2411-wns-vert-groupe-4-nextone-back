@@ -29,20 +29,22 @@ export const sendMail = async (email: string, token:string): Promise<boolean> =>
     }
   })
 
+  const uri = process.env.NODE_ENV !== "dev" ? "https://david4.wns.wilders.dev" : "https://localhost:3000"
+  console.log("URI : ", uri, process.env.NODE_ENV)
   const mailOptions = {
     from: "next.one.gr'@gmail.com",
     to: email,
     subject: 'Renouvellement de mot de passe',
-    text: 'Une demande de renouvellement de mot de passe a été effectué avcec votre adresse email.', 
+    text: 'Une demande de renouvellement de mot de passe a été effectué avec votre adresse email.', 
     html: `
     <h1>NextONE</h1>
     <p>Une demande de réinitialisation de mot de passe a été effectué avec cette adresse email.</p>
-    <p>Pour finaliser la la demande, merci de cliquer sur ce <a target="_blank" href="https://localhost:3000/resetpassword/${token}">lien</></p>
+    <p>Pour finaliser la la demande, merci de cliquer sur ce <a target="_blank" href="${uri}/resetpassword/${token}">lien</></p>
     `
   }
   try {
-    const response = await transport.sendMail(mailOptions)
-    console.log("REPSONSE : ", response)
+    await transport.sendMail(mailOptions)
+    // console.log("REPSONSE : ", response)
     return true
   } catch (error:any) {
     console.error('ERROR SEND MAIL : ', error?.message)

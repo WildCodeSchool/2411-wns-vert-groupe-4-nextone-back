@@ -204,9 +204,9 @@ export default {
         message: "La demande a bien été traitée. Si un email correspondant a été trouvé, un email de récupération a été envoyé."
       }
     },
-    resetPassword: async (_: any, args: MutationResetPasswordArgs): Promise<Message> => {
-      
-      return {}
+    resetPassword: async (_: any, { args }: MutationResetPasswordArgs): Promise<Message> => {
+      const message: Message = await managerService.resetPassword(args)
+      return message
     }
   },
   Manager: {

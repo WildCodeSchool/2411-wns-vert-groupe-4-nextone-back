@@ -93,8 +93,8 @@ export default {
     },
   },
   Authorization: {
-    service: async (parent: AuthorizationEntity,_: any, { loaders: { serviceLoader }}: MyContext) => {
-      return await serviceLoader.load(parent.serviceId)
+    service: async (parent: AuthorizationEntity,_: any, { loaders: { servicesLoader  }}: MyContext) => {
+      return await servicesLoader.load(parent.serviceId)
     },
     manager: async (parent: AuthorizationEntity,_: any, { loaders: { managerLoader }}: MyContext) => {
       return await managerLoader.load(parent.managerId)

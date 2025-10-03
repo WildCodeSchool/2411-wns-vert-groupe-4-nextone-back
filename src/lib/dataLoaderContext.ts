@@ -61,6 +61,7 @@ const ticketLoader = new DataLoader(bachTicket);
 
 //SERVICE
 const batchService = async (ticketIds: Readonly<string[]>) => {
+  console.log('BATCH SERVICE')
   const services =  await Promise.all(
     ticketIds.map(async (id) => {
       return await new ServicesService().db.findOneBy({
@@ -178,6 +179,17 @@ const settingByCompanbyIdLoader = new DataLoader(
   }
 );
 
+const servicesLoader = new DataLoader(
+  async (serviceIds: Readonly<string[]>) => {
+    return await Promise.all(
+      serviceIds.map(async (id) => {
+        return await new ServicesService().getServiceById(id)
+      })
+    )
+  }
+)
+
+
 const loaders = {
   ticketLogsByManagerIdLoader,
   connectionLogByManagerIdLoader,
@@ -192,6 +204,7 @@ const loaders = {
   serviceByCompanyIdLoader,
   managerByCompanyIdLoader,
   settingByCompanbyIdLoader,
+  servicesLoader
 };
 
 export type Loaders = typeof loaders;
