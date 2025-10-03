@@ -7,12 +7,7 @@ import {
   LessThan,
 } from "typeorm";
 import AppDataSource from "../lib/datasource";
-import {
-  ByCreationSlotInput,
-  Order,
-  PaginationInput,
-  QueryTicketLogsByCreationSlotArgs,
-} from "@/generated/graphql";
+import { ByCreationSlotInput, Order, PaginationInput } from "@/generated/graphql";
 
 export default abstract class BaseService<T extends ObjectLiteral> {
   protected repo: Repository<T>;
@@ -24,13 +19,9 @@ export default abstract class BaseService<T extends ObjectLiteral> {
   protected getPagination(pagination?: PaginationInput) {
     const cursor = pagination?.cursor ? new Date(pagination.cursor) : undefined; 
     const limit = pagination?.limit || 20;
-<<<<<<< HEAD
+
     const order: Order = pagination?.order || Order.Desc; 
     return { cursor, limit, order };
-=======
-    const order: Order = pagination?.order || Order.Asc;
-    return { created, limit, order };
->>>>>>> 549ef87 (WM - Invitation OK, no email sent atm)
   }
 
   // CREER UNE INSTANCE DE T
@@ -75,6 +66,7 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     pag?: PaginationInput
   ): Promise<{ items: T[]; totalCount: number }> {
     const { cursor, limit, order } = this.getPagination(pag);
+
     console.log("cursor", cursor);
     console.log("limit", limit);
     console.log("order", order); 
@@ -98,9 +90,12 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     pag?: PaginationInput
   ): Promise<{ items: T[]; totalCount: number }> {
     const { cursor, limit, order } = this.getPagination(pag);
+
     // console.log("cursor", cursor);
     // console.log("limit", limit);
     // console.log("order", order); 
+
+
     const where: FindOptionsWhere<T> = { ...fields };
     if (cursor) {
        (where as any).createdAt = LessThan(cursor); 

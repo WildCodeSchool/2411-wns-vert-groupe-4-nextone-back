@@ -28,31 +28,9 @@ export default {
       _: any,
       { pagination }: QueryTicketsArgs
     ): Promise<{ items: TicketEntity[]; totalCount: number }> => {
-      // const ticketsList = await ticketService.findAll(pagination);
-      // const totalCount = await ticketService.countAll(pagination);
-      // return { items: ticketsList, totalCount };
-      return await ticketService.findAllPaginated(pagination);
-    },
-    ticketsForTVDisplay: async (
-      _: any,
-      { pagination }: QueryTicketsArgs,
-      { ip }: MyContext
-    ): Promise<TicketEntity[] | null> => {
-      console.log("IP du client :", ip);
-      const whitelistedIpService = new WhitelistedIpService();
-
-      const whitelistedIPs = await whitelistedIpService.getAllWhitelistedIps();
-
-      const ipIsWhitelisted = whitelistedIPs.some(
-        (ipEntry) => ipEntry.ipAddress === ip
-      );
-
-      if (!ipIsWhitelisted) {
-        return null;
-      }
-
       const ticketsList = await ticketService.findAll(pagination);
-      return ticketsList;
+      const totalCount = await ticketService.countAll(pagination); 
+      return { items: ticketsList, totalCount };
     },
     ticket: async (
       _: any,
@@ -65,22 +43,16 @@ export default {
     ticketsByProperties: async (
       _: any,
       { fields, pagination }: QueryTicketsByPropertiesArgs
-    ): Promise<{ items: TicketEntity[]; totalCount: number }> => {
-      const { status, ...rest } = fields || {};
-      console.log("fields", fields);
-      console.log("rest", rest);
-      console.log("status", status);
-      if (status) {
+    ): Promise<{ items: TicketEntity[]; totalCount: number }> => { 
+      const { status, ...rest } = fields || {}; 
+      if (status && Array.isArray(status)) {
         return await ticketService.findByPropertiesAndCount(
           { ...rest, status: In(status) },
           pagination
-        );
+        ); 
       }
-      //return await ticketService.findByPropertiesAndCount(rest, pagination);
-      return await ticketService.findByPropertiesAndCount(
-        { ...rest, status: Not(Status.Archived) },
-        pagination
-      );
+
+      return await ticketService.findByPropertiesAndCount(rest, pagination); 
     },
   },
 
