@@ -4,7 +4,7 @@ import TicketLogService from "./ticketLogs.service";
 import TicketLogEntity from "@/entities/TicketLog.entity";
 import ManagerEntity from "@/entities/Manager.entity";
 import BaseService from "./base.service";
-import { Any, FindOptionsWhere, In } from "typeorm";
+import { FindOptionsWhere, In, LessThan } from "typeorm"; 
 
 export default class TicketService extends BaseService<TicketEntity> {
   private static instance: TicketService | null = null;
@@ -43,16 +43,34 @@ export default class TicketService extends BaseService<TicketEntity> {
     return found;
   }
 
-  async ticketsByStatus(
+  async findByPropertiesAndCount(
     fields: FindOptionsWhere<TicketEntity>,
-    statusList: Status[],
-    pag: PaginationInput | undefined
-  ): Promise<TicketEntity[]> {
-    return await this.repo.find({
-      where: {
-        ...fields,
-        status: In(statusList)
-      }
+    pagination?: PaginationInput
+  ): Promise<{ items: TicketEntity[]; totalCount: number }> { 
+    const where: FindOptionsWhere<TicketEntity> = { ...fields };
+
+    if (pagination?.cursor) {
+      where.createdAt = LessThan(new Date(pagination.cursor)); 
+    }
+
+     if (fields.status && Array.isArray(fields.status)) {
+    where.status = In(fields.status as Status[]);
+    }
+
+    const [items, totalCount] = await this.repo.findAndCount({
+      where,
+      order: { createdAt: pagination?.order ?? "DESC" }, 
+      take: pagination?.limit ?? 10,
     });
+
+    return { items, totalCount };
+  }
+
+  public async countAll(pagination?: PaginationInput): Promise<number> {
+    const where: FindOptionsWhere<TicketEntity> = {};
+    if (pagination?.cursor) {
+      where.createdAt = LessThan(new Date(pagination.cursor)); 
+    }
+    return await this.repo.count({ where });
   }
 }
