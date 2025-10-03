@@ -248,7 +248,7 @@ const initializeDataSource = async () => {
 };
 
 export const seedDB = async (): Promise<void> => {
-  console.log("ENV : ", process.env.NODE_ENV)
+  
   try {
     console.log("-------------------");
     console.log("🚀 DEBUT DU SEEDING ...");
