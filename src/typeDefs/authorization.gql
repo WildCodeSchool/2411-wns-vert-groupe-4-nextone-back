@@ -21,6 +21,8 @@ type Mutation {
   addAuthorization(input: NewAuthInput!): AuthorizationResponse!
   updateAuthorization(input: UpdateAuthInput!): AuthorizationResponse!
   deleteAuthorization(input: DeleteAuthInput!): AuthorizationResponse!
+  addBulkAuthorization(input: AddBulkAuthInput!): AuthorizationResponse!
+  deleteBulkAuthorization(input: DeleteBulkAuthInput!): AuthorizationResponse!
 }
 
 type AuthorizationResponse {
@@ -44,4 +46,12 @@ input UpdateAuthInput {
 input DeleteAuthInput {
   serviceId: UUID!
   managerId: UUID!
+}
+
+input AddBulkAuthInput {
+  authsToAdd: [NewAuthInput]!
+}
+
+input DeleteBulkAuthInput {
+  authsToDelete: [DeleteAuthInput]!
 }

@@ -1,5 +1,6 @@
 import {
   MutationAddAuthorizationArgs,
+  MutationAddBulkAuthorizationArgs,
   MutationDeleteAuthorizationArgs,
   MutationUpdateAuthorizationArgs,
 } from "@/generated/graphql";
@@ -104,6 +105,47 @@ export default class AuthorizationService {
     }
     checkRoleInHierarchy(actor.role, targetManager.role);
     await this.db.remove(existing);
+    return true;
+  }
+
+  async addBulkAuthorization(
+    input: MutationAddBulkAuthorizationArgs["input"],
+    manager: ManagerEntity
+  ): Promise<boolean> {
+    if (!input.authsToAdd || input.authsToAdd.length === 0) {
+      throw new Error("Aucune autorisation à ajouter.");
+    }
+
+    const existingAuths = await this.db.find({
+      where: input.authsToAdd.map((a) => ({
+        manager: { id: a?.managerId },
+        service: { id: a?.serviceId },
+      })),
+    });
+
+    if (existingAuths.length > 0) {
+      return false;
+    }
+
+    const newAuthorizations = [];
+
+    for (const authInput of input.authsToAdd) {
+      const [targetManager, targetService] = await this.validateEntities(
+        authInput?.managerId,
+        authInput?.serviceId
+      );
+      if (!targetManager) throw new Error("Manager à modifier introuvable.");
+      if (!targetService) throw new Error("Service à modifier introuvable.");
+
+      const newAuth = this.db.create({
+        manager: targetManager,
+        service: targetService,
+        isAdministrator: authInput?.isAdministrator || false,
+      });
+      newAuthorizations.push(newAuth);
+    }
+
+    await this.db.save(newAuthorizations);
     return true;
   }
 
