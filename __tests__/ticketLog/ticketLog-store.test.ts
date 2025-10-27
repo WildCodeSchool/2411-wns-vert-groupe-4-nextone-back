@@ -22,9 +22,16 @@ import {
 import assert from "assert";
 import { fakeTicketLog, fakeData } from "../../src/utils/dataTest";
 
-type TResponse = {
-  ticketLogs: Partial<TicketLog>[];
-};
+// type TResponse = {
+//   ticketLogs: Partial<TicketLog>[];
+// };
+
+type TResponse = {                                   
+  ticketLogs: {                                      
+    items: Partial<TicketLog>[];                     
+    totalCount: number;                              
+  };                                                 
+};                  
 
 type TResponseCreate = {
   ticketLog: Partial<TicketLog>;
@@ -36,13 +43,18 @@ let server: ApolloServer;
 const schema = makeExecutableSchema({ typeDefs, resolvers });
 const store = createMockStore({ schema });
 
-store.set("Query", "ROOT", "ticketLogs", fakeData);
+// store.set("Query", "ROOT", "ticketLogs", fakeData);
+store.set("Query", "ROOT", "ticketLogs", {           
+  items: fakeData,                                   
+  totalCount: fakeData.length,                       
+});
 
 const fakeResolvers = (store: IMockStore) => ({
   Query: {
     ticketLogs() {
-      const tickets = store.get("Query", "ROOT", "ticketLogs");
-      return tickets;
+      // const tickets = store.get("Query", "ROOT", "ticketLogs");
+      // return tickets;
+      return store.get("Query", "ROOT", "ticketLogs");
     },
     ticketLog(_: any, { id }: { id: string }) {
       return store.get("TicketLog", id);
@@ -74,9 +86,17 @@ describe("TEST DES TICKETLOGS DANS LE STORE", () => {
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.errors).toBeUndefined();
-    expect(response.body.singleResult.data).toEqual<TResponse>({
-      ticketLogs: fakeData.map((f) => ({ id: f.id })),
-    });
+
+    // expect(response.body.singleResult.data).toEqual<TResponse>({
+    //   ticketLogs: fakeData.map((f) => ({ id: f.id })),
+    // });
+
+    expect(response.body.singleResult.data).toEqual<TResponse>({          
+      ticketLogs: {                                                       
+        items: fakeData.map((f) => ({ id: f.id })),                       
+        totalCount: fakeData.length,                                      
+      },                                                                  
+    });        
   });
 
   //CREATION
