@@ -23,7 +23,7 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     return { cursor, limit, order };
   }
 
-  //CREER UNE INSTANCE DE T
+  // CREER UNE INSTANCE DE T
   public async createOne(entity: DeepPartial<T>) {
     const created = await this.repo.save(this.repo.create(entity));
     const finded = await this.repo.findOne({ where: { id: created.id } });
@@ -33,7 +33,7 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     return finded;
   }
 
-  //RECUPERER TOUTES LES INSTANCES
+  // RECUPERER TOUTES LES INSTANCES
   public async findAll(pag?: PaginationInput) {
     const { cursor, limit, order } = this.getPagination(pag);
     const where: FindOptionsWhere<T> = {};
@@ -52,13 +52,13 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     return list;
   }
 
-  //RECUPERER UNE INSTANCE VIA SON ID
+  // RECUPERER UNE INSTANCE VIA SON ID
   public async findById(id: string) {
     const ad = await this.repo.findOne({ where: { id } as any });
     return ad;
   }
 
-  //RECUPERER VIA UNE SEULE PROPRIETE
+  // RECUPERER VIA UNE SEULE PROPRIETE
   public async findByProperty<K extends keyof T>(
     fields: K,
     value: T[K],
@@ -82,7 +82,7 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     return { items, totalCount };
   }
 
-  //RECUPERER VIA PLUSIEURS PROPRIETES
+  // RECUPERER VIA PLUSIEURS PROPRIETES
   public async findByProperties(
     fields: FindOptionsWhere<T>,
     pag?: PaginationInput
@@ -105,7 +105,7 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     return { items, totalCount };
   }
 
-  //RECUPERER ENTRE 2 DATES DE CREATION
+  // RECUPERER ENTRE 2 DATES DE CREATION
   public async findByCreationSlot(data: ByCreationSlotInput): Promise<T[]> {
     const { start, end, name, pagination } = data;
     const startDate = pagination?.cursor || start; 
@@ -121,7 +121,7 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     return result;
   }
 
-  //DELETE
+  // DELETE
   public async deleteOne(id: string): Promise<boolean> {
     const deleted = await this.repo.delete({ id: id as any });
     if (!deleted.affected || deleted.affected === 0) {
@@ -130,7 +130,7 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     return true;
   }
 
-  //UPDATE
+  // UPDATE
   public async updateOne(id: string, entity: Partial<T>): Promise<T | null> {
     const updated = await this.repo.update(id, entity);
     if (!updated) {

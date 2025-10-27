@@ -7,10 +7,11 @@ import {
   QueryTicketArgs,
   QueryTicketsArgs,
   QueryTicketsByPropertiesArgs,
+  Status,
 } from "@/generated/graphql";
 import { MyContext } from "..";
 import ServicesService from "@/services/services.service";
-import { In } from "typeorm";
+import { In, Not } from "typeorm";
 
 type TicketDeleted = {
   message: string;
@@ -52,8 +53,11 @@ export default {
           pagination
         ); 
       }
-
-      return await ticketService.findByPropertiesAndCount(rest, pagination); 
+      //return await ticketService.findByPropertiesAndCount(rest, pagination); 
+       return await ticketService.findByPropertiesAndCount(
+        { ...rest, status: Not(Status.Archived) },
+        pagination
+      );
     },
   },
 
