@@ -12,11 +12,18 @@ type ConnectionLog {
   createdAt: DateTime!
 }
 
- type Query {
-  connectionLogs: [ConnectionLog!]!
-  loginLogs: [ConnectionLog!]!
-  logoutLogs: [ConnectionLog!]!
-  employeeConnectionLogs(managerId: String!): [ConnectionLog!]!
+type ConnectionLogsPaginatedResult {
+  items: [ConnectionLog!]!
+  totalCount: Int!
+}
+
+
+type Query {
+  connectionLogs(pagination: PaginationInput): ConnectionLogsPaginatedResult!
+  loginLogs(pagination: PaginationInput): ConnectionLogsPaginatedResult!
+  logoutLogs(pagination: PaginationInput): ConnectionLogsPaginatedResult!
+  employeeConnectionLogs(managerId: String!, pagination: PaginationInput): ConnectionLogsPaginatedResult!
+
 }
 
  type Mutation {

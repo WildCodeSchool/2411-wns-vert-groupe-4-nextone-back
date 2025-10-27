@@ -1,5 +1,5 @@
 import ConnectionLogEntity from "@/entities/ConnectionLog.entity";
-import { ConnectionEnum } from "@/generated/graphql";
+import { ConnectionEnum, QueryConnectionLogsArgs, QueryEmployeeConnectionLogsArgs, QueryLoginLogsArgs, QueryLogoutLogsArgs } from "@/generated/graphql";
 import ConnectionLogService from "@/services/connectionLog.service";
 import ManagerService from "@/services/manager.service";
 import { MyContext } from "..";
@@ -8,34 +8,64 @@ const connectionLogService = new ConnectionLogService()
 
 export default {
   Query: {
-    connectionLogs:async () => {
-      return await connectionLogService.getAllConnectionLogs()
+      connectionLogs: async (
+      _: any,
+      { pagination }: QueryConnectionLogsArgs
+    ): Promise<{ items: ConnectionLogEntity[]; totalCount: number }> => {
+      return await connectionLogService.getAllConnectionLogsPaginated(pagination);
     },
-    loginLogs: async () => {
-      return await connectionLogService.getConnectionLogsByType(ConnectionEnum.Login)
+
+    loginLogs: async (
+      _: any,
+      { pagination }: QueryLoginLogsArgs
+    ): Promise<{ items: ConnectionLogEntity[]; totalCount: number }> => {
+      return await connectionLogService.getConnectionLogsByTypePaginated(
+        ConnectionEnum.Login,
+        pagination
+      );
     },
-    logoutLogs: async () => {
-      return await connectionLogService.getConnectionLogsByType(ConnectionEnum.Logout)
+
+      logoutLogs: async (
+      _: any,
+      { pagination }: QueryLogoutLogsArgs
+    ): Promise<{ items: ConnectionLogEntity[]; totalCount: number }> => {
+      return await connectionLogService.getConnectionLogsByTypePaginated(
+        ConnectionEnum.Logout,
+        pagination
+      );
     },
-    employeeConnectionLogs: async (_: any, managerId: string) => {
-      return await connectionLogService.getConnectionLogsByEmployee(managerId)
-    }
+
+     employeeConnectionLogs: async (
+      _: any,
+      { managerId, pagination }: QueryEmployeeConnectionLogsArgs
+    ): Promise<{ items: ConnectionLogEntity[]; totalCount: number }> => {
+      return await connectionLogService.getConnectionLogsByEmployeePaginated(
+        managerId,
+        pagination
+      );
+    },
   },
+
   Mutation: {
-    createConnectionLog: async (type: ConnectionEnum, managerId: string) => {
-      const connectionLog = await connectionLogService.createConnectionLog({ type, managerId })
-      return connectionLog
-    }
+createConnectionLog: async (
+      _: any,
+      { type, managerId }: { type: ConnectionEnum; managerId: string }
+    ): Promise<ConnectionLogEntity> => {
+      const connectionLog = await connectionLogService.createConnectionLog({
+        type,
+        managerId,
+      });
+      return connectionLog;
+    },
   },
-  ConnectionLog: {
-    manager: async (parent: ConnectionLogEntity) => {
-      return await new ManagerService().db.findOne({
-        where: {
-          connectionLogs: {
-            id: parent.id
-          }
-        }
-      })
-    }
-  }
-}
+
+ ConnectionLog: {
+    manager: async (
+      parent: ConnectionLogEntity,
+      _: any,
+      { loaders: { managerLoader } }: MyContext
+    ) => {
+      return await managerLoader.load(parent.managerId);
+    },
+  },
+};
