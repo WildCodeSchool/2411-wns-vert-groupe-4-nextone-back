@@ -54,8 +54,11 @@ export default {
           pagination
         ); 
       }
-
-      return await ticketService.findByPropertiesAndCount(rest, pagination); 
+      //return await ticketService.findByPropertiesAndCount(rest, pagination); 
+       return await ticketService.findByPropertiesAndCount(
+        { ...rest, status: Not(Status.Archived) },
+        pagination
+      );
     },
   },
 

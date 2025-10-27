@@ -48,7 +48,7 @@ export default class TicketService extends BaseService<TicketEntity> {
   }
 
   // PAGINATION TEMPS REEL
-  async findByPropertiesAndCount(
+ async findByPropertiesAndCount(
     fields: FindOptionsWhere<TicketEntity>,
     pagination?: PaginationInput
   ): Promise<{ items: TicketEntity[]; totalCount: number }> {
@@ -60,9 +60,7 @@ export default class TicketService extends BaseService<TicketEntity> {
     });
 
     const where: FindOptionsWhere<TicketEntity> = { ...fields };
-    console.log("fields", fields);
-    // console.log("where", where);
-    console.log("pagination", pagination); 
+
     if (pagination?.cursor) {
       where.createdAt = MoreThanOrEqual(new Date(pagination.cursor));
     }
