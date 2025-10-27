@@ -101,18 +101,14 @@ export default {
   },
   Service: {
     authorizations: async (
-      { id }: { id: string },
-      _: any,
-      { loaders: { authsByServiceIdLoader } }: MyContext
-    ) => {
-      return await authsByServiceIdLoader.load(id);
+      { id }: { id: string }) => {
+      return await new AuthorizationService().getByService(id);
     },
     tickets: async (
-      { id }: { id: string },
-      _: any,
-      { loaders: { ticketByServiceIdLoader } }: MyContext
-    ) => {
-      return await ticketByServiceIdLoader.load(id);
+      { id }: { id: string }) => {
+      return await TicketService.gettInstance().findByProperties({
+        serviceId: id
+      });
     },
     company: async ({ id }: { id: string }) => {
       const service = await new ServicesService().getServiceById(id);

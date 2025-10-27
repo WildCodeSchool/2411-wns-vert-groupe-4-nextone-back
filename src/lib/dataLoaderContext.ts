@@ -34,7 +34,7 @@ const batchAuthByServiceId = async (serviceIds: Readonly<string[]>) => {
   return auths;
 };
 
-const authsByServiceIdLoader = new DataLoader(batchAuthByServiceId);
+const authsByServiceIdLoader = new DataLoader(batchAuthByServiceId,{ cache: false, });
 
 //MANAGER
 const batchManager = async (managerIds: Readonly<(string | null)[]>) => {
@@ -193,18 +193,18 @@ const servicesLoader = new DataLoader(
 const loaders = {
   ticketLogsByManagerIdLoader,
   connectionLogByManagerIdLoader,
-  authByManagerIdLoader,
+  // authByManagerIdLoader,
   ticketLogByTicketIdLoader,
-  serviceLoader,
-  ticketLoader,
-  managerLoader,
-  authsByServiceIdLoader,
-  ticketByServiceIdLoader,
-  companyLoader,
-  serviceByCompanyIdLoader,
-  managerByCompanyIdLoader,
-  settingByCompanbyIdLoader,
-  servicesLoader
+  // serviceLoader,
+  // ticketLoader,
+  // managerLoader,
+  // authsByServiceIdLoader,
+  // ticketByServiceIdLoader,
+  // companyLoader,
+  // serviceByCompanyIdLoader,
+  // managerByCompanyIdLoader,
+  // settingByCompanbyIdLoader,
+  // servicesLoader
 };
 
 export type Loaders = typeof loaders;

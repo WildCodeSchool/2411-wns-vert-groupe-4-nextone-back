@@ -68,25 +68,26 @@ export default {
   },
   Company: {
     services: async (
-      { id }: { id: string },
-      _: any,
-      { loaders: { serviceByCompanyIdLoader } }: MyContext
-    ) => {
-      return await serviceByCompanyIdLoader.load(id);
+      { id }: { id: string }) => {
+      return await new ServicesService().db.findOne({
+        where: {
+          companyId: id
+        }
+      });
     },
     managers: async (
-      { id }: { id: string },
-      _: any,
-      { loaders: { managerByCompanyIdLoader } }: MyContext
-    ) => {
-      return await managerByCompanyIdLoader.load(id);
+      { id }: { id: string }) => {
+      return await new ManagerService().db.find({
+        where: {
+          companyId: id
+        }
+      });
     },
     settings: async (
-      { id }: { id: string },
-      _: any,
-      { loaders: { settingByCompanbyIdLoader } }: MyContext
-    ) => {
-      return await settingByCompanbyIdLoader.load(id);
+      { id }: { id: string }) => {
+      return await SettingService.getService().findByProperties({
+        companyId: id
+      });
     },
   },
 };

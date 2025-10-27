@@ -28,8 +28,14 @@ export default {
     }
   },
   ConnectionLog: {
-    manager: async (parent: ConnectionLogEntity,_: any, { loaders: { managerLoader }}: MyContext) => {
-      return await managerLoader.load(parent.managerId)
+    manager: async (parent: ConnectionLogEntity) => {
+      return await new ManagerService().db.findOne({
+        where: {
+          connectionLogs: {
+            id: parent.id
+          }
+        }
+      })
     }
   }
 }
