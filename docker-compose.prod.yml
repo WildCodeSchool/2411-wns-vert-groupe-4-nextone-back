@@ -17,6 +17,7 @@ services:
       db:
         condition: service_healthy
     command: ["sh", "-c", "wait-for-healthcheck-prod.sh"]
+    
     develop:
       watch:
         - action: sync+restart

@@ -26,6 +26,8 @@ type Manager {
   ticketLogs: [TicketLog!]!
   createdAt: DateTime!
   updatedAt: DateTime!
+  resetToken: String
+  resetTokenExpiration: DateTime
 }
 
 type Auth {
@@ -53,6 +55,8 @@ type Mutation {
   # associateManagerAtService(managerId: ID!, serviceId: ID!): Message!
   # dissociateManagerFromService(managerId: ID!, serviceId: ID!): Message!
   toggleGlobalAccessManager(id: UUID!): Message!
+  askResetPassword(email: String!): Message!
+  resetPassword(args: ResetPasswordInput!): Message!
 }
 
 input InputRegister {
@@ -74,5 +78,12 @@ input UpdateManagerInput {
   firstName: String
   lastName: String
   role: ManagerRole
+}
+
+input ResetPasswordInput {
+  resetToken : String!
+  newPassword: String!
+  confirmNewPassword: String!
+  email: String!
 }
 

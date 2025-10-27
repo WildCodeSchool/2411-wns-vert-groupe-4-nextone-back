@@ -46,6 +46,12 @@ export default class ManagerEntity {
   })
   password: string;
 
+  @Column({ nullable: true})
+  resetToken?: string
+
+  @Column({ nullable: true })  
+  resetTokenExpiration?: Date
+
   @Column({
     type: "enum",
     enum: ManagerRole,
@@ -101,8 +107,8 @@ export class LoginInput {
 
 export class UpdateInput {
   @Length(2, 50, { message: "Le prénom est requis." })
-  first_name: string;
+  firstName: string;
 
   @Length(2, 50, { message: "Le nom est requis." })
-  last_name: string;
+  lastName: string;
 }

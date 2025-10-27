@@ -13,6 +13,8 @@ import resolvers from "./resolvers";
 import ManagerEntity from "./entities/Manager.entity";
 import { authContext } from "./lib/authContext";
 import type { Loaders } from "./lib/dataLoaderContext";
+import nodemailer from 'nodemailer'
+import { sendMail } from "./lib/mail";
 
 export interface MyContext {
   req: Request;
@@ -40,16 +42,16 @@ const server = new ApolloServer<MyContext>({
 async function main() {
   await server.start();
   console.log("🚀 Apollo Server démarré sur /graphql");
-
+  
   await datasource
-    .initialize()
-    .then(() => {
-      console.log("📦 Base de données initialisée");
-    })
-    .catch((err) => {
-      console.error("❌ Échec de la connexion à la base de données :", err);
-    });
-
+  .initialize()
+  .then(() => {
+    console.log("📦 Base de données initialisée");
+  })
+  .catch((err) => {
+    console.error("❌ Échec de la connexion à la base de données :", err);
+  });
+  
   
   app.use(
     "/graphql",
@@ -60,11 +62,12 @@ async function main() {
     express.json(),
     expressMiddleware(server, { context: authContext })
   );
-
+  
   await new Promise<void>((resolve) =>
     httpServer.listen({ port: 4005 }, resolve)
-  );
+);
   console.log("✅ Serveur HTTP en écoute sur le port 4005");
+
 }
 
 main();

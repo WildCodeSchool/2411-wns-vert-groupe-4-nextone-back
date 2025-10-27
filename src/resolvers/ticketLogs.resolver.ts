@@ -11,7 +11,8 @@ import {
 } from "@/generated/graphql";
 import TicketLogService from "@/services/ticketLogs.service";
 import { buildResponse } from "@/utils/authorization";
-import { MyContext } from "..";
+import ManagerService from "@/services/manager.service";
+import TicketService from "@/services/ticket.service";
 
 const ticketLogService = TicketLogService.getInstance();
 
@@ -82,11 +83,17 @@ export default {
     },
   },
   TicketLog: {
-    manager: async (parent: TicketLogEntity, _: any, { loaders: { managerLoader } }: MyContext) => {
-      return await managerLoader.load(parent.managerId || "");
+    manager: async (parent: TicketLogEntity) => {
+      return await new ManagerService().db.findOne({
+        where: {
+          ticketLogs: {
+            id: parent.id
+          }
+        }
+      });
     },
-    ticket: async (parent: TicketLogEntity, _: any, { loaders: { ticketLoader } }: MyContext) => {
-      return await ticketLoader.load(parent.ticketId);
+    ticket: async (parent: TicketLogEntity) => {
+      return await TicketService.gettInstance().findById(parent.ticketId);
     },
   },
 };

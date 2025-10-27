@@ -42,8 +42,12 @@ export default {
     }
   },
   Setting: {
-    company: async (parent: SettingEntity,_: any, { loaders: { companyLoader }}: MyContext) => {
-      return await companyLoader.load(parent.companyId)
+    company: async (parent: SettingEntity) => {
+      return await CompanyService.getService().findByProperties({
+        settings: {
+          companyId: parent.id
+        }
+      })
     }
   }
 } 
