@@ -5,6 +5,8 @@ import ManagerEntity from "@/entities/Manager.entity";
 import CompanyService from "./company.service";
 import crypto from "crypto"
 import * as argon2 from 'argon2'
+// 👉 PAGINATION : Décommenter ces imports quand activation de la pagination
+// import { FindOptionsWhere, MoreThanOrEqual } from "typeorm";
 
 export default class ManagerService {
   db: ManagerRepository;
@@ -17,6 +19,34 @@ export default class ManagerService {
     const managers = await this.db.find();
     return managers;
   }
+
+    // 👉 VERSION AVEC PAGINATION - Décommenter cette méthode pour activer la pagination
+  // async listManagersPaginated(
+  //   pagination?: PaginationInput
+  // ): Promise<{ items: ManagerEntity[]; totalCount: number }> {
+  //   console.log("🔍 Manager - pagination:", pagination);
+  //   
+  //   // Count GLOBAL (sans cursor)
+  //   const totalCount = await this.db.count();
+  //   
+  //   // Where pour les items (avec cursor)
+  //   const where: FindOptionsWhere<ManagerEntity> = {};
+  //   
+  //   if (pagination?.cursor) {
+  //     where.createdAt = MoreThanOrEqual(new Date(pagination.cursor));
+  //   }
+  //
+  //   const items = await this.db.find({
+  //     where,
+  //     order: { createdAt: pagination?.order ?? "DESC" },
+  //     take: pagination?.limit ?? 20,
+  //   });
+  //
+  //   console.log("Manager - totalCount:", totalCount);
+  //   console.log("Manager - items.length:", items.length);
+  //
+  //   return { items, totalCount };
+  // }
 
   async findManagerByEmail(email: string) {
     return await this.db.findOneBy({ email });
