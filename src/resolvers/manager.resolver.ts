@@ -211,11 +211,8 @@ export default {
   },
   Manager: {
     authorizations: async (
-      { id }: { id: string },
-      _: any,
-      { loaders: { authByManagerIdLoader } }: MyContext
-    ) => {
-      return await authByManagerIdLoader.load(id);
+      { id }: { id: string }) => {
+      return await new AuthorizationService().getByManager(id);
     },
     company: async (manager: ManagerEntity) => {
       return await CompanyService.getService().findById(manager.companyId);

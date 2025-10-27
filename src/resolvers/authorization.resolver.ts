@@ -9,8 +9,8 @@ import {
 } from "@/generated/graphql";
 import { MyContext } from "..";
 import { buildResponse } from "@/utils/authorization";
-import ServicesService from "@/services/services.service";
 import AuthorizationEntity from "@/entities/Authorization.entity";
+import ServicesService from "@/services/services.service";
 import ManagerService from "@/services/manager.service";
 
 const authorizationService = new AuthorizationService();
@@ -93,11 +93,17 @@ export default {
     },
   },
   Authorization: {
-    service: async (parent: AuthorizationEntity,_: any, { loaders: { servicesLoader  }}: MyContext) => {
-      return await servicesLoader.load(parent.serviceId)
+    service: async (parent: AuthorizationEntity) => {
+      return await new ServicesService().db.findOne({
+        where: {
+          authorizations: {
+            serviceId: parent.serviceId
+          }
+        }
+      })
     },
-    manager: async (parent: AuthorizationEntity,_: any, { loaders: { managerLoader }}: MyContext) => {
-      return await managerLoader.load(parent.managerId)
+    manager: async (parent: AuthorizationEntity) => {
+      return await new ManagerService().getManagerById(parent.managerId)
     },
   },
 };

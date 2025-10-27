@@ -105,13 +105,10 @@ export default class ManagerService {
   async createResetToken(email: string): Promise<string | null> {
 
     const user = await this.findManagerByEmail(email)
-    console.log("USER ; ", user, email)
     if (!user) return null
 
     const token = crypto.randomBytes(32).toString('hex')
     const resetTokenExpiration = new Date(Date.now() + 15 * 60 * 1000)
-
-    console.log('TOKEN : ', token, "RESET EXPIRATION : ", resetTokenExpiration)
 
     await this.db.save({ ...user, resetToken: token, resetTokenExpiration })
     

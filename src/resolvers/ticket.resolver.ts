@@ -104,8 +104,8 @@ export default {
     },
   },
   Ticket: {
-    service: async (ticket: TicketEntity, _: any, ctx: MyContext) => {
-      return await ctx.loaders.serviceLoader.load(ticket.id);
+    service: async (ticket: TicketEntity) => {
+      return await new ServicesService().getServiceById(ticket.serviceId)
     },
     ticketLogs: async (ticket: TicketEntity, _: any, ctx: MyContext) => {
       return await ctx.loaders.ticketLogByTicketIdLoader.load(ticket.id);
