@@ -7,7 +7,8 @@ import {
   MutationToggleGlobalAccessManagerArgs,
   Message,
   Auth,
-   // 👉 PAGINATION : Décommenter cet import pour activer la pagination
+  MutationResetPasswordArgs,
+  // 👉 PAGINATION : Décommenter cet import pour activer la pagination
   // QueryManagersArgs,
 } from "@/generated/graphql";
 import { MyContext } from "..";
