@@ -8,6 +8,8 @@ import {
   Message,
   Auth,
   MutationResetPasswordArgs,
+  // 👉 PAGINATION : Décommenter cet import pour activer la pagination
+  // QueryManagersArgs,
 } from "@/generated/graphql";
 import { MyContext } from "..";
 import Cookies from "cookies";
@@ -46,6 +48,20 @@ export default {
       verifyCreatorPermission(manager?.role);
       return managerService.listManagers();
     },
+
+    // 👉 VERSION AVEC PAGINATION - Décommenter cette version et commenter celle du dessus
+    // managers: async (
+    //   _: any,
+    //   { pagination }: QueryManagersArgs,
+    //   ctx: MyContext
+    // ): Promise<{ items: ManagerEntity[]; totalCount: number }> => {
+    //   const { manager } = ctx;
+    //   if (!manager) {
+    //     throw new Error("Manager non authentifié");
+    //   }
+    //   verifyCreatorPermission(manager?.role);
+    //   return managerService.listManagersPaginated(pagination);
+    // },
 
     manager: async (
       _: any,
@@ -194,24 +210,30 @@ export default {
         "Manager is not active."
       );
     },
-    askResetPassword: async (_: any, { email }: {email: string}): Promise<Message> => {
-      const token = await managerService.createResetToken(email)
+    askResetPassword: async (
+      _: any,
+      { email }: { email: string }
+    ): Promise<Message> => {
+      const token = await managerService.createResetToken(email);
       if (token) {
-        sendMail(email, token)
+        sendMail(email, token);
       }
       return {
         success: !!token,
-        message: "La demande a bien été traitée. Si un email correspondant a été trouvé, un email de récupération a été envoyé."
-      }
+        message:
+          "La demande a bien été traitée. Si un email correspondant a été trouvé, un email de récupération a été envoyé.",
+      };
     },
-    resetPassword: async (_: any, { args }: MutationResetPasswordArgs): Promise<Message> => {
-      const message: Message = await managerService.resetPassword(args)
-      return message
-    }
+    resetPassword: async (
+      _: any,
+      { args }: MutationResetPasswordArgs
+    ): Promise<Message> => {
+      const message: Message = await managerService.resetPassword(args);
+      return message;
+    },
   },
   Manager: {
-    authorizations: async (
-      { id }: { id: string }) => {
+    authorizations: async ({ id }: { id: string }) => {
       return await new AuthorizationService().getByManager(id);
     },
     company: async (manager: ManagerEntity) => {

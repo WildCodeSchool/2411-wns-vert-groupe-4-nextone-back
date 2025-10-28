@@ -25,33 +25,43 @@ export default {
       return await ticketLogService.findById(id);
     },
 
-    async ticketLogs(_: any, { pagination }: QueryTicketLogsArgs): Promise<TicketLogEntity[]> {
-      const tickets = await ticketLogService.findAll(pagination);
-      return tickets;
+    async ticketLogs(
+      _: any,
+      { pagination }: QueryTicketLogsArgs
+    ): Promise<{ items: TicketLogEntity[]; totalCount: number }> {
+      return await ticketLogService.findAllPaginated(pagination);
     },
 
-    async ticketLogsByProperty(_: any, args: QueryTicketLogsByPropertyArgs) {
+  
+    async ticketLogsByProperty(
+      _: any,
+      args: QueryTicketLogsByPropertyArgs
+    ): Promise<{ items: TicketLogEntity[]; totalCount: number }> {
       let key = Object.keys(args.field)[0] as keyof typeof args.field;
       const value = args.field[key];
-      const tl = await ticketLogService.findByProperty(key, value, args.pagination);
-      return tl
+      return await ticketLogService.findByProperty(key, value, args.pagination);
     },
 
+  
     async ticketLogsByProperties(
       _: any,
-      { fields, }: QueryTicketLogsByPropertiesArgs
-    ) {
-      const { pagination, ...rest} = fields
-      return await ticketLogService.findByProperties(rest, pagination);
+      { fields, pagination }: QueryTicketLogsByPropertiesArgs
+    ): Promise<{ items: TicketLogEntity[]; totalCount: number }> {
+      return await ticketLogService.findByPropertiesAndCount(fields, pagination);
     },
+
 
     async ticketLogsByCreationSlot(
       _: any,
       args: QueryTicketLogsByCreationSlotArgs
-    ) {
-      return await ticketLogService.findByCreationSlot({ ...args.data });
+    ): Promise<{ items: TicketLogEntity[]; totalCount: number }> {
+  
+      const items = await ticketLogService.findByCreationSlot({ ...args.data });
+      const totalCount = items.length; 
+      return { items, totalCount };
     },
   },
+  
   Mutation: {
     async createTicketLog(
       _: any,
@@ -64,12 +74,14 @@ export default {
       });
       return newTicket;
     },
+    
     async updateTicketLog(
       _: any,
       args: MutationUpdateTicketLogArgs
     ): Promise<TicketLogEntity | null> {
       return await ticketLogService.updateOne(args.data.id, args.data);
     },
+    
     async deleteTicketLog(
       _: any,
       { id }: MutationDeleteTicketLogArgs
@@ -82,6 +94,7 @@ export default {
       );
     },
   },
+  
   TicketLog: {
     manager: async (parent: TicketLogEntity) => {
       return await new ManagerService().db.findOne({
@@ -97,3 +110,4 @@ export default {
     },
   },
 };
+

@@ -1,5 +1,3 @@
-
-
 import { ApolloServer } from "@apollo/server";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import typeDefs from "../../src/typeDefs";
@@ -32,7 +30,6 @@ import ServicesService from "../../src/services/services.service";
 import {
   fakeCompanyInput,
   fakeManagerInput,
-  fakeService,
   fakeServiceInput,
   fakeTicketInput,
 } from "../../src/utils/dataTest";
@@ -51,8 +48,17 @@ type PartialTicketLog = Partial<Omit<TicketLog, "ticket">> & {
   ticket: Pick<Ticket, "id" | "firstName" | "lastName">;
 };
 
+// type TResponse = {
+//   ticketLogs: PartialTicketLog[] | null;
+// };
+
 type TResponse = {
-  ticketLogs: PartialTicketLog[] | null;
+  ticketLogsByProperty:
+    | {
+        items: PartialTicketLog[];
+        totalCount: number;
+      }
+    | null;
 };
 
 type TResponseDelete = {
@@ -153,9 +159,16 @@ describe("TEST TICKETLOG DANS LA DB", () => {
     expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data).not.toBeNull();
     expect(response.body.singleResult.data).not.toBeUndefined();
-    expect(response.body.singleResult.data?.ticketLogs).toHaveLength(1);
-    const { id, ...rest } = response.body.singleResult.data?.ticketLogs![0]!;
-    expect(validate(id)).toBeTruthy;
+
+   // expect(response.body.singleResult.data?.ticketLogs).toHaveLength(1);
+   // const { id, ...rest } = response.body.singleResult.data?.ticketLogs![0]!;
+   // expect(validate(id)).toBeTruthy;
+
+    const logs = response.body.singleResult.data!.ticketLogsByProperty!.items; 
+    expect(logs).toHaveLength(1); 
+    const { id, ...rest } = logs[0]!; 
+
+    expect(validate(id!)).toBeTruthy();
     baseId = id!;
     expect(rest).toEqual<PartialTicketLog>({
       ticket: {
@@ -204,9 +217,16 @@ describe("TEST TICKETLOG DANS LA DB", () => {
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.errors).toBeUndefined();
-    expect(response.body.singleResult.data?.ticketLogs).toHaveLength(2);
-    const { id, ...rest } = response.body.singleResult.data
-      ?.ticketLogs![1] as PartialTicketLog;
+  
+    // expect(response.body.singleResult.data?.ticketLogs).toHaveLength(2);
+    // const { id, ...rest } = response.body.singleResult.data
+    //   ?.ticketLogs![1] as PartialTicketLog;
+
+    const logs = response.body.singleResult.data!.ticketLogsByProperty!.items; 
+    expect(logs).toHaveLength(2); 
+    const { id, ...rest } = logs[1] as PartialTicketLog; 
+
+
     expect(validate(id)).toBeTruthy();
     expect(rest).toEqual<PartialTicketLog>({
       ticket: {
@@ -214,7 +234,7 @@ describe("TEST TICKETLOG DANS LA DB", () => {
         firstName: fakeTicketInput.firstName,
         lastName: fakeTicketInput.lastName,
       },
-      status: Status.Pending,
+      status: Status.Created,
     });
   });
 

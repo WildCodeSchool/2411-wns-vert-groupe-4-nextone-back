@@ -1,10 +1,18 @@
 import ManagerRepository from "@/repositories/Manager.repository";
-import { MutationCreateManagerArgs, QueryLoginArgs, MutationResetPasswordArgs, Message, ResetPasswordInput } from "@/generated/graphql";
+import {
+  MutationCreateManagerArgs,
+  QueryLoginArgs,
+  MutationResetPasswordArgs,
+  Message,
+  ResetPasswordInput,
+} from "@/generated/graphql";
 import { SignJWT } from "jose";
 import ManagerEntity from "@/entities/Manager.entity";
 import CompanyService from "./company.service";
-import crypto from "crypto"
-import * as argon2 from 'argon2'
+import crypto from "crypto";
+import * as argon2 from "argon2";
+// 👉 PAGINATION : Décommenter ces imports quand activation de la pagination
+// import { FindOptionsWhere, MoreThanOrEqual } from "typeorm";
 
 export default class ManagerService {
   db: ManagerRepository;
@@ -18,13 +26,40 @@ export default class ManagerService {
     return managers;
   }
 
+  // 👉 VERSION AVEC PAGINATION - Décommenter cette méthode pour activer la pagination
+  // async listManagersPaginated(
+  //   pagination?: PaginationInput
+  // ): Promise<{ items: ManagerEntity[]; totalCount: number }> {
+  //   console.log("🔍 Manager - pagination:", pagination);
+  //
+  //   // Count GLOBAL (sans cursor)
+  //   const totalCount = await this.db.count();
+  //
+  //   // Where pour les items (avec cursor)
+  //   const where: FindOptionsWhere<ManagerEntity> = {};
+  //
+  //   if (pagination?.cursor) {
+  //     where.createdAt = MoreThanOrEqual(new Date(pagination.cursor));
+  //   }
+  //
+  //   const items = await this.db.find({
+  //     where,
+  //     order: { createdAt: pagination?.order ?? "DESC" },
+  //     take: pagination?.limit ?? 20,
+  //   });
+  //
+  //   console.log("Manager - totalCount:", totalCount);
+  //   console.log("Manager - items.length:", items.length);
+  //
+  //   return { items, totalCount };
+  // }
+
   async findManagerByEmail(email: string) {
     return await this.db.findOneBy({ email });
   }
 
   async findByIdWithAuthorizations(managerId: string) {
-    return this.db.findOne({
-    });
+    return this.db.findOne({});
   }
 
   async getManagerById(id: string) {
@@ -103,51 +138,52 @@ export default class ManagerService {
   }
 
   async createResetToken(email: string): Promise<string | null> {
+    const user = await this.findManagerByEmail(email);
+    if (!user) return null;
 
-    const user = await this.findManagerByEmail(email)
-    if (!user) return null
+    const token = crypto.randomBytes(32).toString("hex");
+    const resetTokenExpiration = new Date(Date.now() + 15 * 60 * 1000);
 
-    const token = crypto.randomBytes(32).toString('hex')
-    const resetTokenExpiration = new Date(Date.now() + 15 * 60 * 1000)
+    await this.db.save({ ...user, resetToken: token, resetTokenExpiration });
 
-    await this.db.save({ ...user, resetToken: token, resetTokenExpiration })
-    
-    return token
+    return token;
   }
 
   async resetPassword(args: ResetPasswordInput): Promise<Message> {
-
-    const user = await this.findManagerByEmail(args.email)
+    const user = await this.findManagerByEmail(args.email);
 
     //VERIFICATION
     if (!user || !user.resetToken || user.resetToken !== args.resetToken) {
       return {
         success: false,
-        message: "Impossible de mettre à jour le mot de passe"
-      }
+        message: "Impossible de mettre à jour le mot de passe",
+      };
     }
-    if (user.resetTokenExpiration && new Date(user.resetTokenExpiration).getTime() < Date.now()) {
+    if (
+      user.resetTokenExpiration &&
+      new Date(user.resetTokenExpiration).getTime() < Date.now()
+    ) {
       return {
         success: false,
-        message: "La demande a expiré. Merci de la renouveller"
-      }
+        message: "La demande a expiré. Merci de la renouveller",
+      };
     }
     if (args.confirmNewPassword !== args.newPassword) {
       return {
         success: false,
-        message: "Le mot de passe ne correspond pas à sa confirmation."
-      }
+        message: "Le mot de passe ne correspond pas à sa confirmation.",
+      };
     }
 
     //UPDATE DB
-    const hashedPassword = await argon2.hash(args.newPassword)
-    user.password = hashedPassword
-    user.resetToken = undefined
-    user.resetTokenExpiration = undefined
-    await this.db.save(user)
+    const hashedPassword = await argon2.hash(args.newPassword);
+    user.password = hashedPassword;
+    user.resetToken = undefined;
+    user.resetTokenExpiration = undefined;
+    await this.db.save(user);
     return {
       success: true,
-      message: "Le mot de passe a été réinitialisé."
-    }
+      message: "Le mot de passe a été réinitialisé.",
+    };
   }
 }
