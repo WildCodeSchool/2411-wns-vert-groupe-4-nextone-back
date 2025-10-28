@@ -1,10 +1,14 @@
 import TicketEntity from "@/entities/Ticket.entity";
-import { PaginationInput, Status, UpdateStatusTicketInput } from "@/generated/graphql";
+import {
+  PaginationInput,
+  Status,
+  UpdateStatusTicketInput,
+} from "@/generated/graphql";
 import TicketLogService from "./ticketLogs.service";
 import TicketLogEntity from "@/entities/TicketLog.entity";
 import ManagerEntity from "@/entities/Manager.entity";
 import BaseService from "./base.service";
-import { FindOptionsWhere, In, MoreThanOrEqual } from "typeorm"; 
+import { FindOptionsWhere, In, MoreThanOrEqual } from "typeorm";
 
 export default class TicketService extends BaseService<TicketEntity> {
   private static instance: TicketService | null = null;
@@ -47,29 +51,27 @@ export default class TicketService extends BaseService<TicketEntity> {
   async findByPropertiesAndCount(
     fields: FindOptionsWhere<TicketEntity>,
     pagination?: PaginationInput
-  ): Promise<{ items: TicketEntity[]; totalCount: number }> { 
-
+  ): Promise<{ items: TicketEntity[]; totalCount: number }> {
     console.log("fields", fields);
-    console.log("pagination", pagination); 
+    console.log("pagination", pagination);
 
-     const totalCount = await this.repo.count({ 
-      where: fields  
+    const totalCount = await this.repo.count({
+      where: fields,
     });
-    
-  
+
     const where: FindOptionsWhere<TicketEntity> = { ...fields };
 
     if (pagination?.cursor) {
-      where.createdAt = MoreThanOrEqual(new Date(pagination.cursor)); 
+      where.createdAt = MoreThanOrEqual(new Date(pagination.cursor));
     }
 
-     if (fields.status && Array.isArray(fields.status)) {
-    where.status = In(fields.status as Status[]);
+    if (fields.status && Array.isArray(fields.status)) {
+      where.status = In(fields.status as Status[]);
     }
 
     const items = await this.repo.find({
       where,
-      order: { createdAt: pagination?.order ?? "ASC", id: "ASC" }, 
+      order: { createdAt: pagination?.order ?? "ASC", id: "ASC" },
       take: pagination?.limit ?? 10,
     });
 
@@ -77,6 +79,12 @@ export default class TicketService extends BaseService<TicketEntity> {
     console.log("items.length:", items.length);
 
     return { items, totalCount };
+  }
+
+  async findAllPaginated(
+    pagination?: PaginationInput
+  ): Promise<{ items: TicketEntity[]; totalCount: number }> {
+    return this.findByPropertiesAndCount({}, pagination);
   }
 
   public async countAll(pagination?: PaginationInput): Promise<number> {
