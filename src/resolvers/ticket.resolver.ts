@@ -28,9 +28,10 @@ export default {
       _: any,
       { pagination }: QueryTicketsArgs
     ): Promise<{ items: TicketEntity[]; totalCount: number }> => {
-      const ticketsList = await ticketService.findAll(pagination);
-      const totalCount = await ticketService.countAll(pagination); 
-      return { items: ticketsList, totalCount };
+      // const ticketsList = await ticketService.findAll(pagination);
+      // const totalCount = await ticketService.countAll(pagination);
+      // return { items: ticketsList, totalCount };
+      return await ticketService.findAllPaginated(pagination);
     },
     ticket: async (
       _: any,
@@ -43,19 +44,19 @@ export default {
     ticketsByProperties: async (
       _: any,
       { fields, pagination }: QueryTicketsByPropertiesArgs
-    ): Promise<{ items: TicketEntity[]; totalCount: number }> => { 
+    ): Promise<{ items: TicketEntity[]; totalCount: number }> => {
       const { status, ...rest } = fields || {};
       console.log("fields", fields);
       console.log("rest", rest);
-      console.log("status", status); 
+      console.log("status", status);
       if (status) {
         return await ticketService.findByPropertiesAndCount(
           { ...rest, status: In(status) },
           pagination
-        ); 
+        );
       }
-      //return await ticketService.findByPropertiesAndCount(rest, pagination); 
-       return await ticketService.findByPropertiesAndCount(
+      //return await ticketService.findByPropertiesAndCount(rest, pagination);
+      return await ticketService.findByPropertiesAndCount(
         { ...rest, status: Not(Status.Archived) },
         pagination
       );
