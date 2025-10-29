@@ -7,7 +7,12 @@ import {
   LessThan,
 } from "typeorm";
 import AppDataSource from "../lib/datasource";
-import { ByCreationSlotInput, Order, PaginationInput } from "@/generated/graphql";
+import {
+  ByCreationSlotInput,
+  Order,
+  PaginationInput,
+  QueryTicketLogsByCreationSlotArgs,
+} from "@/generated/graphql";
 
 export default abstract class BaseService<T extends ObjectLiteral> {
   protected repo: Repository<T>;
