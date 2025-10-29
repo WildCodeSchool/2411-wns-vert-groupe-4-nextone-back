@@ -10,6 +10,9 @@ import CompanyService from "@/services/company.service";
 import CompanyEntity from "@/entities/Company.entity";
 import { checkStrictRole } from "@/utils/manager";
 import { buildResponse } from "@/utils/authorization";
+import ServicesService from "@/services/services.service";
+import ManagerService from "@/services/manager.service";
+import SettingService from "@/services/setting.service";
 
 const companyService = CompanyService.getService();
 
