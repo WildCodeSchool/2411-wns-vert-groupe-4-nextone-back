@@ -26,10 +26,8 @@ import {
 } from "@/utils/manager";
 import { buildResponse } from "@/utils/authorization";
 import AuthorizationService from "@/services/authorization.service";
-import { ServiceEntity } from "@/entities/Service.entity";
 import CompanyService from "@/services/company.service";
-import ConnectionLogService from "@/services/connectionLog.service";
-import TicketLogService from "@/services/ticketLogs.service";
+
 import { sendMail } from "@/lib/mail";
 
 const managerService = new ManagerService();

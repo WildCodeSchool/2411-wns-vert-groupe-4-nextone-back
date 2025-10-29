@@ -11,8 +11,7 @@ import ManagerEntity from "@/entities/Manager.entity";
 import CompanyService from "./company.service";
 import crypto from "crypto";
 import * as argon2 from "argon2";
-// 👉 PAGINATION : Décommenter ces imports quand activation de la pagination
-// import { FindOptionsWhere, MoreThanOrEqual } from "typeorm";
+import { createTokenAndExpiration } from "@/utils/tokens.utils";
 
 export default class ManagerService {
   db: ManagerRepository;
@@ -141,10 +140,15 @@ export default class ManagerService {
     const user = await this.findManagerByEmail(email);
     if (!user) return null;
 
-    const token = crypto.randomBytes(32).toString("hex");
-    const resetTokenExpiration = new Date(Date.now() + 15 * 60 * 1000);
+    // const token = crypto.randomBytes(32).toString('hex')
+    // const resetTokenExpiration = new Date(Date.now() + 15 * 60 * 1000)
+    const { token, expiration } = createTokenAndExpiration(15);
 
-    await this.db.save({ ...user, resetToken: token, resetTokenExpiration });
+    await this.db.save({
+      ...user,
+      resetToken: token,
+      resetTokenExpiration: expiration,
+    });
 
     return token;
   }
