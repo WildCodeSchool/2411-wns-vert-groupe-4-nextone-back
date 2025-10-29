@@ -17,6 +17,9 @@ export class WhitelistedIpEntity {
   @Column({ unique: true })
   ipAddress: string;
 
+  @Column({ type: "uuid" })
+  companyId: string;
+
   @CreateDateColumn({ name: "created_at" })
   createdAt: Date;
 
