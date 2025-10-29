@@ -10,13 +10,7 @@ import { ServiceEntity } from "./Service.entity";
 import ManagerEntity from "./Manager.entity";
 import SettingEntity from "./setting.entity";
 import InvitationEntity from "./Invitation.entity";
-<<<<<<< HEAD
 import { WhitelistedIpEntity } from "./WhitelistedIp.entity";
-=======
-    
-  @Entity({ name: "company" })
-  export default class CompanyEntity {
->>>>>>> 549ef87 (WM - Invitation OK, no email sent atm)
 
 @Entity({ name: "company" })
 export default class CompanyEntity {
@@ -59,7 +53,6 @@ export default class CompanyEntity {
   })
   services: ServiceEntity[];
 
-<<<<<<< HEAD
   @OneToMany(() => InvitationEntity, (invitation) => invitation.company)
   invitations: InvitationEntity[];
 
@@ -80,11 +73,3 @@ export default class CompanyEntity {
   )
   whitelistedIps: WhitelistedIpEntity[];
 }
-=======
-    @OneToMany(() => SettingEntity, (setting) => setting.company,  { onDelete: "CASCADE"})
-    settings: SettingEntity[]
-
-    @OneToMany(() => InvitationEntity, (invitation) => invitation.company)
-    invitations: InvitationEntity[]
-  }
->>>>>>> 549ef87 (WM - Invitation OK, no email sent atm)
