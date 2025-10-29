@@ -5,6 +5,7 @@ import { jwtVerify } from "jose";
 import ManagerService from "../services/manager.service";
 import ManagerEntity from "../entities/Manager.entity";
 import loaders from "./dataLoaderContext";
+import { ipContext } from "./ipContext";
 
 export interface Payload {
   email: string;
@@ -18,6 +19,7 @@ export const authContext = async ({
   req: Request;
   res: Response;
 }): Promise<MyContext> => {
+  const { ip } = await ipContext({ req });
   let manager: ManagerEntity | null = null;
   const cookies = new Cookies(req, res);
   const token = cookies.get("token");
@@ -35,9 +37,10 @@ export const authContext = async ({
     }
   }
   return {
+    ip,
     req,
     res,
     manager,
-    loaders
+    loaders,
   };
 };
