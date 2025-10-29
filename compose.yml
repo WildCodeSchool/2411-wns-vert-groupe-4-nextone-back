@@ -48,7 +48,7 @@ services:
   #         ignore:
   #           - node_modules/
   db:
-    image: postgres
+    image: postgres:17.6
     restart: always
     env_file:
       - ./db.env
@@ -64,7 +64,7 @@ services:
     volumes:
       - gcdatabase:/var/lib/postgresql/data
   db_test:
-    image: postgres
+    image: postgres:17.6
     restart: always
     env_file:
       - ./db_test.env

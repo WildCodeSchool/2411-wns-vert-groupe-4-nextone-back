@@ -40,7 +40,17 @@ type Message {
   success: Boolean
 }
 
+# 👉 PAGINATION : a décommenter pour activer la pagination
+# type ManagersPaginatedResult {
+#   items: [Manager!]!
+#   totalCount: Int!
+# }
+
+
 type Query {
+  # 👉 VERSION AVEC PAGINATION - décommenter cette ligne et commenter celle du dessous
+  # managers(pagination: PaginationInput): ManagersPaginatedResult!
+ 
   managers: [Manager!]
   manager(id: ID!): Manager!
   login(infos: InputLogin!): Auth

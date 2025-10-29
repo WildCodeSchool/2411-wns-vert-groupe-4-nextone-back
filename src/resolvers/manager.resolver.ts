@@ -8,6 +8,8 @@ import {
   Message,
   Auth,
   MutationResetPasswordArgs,
+  // 👉 PAGINATION : Décommenter cet import pour activer la pagination
+  // QueryManagersArgs,
 } from "@/generated/graphql";
 import { MyContext } from "..";
 import Cookies from "cookies";
@@ -44,6 +46,20 @@ export default {
       verifyCreatorPermission(manager?.role);
       return managerService.listManagers();
     },
+
+    // 👉 VERSION AVEC PAGINATION - Décommenter cette version et commenter celle du dessus
+    // managers: async (
+    //   _: any,
+    //   { pagination }: QueryManagersArgs,
+    //   ctx: MyContext
+    // ): Promise<{ items: ManagerEntity[]; totalCount: number }> => {
+    //   const { manager } = ctx;
+    //   if (!manager) {
+    //     throw new Error("Manager non authentifié");
+    //   }
+    //   verifyCreatorPermission(manager?.role);
+    //   return managerService.listManagersPaginated(pagination);
+    // },
 
     manager: async (
       _: any,

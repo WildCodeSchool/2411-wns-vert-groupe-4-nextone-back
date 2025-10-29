@@ -19,13 +19,25 @@ type TicketLog {
   updatedAt: DateTime!
 }
 
+type TicketLogsPaginatedResult {
+  items: [TicketLog!]!
+  totalCount: Int!
+}
 
 type Query {
   ticketLog(id: UUID!): TicketLog
-  ticketLogs(pagination: PaginationInput): [TicketLog!]!
-  ticketLogsByProperty(field: TicketLogPropertyInput!, pagination: PaginationInput): [TicketLog!]!
-  ticketLogsByProperties(fields: TicketLogPropertiesInput!): [TicketLog!]!
-  ticketLogsByCreationSlot(data: ByCreationSlotInput!): [TicketLog!]!
+  ticketLogs(pagination: PaginationInput): TicketLogsPaginatedResult!
+  ticketLogsByProperty(
+    field: TicketLogPropertyInput!
+    pagination: PaginationInput
+  ): TicketLogsPaginatedResult!
+ 
+    ticketLogsByProperties(
+    fields: TicketLogPropertiesInput!
+    pagination: PaginationInput
+  ): TicketLogsPaginatedResult!
+ 
+   ticketLogsByCreationSlot(data: ByCreationSlotInput!): TicketLogsPaginatedResult!
 }
 
 type Mutation {
@@ -55,7 +67,6 @@ input TicketLogPropertiesInput  {
   status: Status
   createdAt: DateTime
   updatedAt: DateTime
-  pagination: PaginationInput
 }
 
 type DeleteResponse {
