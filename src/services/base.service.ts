@@ -9,7 +9,12 @@ import {
   Repository,
 } from "typeorm";
 import AppDataSource from "../lib/datasource";
-import { ByCreationSlotInput, Order, PaginationInput, QueryTicketLogsByCreationSlotArgs } from "@/generated/graphql";
+import {
+  ByCreationSlotInput,
+  Order,
+  PaginationInput,
+  QueryTicketLogsByCreationSlotArgs,
+} from "@/generated/graphql";
 
 export default abstract class BaseService<T extends ObjectLiteral> {
   protected repo: Repository<T>;
@@ -21,7 +26,7 @@ export default abstract class BaseService<T extends ObjectLiteral> {
   protected getPagination(pagination?: PaginationInput) {
     const created = pagination?.created ?? new Date(1970, 1, 1);
     const limit = pagination?.limit || 20;
-    const order: Order = pagination?.order || Order.Asc
+    const order: Order = pagination?.order || Order.Asc;
     return { created, limit, order };
   }
 
@@ -70,8 +75,7 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     value: T[K],
     pag?: PaginationInput
   ): Promise<T[]> {
-
-    const { created, limit, order } = this.getPagination(pag)
+    const { created, limit, order } = this.getPagination(pag);
 
     const entities = await this.repo.find({
       where: {
@@ -79,9 +83,9 @@ export default abstract class BaseService<T extends ObjectLiteral> {
         createdAt: Raw((alias) => `${alias} >= :created`, { created }),
       } as any,
       order: {
-        createdAt: order
+        createdAt: order,
       } as any,
-      take: limit
+      take: limit,
     });
 
     return entities;
@@ -108,8 +112,8 @@ export default abstract class BaseService<T extends ObjectLiteral> {
   //RECUPERER ENTRE 2 DATES DE CREATION
   public async findByCreationSlot(data: ByCreationSlotInput): Promise<T[]> {
     const { start, end, name, pagination } = data;
-  
-    const startDate = pagination?.created || start
+
+    const startDate = pagination?.created || start;
 
     const result = await this.repo
       .createQueryBuilder(name)

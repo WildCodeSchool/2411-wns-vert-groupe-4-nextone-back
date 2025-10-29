@@ -1,0 +1,36 @@
+scalar Timestamp
+scalar DateTime
+
+type Invitation {
+  id: UUID!
+  email: String!
+  role: ManagerRole!
+  token: String!
+  tokenExpiration: Timestamp!
+  company: Company!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Query {
+  invitation(id: UUID!): Invitation
+  invitations: [Invitation!]!
+}
+
+type Mutation {
+  createInvitation(args: CreateInvitationInput!): Invitation!
+  updateInvitation(args: UpdateInvitationInput!): Invitation
+  renewInvitation(id: UUID!): Invitation!
+  deleteInvitation(id: UUID!): DeleteResponse!
+}
+
+input CreateInvitationInput {
+  email: String!
+  role: ManagerRole!
+}
+
+input UpdateInvitationInput {
+  id: UUID!
+  email: String
+  role: ManagerRole
+}

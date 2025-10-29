@@ -1,10 +1,17 @@
 import ManagerRepository from "@/repositories/Manager.repository";
-import { MutationCreateManagerArgs, QueryLoginArgs, MutationResetPasswordArgs, Message, ResetPasswordInput } from "@/generated/graphql";
+import {
+  MutationCreateManagerArgs,
+  QueryLoginArgs,
+  MutationResetPasswordArgs,
+  Message,
+  ResetPasswordInput,
+} from "@/generated/graphql";
 import { SignJWT } from "jose";
 import ManagerEntity from "@/entities/Manager.entity";
 import CompanyService from "./company.service";
-import crypto from "crypto"
-import * as argon2 from 'argon2'
+import crypto from "crypto";
+import * as argon2 from "argon2";
+import { createTokenAndExpiration } from "@/utils/tokens.utils";
 
 export default class ManagerService {
   db: ManagerRepository;
@@ -23,8 +30,7 @@ export default class ManagerService {
   }
 
   async findByIdWithAuthorizations(managerId: string) {
-    return this.db.findOne({
-    });
+    return this.db.findOne({});
   }
 
   async getManagerById(id: string) {
@@ -103,51 +109,57 @@ export default class ManagerService {
   }
 
   async createResetToken(email: string): Promise<string | null> {
+    const user = await this.findManagerByEmail(email);
+    if (!user) return null;
 
-    const user = await this.findManagerByEmail(email)
-    if (!user) return null
+    // const token = crypto.randomBytes(32).toString('hex')
+    // const resetTokenExpiration = new Date(Date.now() + 15 * 60 * 1000)
+    const { token, expiration } = createTokenAndExpiration(15);
 
-    const token = crypto.randomBytes(32).toString('hex')
-    const resetTokenExpiration = new Date(Date.now() + 15 * 60 * 1000)
+    await this.db.save({
+      ...user,
+      resetToken: token,
+      resetTokenExpiration: expiration,
+    });
 
-    await this.db.save({ ...user, resetToken: token, resetTokenExpiration })
-    
-    return token
+    return token;
   }
 
   async resetPassword(args: ResetPasswordInput): Promise<Message> {
-
-    const user = await this.findManagerByEmail(args.email)
+    const user = await this.findManagerByEmail(args.email);
 
     //VERIFICATION
     if (!user || !user.resetToken || user.resetToken !== args.resetToken) {
       return {
         success: false,
-        message: "Impossible de mettre à jour le mot de passe"
-      }
+        message: "Impossible de mettre à jour le mot de passe",
+      };
     }
-    if (user.resetTokenExpiration && new Date(user.resetTokenExpiration).getTime() < Date.now()) {
+    if (
+      user.resetTokenExpiration &&
+      new Date(user.resetTokenExpiration).getTime() < Date.now()
+    ) {
       return {
         success: false,
-        message: "La demande a expiré. Merci de la renouveller"
-      }
+        message: "La demande a expiré. Merci de la renouveller",
+      };
     }
     if (args.confirmNewPassword !== args.newPassword) {
       return {
         success: false,
-        message: "Le mot de passe ne correspond pas à sa confirmation."
-      }
+        message: "Le mot de passe ne correspond pas à sa confirmation.",
+      };
     }
 
     //UPDATE DB
-    const hashedPassword = await argon2.hash(args.newPassword)
-    user.password = hashedPassword
-    user.resetToken = undefined
-    user.resetTokenExpiration = undefined
-    await this.db.save(user)
+    const hashedPassword = await argon2.hash(args.newPassword);
+    user.password = hashedPassword;
+    user.resetToken = undefined;
+    user.resetTokenExpiration = undefined;
+    await this.db.save(user);
     return {
       success: true,
-      message: "Le mot de passe a été réinitialisé."
-    }
+      message: "Le mot de passe a été réinitialisé.",
+    };
   }
 }
