@@ -4,12 +4,9 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToMany,
   ManyToOne,
   JoinColumn,
 } from "typeorm";
-import AuthorizationEntity from "./Authorization.entity";
-import TicketEntity from "./Ticket.entity";
 import CompanyEntity from "./Company.entity";
 
 @Entity("whitelisted_ip")
