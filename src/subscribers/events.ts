@@ -1,0 +1,8 @@
+// Centralize all event names
+// MR
+export const EVENTS = {
+  TICKET_CREATED: "TICKET_CREATED",
+  TICKET_STATUS_CHANGED: "TICKET_STATUS_CHANGED",
+  TICKET_DELETED: "TICKET_DELETED",
+} as const;
+// END MR
