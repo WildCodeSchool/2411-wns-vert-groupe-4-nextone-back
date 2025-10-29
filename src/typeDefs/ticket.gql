@@ -14,15 +14,19 @@ type Ticket {
   updatedAt: DateTime
 }
 
-type TicketsPaginatedResult {              
-  items: [Ticket!]!                       
-  totalCount: Int!                         
+type TicketsPaginatedResult {
+  items: [Ticket!]!
+  totalCount: Int!
 }
 
 type Query {
   tickets(pagination: PaginationInput): TicketsPaginatedResult!
   ticket(id: ID!): Ticket
-  ticketsByProperties(fields: TicketPropertiesInput, pagination: PaginationInput): TicketsPaginatedResult! 
+  ticketsByProperties(
+    fields: TicketPropertiesInput
+    pagination: PaginationInput
+  ): TicketsPaginatedResult!
+  ticketsForTVDisplay: [Ticket!]
 }
 
 type Mutation {
@@ -38,7 +42,8 @@ enum Order {
 }
 
 input PaginationInput {
-  cursor: DateTime 
+  cursor: DateTime
+  created: DateTime
   limit: Int
   order: Order
 }
