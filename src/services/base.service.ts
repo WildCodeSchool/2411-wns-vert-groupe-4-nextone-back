@@ -11,7 +11,6 @@ import {
   ByCreationSlotInput,
   Order,
   PaginationInput,
-  QueryTicketLogsByCreationSlotArgs,
 } from "@/generated/graphql";
 
 export default abstract class BaseService<T extends ObjectLiteral> {
