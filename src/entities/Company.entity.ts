@@ -1,63 +1,75 @@
 import {
-    Entity,
-    Column,
-    PrimaryGeneratedColumn,
-    CreateDateColumn,
-    UpdateDateColumn,
-    OneToMany,
-
-  } from "typeorm";
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+} from "typeorm";
 import { ServiceEntity } from "./Service.entity";
 import ManagerEntity from "./Manager.entity";
 import SettingEntity from "./setting.entity";
 import InvitationEntity from "./Invitation.entity";
-    
-  @Entity({ name: "company" })
-  export default class CompanyEntity {
+import { WhitelistedIpEntity } from "./WhitelistedIp.entity";
 
-    @PrimaryGeneratedColumn("uuid")
-    id: string;
+@Entity({ name: "company" })
+export default class CompanyEntity {
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
 
-    @Column()
-    name: string
+  @Column()
+  name: string;
 
-    @Column()
-    address: string;
+  @Column()
+  address: string;
 
-    @Column()
-    postalCode: string;
+  @Column()
+  postalCode: string;
 
-    @Column()
-    city: string;
+  @Column()
+  city: string;
 
-    @Column({
-      unique: true
-    })
-    siret: string;
+  @Column({
+    unique: true,
+  })
+  siret: string;
 
-    @Column({ unique: true })
-    email: string
+  @Column({ unique: true })
+  email: string;
 
-    @Column({
-      unique: true
-    })
-    phone: string
+  @Column({
+    unique: true,
+  })
+  phone: string;
 
-    @CreateDateColumn()
-    createdAt: Date; 
-    
-    @UpdateDateColumn()
-    updatedAt: Date; 
+  @CreateDateColumn()
+  createdAt: Date;
 
-    @OneToMany(() => ServiceEntity, (service: ServiceEntity) => service.company,  { onDelete: "CASCADE"})
-    services: ServiceEntity[]
+  @UpdateDateColumn()
+  updatedAt: Date;
 
-    @OneToMany(() => ManagerEntity, (manager: ManagerEntity) => manager.company, { onDelete: "CASCADE" })
-    managers: ManagerEntity[]
+  @OneToMany(() => ServiceEntity, (service: ServiceEntity) => service.company, {
+    onDelete: "CASCADE",
+  })
+  services: ServiceEntity[];
 
-    @OneToMany(() => SettingEntity, (setting) => setting.company,  { onDelete: "CASCADE"})
-    settings: SettingEntity[]
+  @OneToMany(() => InvitationEntity, (invitation) => invitation.company)
+  invitations: InvitationEntity[];
 
-    @OneToMany(() => InvitationEntity, (invitation) => invitation.company)
-    invitations: InvitationEntity[]
-  }
+  @OneToMany(() => ManagerEntity, (manager: ManagerEntity) => manager.company, {
+    onDelete: "CASCADE",
+  })
+  managers: ManagerEntity[];
+
+  @OneToMany(() => SettingEntity, (setting) => setting.company, {
+    onDelete: "CASCADE",
+  })
+  settings: SettingEntity[];
+
+  @OneToMany(
+    () => WhitelistedIpEntity,
+    (whitelistedIp) => whitelistedIp.company,
+    { onDelete: "CASCADE" }
+  )
+  whitelistedIps: WhitelistedIpEntity[];
+}
