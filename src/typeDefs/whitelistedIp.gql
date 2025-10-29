@@ -5,7 +5,7 @@ scalar DateTime
 
 type WhitelistedIp {
   id: UUID!
-  address: String!
+  ipAddress: String!
   company: Company!
   createdAt: DateTime!
   updatedAt: DateTime!
@@ -28,6 +28,6 @@ type WhitelistedIpResponse {
 
 ### Input
 input CreateWhitelistedIpInput {
-  address: String!
+  ipAddress: String!
   companyId: UUID!
 }
