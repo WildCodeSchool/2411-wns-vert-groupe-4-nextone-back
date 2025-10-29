@@ -5,12 +5,18 @@ import {
   MutationCreateWhitelistedIpArgs,
   MutationDeleteWhitelistedIpArgs,
   QueryWhitelistedIpArgs,
+<<<<<<< HEAD
   WhitelistedIp,
+=======
+>>>>>>> 673365b (add whitelistedIp Resolver)
   WhitelistedIpResponse,
 } from "@/generated/graphql";
 import { checkStrictRole } from "@/utils/manager";
 import { buildResponse } from "@/utils/authorization";
+<<<<<<< HEAD
 import CompanyService from "@/services/company.service";
+=======
+>>>>>>> 673365b (add whitelistedIp Resolver)
 
 const whitelistedIpService = new WhitelistedIpService();
 
@@ -63,6 +69,7 @@ export default {
       );
     },
   },
+<<<<<<< HEAD
   WhitelistedIp: {
     company: async (parent: WhitelistedIpEntity) => {
       const company = await CompanyService.getService().findById(
@@ -71,4 +78,6 @@ export default {
       return company;
     },
   },
+=======
+>>>>>>> 673365b (add whitelistedIp Resolver)
 };
