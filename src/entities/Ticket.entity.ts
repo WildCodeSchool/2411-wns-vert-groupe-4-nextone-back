@@ -8,7 +8,6 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
-  BeforeInsert,
 } from "typeorm";
 import { ServiceEntity } from "./Service.entity";
 import TicketLogEntity from "./TicketLog.entity";

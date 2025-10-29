@@ -12,6 +12,7 @@ import { GraphQLError } from "graphql";
 import { MyContext } from "..";
 import InvitationEntity from "@/entities/Invitation.entity";
 import CompanyService from "@/services/company.service";
+import { sendMail } from "@/lib/mail";
 
 export default {
   Query: {
@@ -46,7 +47,8 @@ export default {
         });
       }
       const {companyId} = manager
-      const created = await InvitationService.getInstance().createOne({...args, companyId});
+      const created = await InvitationService.getInstance().createOne({ ...args, companyId });
+      const mail = await sendMail(created.email, created.token, "CREATE_INVITATION")
       return created;
     },
     updateInvitation: async (
@@ -62,6 +64,7 @@ export default {
       { id }: MutationRenewInvitationArgs
     ): Promise<Invitation> => {
       const renew = await InvitationService.getInstance().renewInvitation(id);
+      const sentMail = await sendMail(renew.email, renew.token, "RENEW_INVITATION")
       return renew;
     },
     deleteInvitation: async (

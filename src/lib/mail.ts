@@ -1,17 +1,46 @@
-import { google } from "googleapis"
-import nodeMailer from "nodemailer"
+import { google } from "googleapis";
+import nodeMailer from "nodemailer";
 
 const oauth2Client = new google.auth.OAuth2({
   client_id: process.env.GOOGLE_CLIENT_ID!,
   client_secret: process.env.GOOGLE_CLIENT_SECRET!,
-  redirectUri: process.env.GOOGLE_REDIRECT_URI!
-})
+  redirectUri: process.env.GOOGLE_REDIRECT_URI!,
+});
 
-oauth2Client.setCredentials({ refresh_token: process.env.GOOGLE_REFRESH_TOKEN! })
+oauth2Client.setCredentials({
+  refresh_token: process.env.GOOGLE_REFRESH_TOKEN!,
+});
 
+const mailPatterns = {
+  RESET_PASSWORD: {
+    subject: "Renouvellement du mot de passe",
+    intro:
+      " Une demande de réinitialisation de mot de passe a été effectué avec cette adresse email.",
+    endURL: "resetpassword",
+    buttonText: "Renouveller mon mot de passe"
+  },
+  CREATE_INVITATION: {
+    subject: "Création de compte",
+    intro: "Vous avez reçu une invitation vous permettant de créer un compte NextONE. Celle ci est valable 24h.",
+    endURL: "create",
+    buttonText: "Créer mon compte"
+  },
+  RENEW_INVITATION: {
+    subject: "Renouvellement de l'invitation",
+    intro: "Votre invitation a été renouvellée pour une durée de 24h.",
+    endURL: "create",
+    buttonText: "Créer mon compte"
+  }
+};
 
-export const sendMail = async (email: string, token:string): Promise<boolean> => {
-  const ACCESS_TOKEN = await oauth2Client.getAccessToken()
+export type TMail = keyof typeof mailPatterns
+
+export const sendMail = async (
+  email: string,
+  token: string,
+  type: TMail
+): Promise<boolean> => {
+  const ACCESS_TOKEN = await oauth2Client.getAccessToken();
   const transport = nodeMailer.createTransport({
     host: "smtp.gmail.com",
     port: 465,
@@ -20,18 +49,19 @@ export const sendMail = async (email: string, token:string): Promise<boolean> =>
     auth: {
       type: "OAuth2",
       user: process.env.EMAIL_ADDRESS!,
-      accessToken: ACCESS_TOKEN.token!
+      accessToken: ACCESS_TOKEN.token!,
     },
+  });
 
-  })
-
-  const uri = process.env.NODE_ENV !== "dev" ? "https://david4.wns.wilders.dev" : "https://localhost:3000"
-
+  const uri =
+    process.env.NODE_ENV !== "dev"
+      ? "https://david4.wns.wilders.dev"
+      : "https://localhost:3000";
 
   const mailOptions = {
     from: "next.one.gr'@gmail.com",
     to: email,
-    subject: 'Renouvellement de mot de passe',
+    subject: mailPatterns[type].subject,
     html: `
       <body>
   <div
@@ -73,8 +103,7 @@ export const sendMail = async (email: string, token:string): Promise<boolean> =>
       "
     >
       <p>
-        Une demande de réinitialisation de mot de passe a été effectué avec
-        cette adresse email.
+        ${mailPatterns[type].intro}
       </p>
       <p style="font-weight: bold">
         Pour finaliser la la demande, merci de cliquer sur le lien ci-dessous
@@ -92,9 +121,9 @@ export const sendMail = async (email: string, token:string): Promise<boolean> =>
         align-self: center;
       "
       target="_blank"
-      href="${uri}/resetpassword/${token}"
+      href="${uri}/${mailPatterns[type].endURL}/${token}"
     >
-      Réinitialiser le mot de passe
+      ${mailPatterns[type].buttonText}
     </a>
     <p
       style="
@@ -115,16 +144,15 @@ export const sendMail = async (email: string, token:string): Promise<boolean> =>
       {
         filename: "nextone-green.svg",
         path: "src/assets/nextone-green.svg",
-        cid: "logo"
-      }
-    ]
-  }
+        cid: "logo",
+      },
+    ],
+  };
   try {
-    await transport.sendMail(mailOptions)
-    return true
-  } catch (error:any) {
-    console.error('ERROR SEND MAIL : ', error?.message)
-    return false
+    await transport.sendMail(mailOptions);
+    return true;
+  } catch (error: any) {
+    console.error("ERROR SEND MAIL : ", error?.message);
+    return false;
   }
-  
-}
+};

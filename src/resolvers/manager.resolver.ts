@@ -214,7 +214,7 @@ export default {
     ): Promise<Message> => {
       const token = await managerService.createResetToken(email);
       if (token) {
-        sendMail(email, token);
+        sendMail(email, token, "RESET_PASSWORD");
       }
       return {
         success: !!token,
