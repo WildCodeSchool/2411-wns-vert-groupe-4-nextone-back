@@ -24,10 +24,8 @@ import {
 } from "@/utils/manager";
 import { buildResponse } from "@/utils/authorization";
 import AuthorizationService from "@/services/authorization.service";
-import { ServiceEntity } from "@/entities/Service.entity";
 import CompanyService from "@/services/company.service";
-import ConnectionLogService from "@/services/connectionLog.service";
-import TicketLogService from "@/services/ticketLogs.service";
+
 import { sendMail } from "@/lib/mail";
 
 const managerService = new ManagerService();
@@ -194,24 +192,30 @@ export default {
         "Manager is not active."
       );
     },
-    askResetPassword: async (_: any, { email }: {email: string}): Promise<Message> => {
-      const token = await managerService.createResetToken(email)
+    askResetPassword: async (
+      _: any,
+      { email }: { email: string }
+    ): Promise<Message> => {
+      const token = await managerService.createResetToken(email);
       if (token) {
-        sendMail(email, token)
+        sendMail(email, token);
       }
       return {
         success: !!token,
-        message: "La demande a bien été traitée. Si un email correspondant a été trouvé, un email de récupération a été envoyé."
-      }
+        message:
+          "La demande a bien été traitée. Si un email correspondant a été trouvé, un email de récupération a été envoyé.",
+      };
     },
-    resetPassword: async (_: any, { args }: MutationResetPasswordArgs): Promise<Message> => {
-      const message: Message = await managerService.resetPassword(args)
-      return message
-    }
+    resetPassword: async (
+      _: any,
+      { args }: MutationResetPasswordArgs
+    ): Promise<Message> => {
+      const message: Message = await managerService.resetPassword(args);
+      return message;
+    },
   },
   Manager: {
-    authorizations: async (
-      { id }: { id: string }) => {
+    authorizations: async ({ id }: { id: string }) => {
       return await new AuthorizationService().getByManager(id);
     },
     company: async (manager: ManagerEntity) => {

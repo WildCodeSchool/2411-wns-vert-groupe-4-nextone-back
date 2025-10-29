@@ -10,6 +10,7 @@ import {
 import { ServiceEntity } from "./Service.entity";
 import ManagerEntity from "./Manager.entity";
 import SettingEntity from "./setting.entity";
+import InvitationEntity from "./Invitation.entity";
     
   @Entity({ name: "company" })
   export default class CompanyEntity {
@@ -56,4 +57,7 @@ import SettingEntity from "./setting.entity";
 
     @OneToMany(() => SettingEntity, (setting) => setting.company,  { onDelete: "CASCADE"})
     settings: SettingEntity[]
+
+    @OneToMany(() => InvitationEntity, (invitation) => invitation.company)
+    invitations: InvitationEntity[]
   }
