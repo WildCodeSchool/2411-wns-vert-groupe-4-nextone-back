@@ -5,10 +5,12 @@ import {
   MutationCreateWhitelistedIpArgs,
   MutationDeleteWhitelistedIpArgs,
   QueryWhitelistedIpArgs,
+  WhitelistedIp,
   WhitelistedIpResponse,
 } from "@/generated/graphql";
 import { checkStrictRole } from "@/utils/manager";
 import { buildResponse } from "@/utils/authorization";
+import CompanyService from "@/services/company.service";
 
 const whitelistedIpService = new WhitelistedIpService();
 
@@ -59,6 +61,14 @@ export default {
         "Whitelisted IP deleted successfully.",
         "Whitelisted IP not found or already deleted."
       );
+    },
+  },
+  WhitelistedIp: {
+    company: async (parent: WhitelistedIpEntity) => {
+      const company = await CompanyService.getService().findById(
+        parent.companyId
+      );
+      return company;
     },
   },
 };
