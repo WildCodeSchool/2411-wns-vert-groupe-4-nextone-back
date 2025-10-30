@@ -131,6 +131,8 @@ export default {
             id: ctx.manager.id,
             firstName: ctx.manager.firstName,
             lastName: ctx.manager.lastName,
+            role: ctx.manager.role,
+            companyId: ctx.manager.companyId,
           }
         : null;
     },
@@ -209,7 +211,10 @@ export default {
       if (!manager?.role) {
         throw new Error("Le rôle du manager est manquant.");
       }
-      checkRoleInHierarchy(manager.role, targetManager.role);
+      const isManagerUpdatingSelf = manager.id === targetManager.id;
+      if (!isManagerUpdatingSelf) {
+        checkRoleInHierarchy(manager.role, targetManager.role);
+      }
       const updatedManager = plainToInstance(
         UpdateInput,
         { ...targetManager, ...data },

@@ -108,7 +108,7 @@ export const fakeManager: Manager = {
 export const fakeAuthorization: Authorization = {
   service: fakeService,
   manager: fakeManager,
-  isActive: true,
+  isAdministrator: true,
   createdAt: new Date(),
   updatedAt: new Date(),
 };

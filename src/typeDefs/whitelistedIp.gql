@@ -1,0 +1,33 @@
+scalar UUID
+scalar DateTime
+
+####### Types
+
+type WhitelistedIp {
+  id: UUID!
+  ipAddress: String!
+  company: Company!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Query {
+  whitelistedIps: [WhitelistedIp!]!
+  whitelistedIp(ipAddress: String!): WhitelistedIp
+}
+
+type Mutation {
+  createWhitelistedIp(data: CreateWhitelistedIpInput!): WhitelistedIp!
+  deleteWhitelistedIp(id: UUID!): WhitelistedIpResponse!
+}
+
+type WhitelistedIpResponse {
+  message: String!
+  success: Boolean!
+}
+
+### Input
+input CreateWhitelistedIpInput {
+  ipAddress: String!
+  companyId: UUID!
+}

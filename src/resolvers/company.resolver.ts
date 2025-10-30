@@ -67,26 +67,23 @@ export default {
     },
   },
   Company: {
-    services: async (
-      { id }: { id: string }) => {
+    services: async ({ id }: { id: string }) => {
       return await new ServicesService().db.findOne({
         where: {
-          companyId: id
-        }
+          companyId: id,
+        },
       });
     },
-    managers: async (
-      { id }: { id: string }) => {
+    managers: async ({ id }: { id: string }) => {
       return await new ManagerService().db.find({
         where: {
-          companyId: id
-        }
+          companyId: id,
+        },
       });
     },
-    settings: async (
-      { id }: { id: string }) => {
+    settings: async ({ id }: { id: string }) => {
       return await SettingService.getService().findByProperties({
-        companyId: id
+        companyId: id,
       });
     },
   },

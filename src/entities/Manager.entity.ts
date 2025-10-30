@@ -72,22 +72,31 @@ export default class ManagerEntity {
   authorizations: AuthorizationEntity[];
 
   @Column({ type: "uuid" })
-  companyId: string
+  companyId: string;
 
   //COMPANY
-  @ManyToOne(() => CompanyEntity, (company: CompanyEntity) => company.managers, {
-    onDelete: "CASCADE",
-  })
+  @ManyToOne(
+    () => CompanyEntity,
+    (company: CompanyEntity) => company.managers,
+    {
+      onDelete: "CASCADE",
+    }
+  )
   company: CompanyEntity;
 
   //CONNECTIONLOG
-  @OneToMany(() => ConnectionLogEntity, (connectionLog) => connectionLog.manager)
-  connectionLogs: ConnectionLogEntity[]
+  @OneToMany(
+    () => ConnectionLogEntity,
+    (connectionLog) => connectionLog.manager
+  )
+  connectionLogs: ConnectionLogEntity[];
 
   //TICKETLOG
-  @OneToMany(() => TicketLogEntity, (ticketLog) => ticketLog.manager, { nullable: true})
-  ticketLogs: TicketLogEntity[]
-    
+  @OneToMany(() => TicketLogEntity, (ticketLog) => ticketLog.manager, {
+    nullable: true,
+  })
+  ticketLogs: TicketLogEntity[];
+
   @CreateDateColumn()
   createdAt: Date;
 
