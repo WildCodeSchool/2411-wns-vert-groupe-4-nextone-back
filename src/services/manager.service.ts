@@ -12,6 +12,7 @@ import CompanyService from "./company.service";
 import crypto from "crypto";
 import * as argon2 from "argon2";
 import { createTokenAndExpiration } from "@/utils/tokens.utils";
+import { DeepPartial } from "typeorm";
 
 export default class ManagerService {
   db: ManagerRepository;
@@ -69,9 +70,9 @@ export default class ManagerService {
     return manager;
   }
 
-  async create(manager: MutationCreateManagerArgs["infos"]) {
+  async create(manager: DeepPartial<ManagerEntity>) {
     const company = await CompanyService.getService().findById(
-      manager.companyId
+      manager.companyId!
     );
     if (!company) {
       throw new Error(
