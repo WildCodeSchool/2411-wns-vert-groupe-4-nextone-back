@@ -20,7 +20,6 @@ export const REGISTER_MANAGER = `#graphql
       id
       isGloballyActive
       lastName
-      role
     }
   }
 `;
