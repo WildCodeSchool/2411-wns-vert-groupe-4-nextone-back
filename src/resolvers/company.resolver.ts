@@ -24,14 +24,8 @@ export default {
     },
     company: async (
       _: any,
-      { id }: QueryCompanyArgs,
-      ctx: MyContext
+      { id }: QueryCompanyArgs
     ): Promise<CompanyEntity | null> => {
-      const { manager } = ctx;
-      const isManagerOnAskedCompany = manager?.companyId === id;
-      if (!isManagerOnAskedCompany) {
-        throw new Error("Non autorisé.");
-      }
       const company = await companyService.findById(id);
       return company;
     },
