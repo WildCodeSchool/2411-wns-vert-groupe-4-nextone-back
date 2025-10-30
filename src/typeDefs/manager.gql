@@ -74,9 +74,11 @@ input InputRegister {
   lastName: String!
   email: String!
   password: String!
-  role: ManagerRole = OPERATOR
+  confirmPassword: String!
+  invitationToken: String!
+  # role: ManagerRole = OPERATOR
   isGloballyActive: Boolean = FALSE
-  companyId: UUID!
+  # companyId: UUID!
 }
 
 input InputLogin {

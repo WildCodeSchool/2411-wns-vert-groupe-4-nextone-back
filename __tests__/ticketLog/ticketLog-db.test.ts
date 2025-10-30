@@ -5,6 +5,7 @@ import resolvers from "../../src/resolvers";
 import testDataSource from "../../src/lib/datasource_test";
 import {
   DeleteResponse,
+  Manager,
   MutationDeleteTicketLogArgs,
   QueryTicketLogArgs,
   QueryTicketLogsByPropertyArgs,
@@ -181,12 +182,12 @@ describe("TEST TICKETLOG DANS LA DB", () => {
   });
 
   it("UPDATE DU TICKET CREE", async () => {
-    //CREATION D'UN MANAGER POUR POUVOIR UPDATE LE TICKET
-    fakeManagerInput.companyId = baseCompanyId;
-    const newManager: ManagerEntity = await new ManagerService().create(
-      fakeManagerInput
-    );
-    baseManagerId = newManager.id;
+
+    const manager: any = await new ManagerService().db.findOne({
+      where: {
+        email: "jambo.no@gmail.com"
+      }
+    })
 
     //ON MET A JOUR LE TICKET
     const updateData: UpdateStatusTicketInput = {
@@ -195,7 +196,7 @@ describe("TEST TICKETLOG DANS LA DB", () => {
     };
     await TicketService.gettInstance().updateTicketStatus(
       updateData,
-      newManager
+      manager
     );
 
     //ON RECUPERE LE TICKETLOG QUI A ETE CREE

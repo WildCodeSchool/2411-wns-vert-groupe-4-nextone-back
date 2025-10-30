@@ -11,6 +11,7 @@ import CounterEntity from "@/entities/Counter.entity";
 import { TicketSubscriber } from "@/subscribers/ticket.subscriber";
 import CompanySubscriber from "@/subscribers/company.subscriber";
 import InvitationEntity from "@/entities/Invitation.entity";
+import ManagerSubscriber from "@/subscribers/manager.subscriber";
 
 export default new DataSource({
   type: "postgres",
@@ -32,7 +33,7 @@ export default new DataSource({
     CounterEntity,
     InvitationEntity
   ],
-  subscribers: [TicketSubscriber, CompanySubscriber],
+  subscribers: [TicketSubscriber, CompanySubscriber, ManagerSubscriber],
 
   synchronize: true, // pas à utiliser en prod (faire des migrations pour la prod);
 
