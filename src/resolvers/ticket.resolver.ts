@@ -14,6 +14,7 @@ import ServicesService from "@/services/services.service";
 import { In, Not } from "typeorm";
 import { TICKET_ADDED, pubsub } from "../pub_sub/ticketsByProperties";
 import WhitelistedIpService from "@/services/whitelistedIp.service";
+import { composeResolvers } from "@graphql-tools/resolvers-composition"
 
 type TicketDeleted = {
   message: string;
@@ -22,7 +23,7 @@ type TicketDeleted = {
 
 const ticketService = TicketService.gettInstance();
 
-export default {
+const ticketResolver =  {
   Query: {
     tickets: async (
       _: any,
@@ -175,3 +176,9 @@ export default {
     },
   },
 };
+
+const composition = {
+  "*":[]
+}
+const composedResolver = composeResolvers(ticketResolver, composition)
+export default ticketResolver
