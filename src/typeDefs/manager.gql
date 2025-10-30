@@ -46,6 +46,11 @@ type Message {
 #   totalCount: Int!
 # }
 
+type SortedManagers {
+  active: [Manager!]!
+  disable: [Manager!]!
+}
+
 
 type Query {
   # 👉 VERSION AVEC PAGINATION - décommenter cette ligne et commenter celle du dessous
@@ -56,6 +61,7 @@ type Query {
   login(infos: InputLogin!): Auth
   logout: Message!
   checkToken: CheckToken
+  SortedManagers: SortedManagers!
 }
 
 type Mutation {

@@ -8,6 +8,8 @@ import {
   Message,
   Auth,
   MutationResetPasswordArgs,
+  SortedManagers,
+  Manager,
   // 👉 PAGINATION : Décommenter cet import pour activer la pagination
   // QueryManagersArgs,
 } from "@/generated/graphql";
@@ -47,6 +49,20 @@ export default {
       }
       verifyCreatorPermission(manager?.role);
       return managerService.listManagers();
+    },
+    SortedManagers: async (): Promise<SortedManagers> => {
+      const managers = await managerService.listManagers();
+      const sorted: SortedManagers = {
+        active: [],
+        disable: []
+      }
+      managers.forEach(m => {
+        if (m.isGloballyActive) {
+          return sorted.active.push(m)
+        }
+        return sorted.disable.push(m)
+      })
+      return sorted
     },
 
     // 👉 VERSION AVEC PAGINATION - Décommenter cette version et commenter celle du dessus
