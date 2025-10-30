@@ -71,7 +71,7 @@ const createManagers = async (
   company: CompanyEntity
 ): Promise<ManagerEntity[]> => {
   console.log("⛹️ --> CREATION DES MANAGERS...");
-  const createRandomUser = (): InputRegister => {
+  const createRandomUser = (): DeepPartial<ManagerEntity> => {
     return {
       email: faker.internet.email(),
       firstName: faker.person.firstName(),
