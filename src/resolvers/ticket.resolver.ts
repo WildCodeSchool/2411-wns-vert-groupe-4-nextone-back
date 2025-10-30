@@ -12,6 +12,7 @@ import {
 import { MyContext } from "..";
 import ServicesService from "@/services/services.service";
 import { In, Not } from "typeorm";
+import { TICKET_ADDED, pubsub } from "../pub_sub/ticketsByProperties";
 import WhitelistedIpService from "@/services/whitelistedIp.service";
 
 type TicketDeleted = {
@@ -99,6 +100,7 @@ export default {
       }
       const creationData = { ...data, service };
       const newTicket = await ticketService.createOne(creationData);
+      await pubsub.publish(TICKET_ADDED, { ticketAdded: newTicket });
       return newTicket;
     },
 
@@ -108,7 +110,6 @@ export default {
       ctx: MyContext
     ): Promise<TicketDeleted> => {
       const isTicketDeleted = await ticketService.deleteOne(id);
-
       if (!isTicketDeleted) {
         return { message: "Ticket not found", success: isTicketDeleted };
       }
@@ -139,7 +140,6 @@ export default {
         args.data,
         ctx.manager
       );
-
       return updated;
     },
   },
@@ -150,6 +150,12 @@ export default {
     },
     ticketLogs: async (ticket: TicketEntity, _: any, ctx: MyContext) => {
       return await ctx.loaders.ticketLogByTicketIdLoader.load(ticket.id);
+    },
+  },
+
+  Subscription: {
+    ticketAdded: {
+      subscribe: () => { return pubsub.asyncIterableIterator([TICKET_ADDED])},
     },
   },
 };

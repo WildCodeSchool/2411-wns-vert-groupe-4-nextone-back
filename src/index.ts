@@ -2,10 +2,13 @@ import express, { Request, Response } from "express";
 import "reflect-metadata";
 import { ApolloServer } from "@apollo/server";
 import http from "http";
+import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
+import { makeExecutableSchema } from "@graphql-tools/schema";
+import { WebSocketServer } from "ws";
+import { useServer } from "graphql-ws/use/ws";
 import datasource from "./lib/datasource";
 import "dotenv/config";
 import depthLimit from "graphql-depth-limit";
-import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import cors from "cors";
 import { expressMiddleware } from "@apollo/server/express4";
 import typeDefs from "./typeDefs";
@@ -13,6 +16,8 @@ import resolvers from "./resolvers";
 import ManagerEntity from "./entities/Manager.entity";
 import { authContext } from "./lib/authContext";
 import type { Loaders } from "./lib/dataLoaderContext";
+import nodemailer from "nodemailer";
+import { sendMail } from "./lib/mail";
 
 export interface MyContext {
   req: Request;
@@ -31,12 +36,41 @@ const authorizedCorsUrls = [
   "https://staging.david4.wns.wilders.dev",
 ];
 
-const server = new ApolloServer<MyContext>({
-  typeDefs,
-  resolvers,
-  validationRules: [depthLimit(5)],
-  plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+// MR
+const schema = makeExecutableSchema({ typeDefs, resolvers });
+
+const wsServer = new WebSocketServer({
+  server: httpServer,
+  path: "/graphql",
 });
+
+const serverCleanup = useServer({ schema }, wsServer);
+
+// const server = new ApolloServer<MyContext>({
+//   typeDefs,
+//   resolvers,
+//   validationRules: [depthLimit(5)],
+//   plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+// });
+
+//New instance ApolloServer with (HTTP + WS)
+const server = new ApolloServer<MyContext>({
+  schema,
+  validationRules: [depthLimit(5)],
+  plugins: [
+    ApolloServerPluginDrainHttpServer({ httpServer }),
+    {
+      async serverWillStart() {
+        return {
+          async drainServer() {
+            await serverCleanup.dispose();
+          },
+        };
+      },
+    },
+  ],
+});
+// END MR
 
 async function main() {
   await server.start();
@@ -65,6 +99,7 @@ async function main() {
     httpServer.listen({ port: 4005 }, resolve)
   );
   console.log("✅ Serveur HTTP en écoute sur le port 4005");
+  console.log("🔌 Subscriptions WebSocket prêtes sur ws://localhost:4005/graphql"); // MR
 }
 
 main();
