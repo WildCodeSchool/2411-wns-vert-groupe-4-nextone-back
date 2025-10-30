@@ -5,6 +5,7 @@ import {
   MutationDeleteInvitationArgs,
   MutationRenewInvitationArgs,
   MutationUpdateInvitationArgs,
+  SortedInvitations,
 } from "@/generated/graphql";
 import InvitationService from "@/services/invitation.service";
 import ManagerService from "@/services/manager.service";
@@ -22,6 +23,23 @@ export default {
     invitations: async () => {
       return await InvitationService.getInstance().findAll();
     },
+    sortedInvitations: async (): Promise<SortedInvitations> => {
+      const invitations = await InvitationService.getInstance().findAll()
+      const sorted: SortedInvitations = {
+        expired: [],
+        pending: []
+      }
+      invitations.forEach(invit => {
+        const now = Date.now()
+        if (now < invit.tokenExpiration.getTime()) {
+          return sorted.pending.push(invit)
+        } else {
+          return sorted.expired.push(invit)
+          
+        }
+      })
+      return sorted
+    }
   },
   Mutation: {
     createInvitation: async (
