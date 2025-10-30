@@ -16,13 +16,8 @@ import resolvers from "./resolvers";
 import ManagerEntity from "./entities/Manager.entity";
 import { authContext } from "./lib/authContext";
 import type { Loaders } from "./lib/dataLoaderContext";
-<<<<<<< HEAD
-// import nodemailer from "nodemailer";
-// import { sendMail } from "./lib/mail";
-=======
 import nodemailer from "nodemailer";
 import { sendMail } from "./lib/mail";
->>>>>>> 4758ca6 (📦 Configuration:  Add graphql-ws setup and fix TypeScript moduleResolution to Node16 for proper imports)
 
 export interface MyContext {
   req: Request;
