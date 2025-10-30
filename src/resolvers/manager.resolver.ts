@@ -8,6 +8,8 @@ import {
   Message,
   Auth,
   MutationResetPasswordArgs,
+  SortedManagers,
+  Manager,
   // 👉 PAGINATION : Décommenter cet import pour activer la pagination
   // QueryManagersArgs,
 } from "@/generated/graphql";
@@ -29,6 +31,8 @@ import AuthorizationService from "@/services/authorization.service";
 import CompanyService from "@/services/company.service";
 
 import { sendMail } from "@/lib/mail";
+import InvitationService from "@/services/invitation.service";
+import { GraphQLError } from "graphql";
 
 const managerService = new ManagerService();
 
@@ -45,6 +49,20 @@ export default {
       }
       verifyCreatorPermission(manager?.role);
       return managerService.listManagers();
+    },
+    SortedManagers: async (): Promise<SortedManagers> => {
+      const managers = await managerService.listManagers();
+      const sorted: SortedManagers = {
+        active: [],
+        disable: []
+      }
+      managers.forEach(m => {
+        if (m.isGloballyActive) {
+          return sorted.active.push(m)
+        }
+        return sorted.disable.push(m)
+      })
+      return sorted
     },
 
     // 👉 VERSION AVEC PAGINATION - Décommenter cette version et commenter celle du dessus
@@ -113,6 +131,8 @@ export default {
             id: ctx.manager.id,
             firstName: ctx.manager.firstName,
             lastName: ctx.manager.lastName,
+            role: ctx.manager.role,
+            companyId: ctx.manager.companyId,
           }
         : null;
     },
@@ -123,22 +143,38 @@ export default {
       { infos }: MutationCreateManagerArgs,
       { manager }: MyContext
     ): Promise<ManagerEntity> => {
-      if (!manager?.role) {
-        throw new Error("Le rôle du manager est manquant.");
+      // if (!manager?.role) {
+      //   throw new Error("Le rôle du manager est manquant.");
+      // }
+      // if (!infos.role) {
+      //   throw new Error("Le rôle est requis.");
+      // }
+      // checkRoleInHierarchy(manager.role, infos.role);
+      // const managerExists = await managerService.findManagerByEmail(
+      //   infos.email
+      // );
+      // if (managerExists) {
+      //   throw new Error("Cet email est déjà pris !");
+      // }
+      // const newManager = plainToInstance(ManagerEntity, infos);
+      // await validateOrThrow(newManager);
+
+      //LINVITATION EXISTE
+      const invitations = await InvitationService.getInstance().findByProperties({
+        email: infos.email,
+        token: infos.invitationToken
+      })
+      if (invitations.totalCount !== 1) {
+        throw new GraphQLError('No invitation match.')
       }
-      if (!infos.role) {
-        throw new Error("Le rôle est requis.");
+      //ELLE EST ENCORE VALIDE
+      const invit = invitations.items[0]
+      const now = Date.now()
+      if (now > new Date(invit.tokenExpiration).getTime()) {
+        throw new GraphQLError('The invitation expired. Please ask your N+1 for renew.')
       }
-      checkRoleInHierarchy(manager.role, infos.role);
-      const managerExists = await managerService.findManagerByEmail(
-        infos.email
-      );
-      if (managerExists) {
-        throw new Error("Cet email est déjà pris !");
-      }
-      const newManager = plainToInstance(ManagerEntity, infos);
-      await validateOrThrow(newManager);
-      return await managerService.create(infos);
+
+      return await managerService.create({...infos,companyId: invit.companyId, role: invit.role});
     },
 
     deleteManager: async (
@@ -175,7 +211,10 @@ export default {
       if (!manager?.role) {
         throw new Error("Le rôle du manager est manquant.");
       }
-      checkRoleInHierarchy(manager.role, targetManager.role);
+      const isManagerUpdatingSelf = manager.id === targetManager.id;
+      if (!isManagerUpdatingSelf) {
+        checkRoleInHierarchy(manager.role, targetManager.role);
+      }
       const updatedManager = plainToInstance(
         UpdateInput,
         { ...targetManager, ...data },
@@ -214,7 +253,7 @@ export default {
     ): Promise<Message> => {
       const token = await managerService.createResetToken(email);
       if (token) {
-        sendMail(email, token);
+        sendMail(email, token, "RESET_PASSWORD");
       }
       return {
         success: !!token,

@@ -9,10 +9,11 @@ import TicketLogEntity from "@/entities/TicketLog.entity";
 import ManagerEntity from "@/entities/Manager.entity";
 import CounterEntity from "@/entities/Counter.entity";
 
-
 import { TicketSubscriber } from "@/subscribers/ticket.subscriber";
 import CompanySubscriber from "@/subscribers/company.subscriber";
 import InvitationEntity from "@/entities/Invitation.entity";
+import ManagerSubscriber from "@/subscribers/manager.subscriber";
+import { WhitelistedIpEntity } from "@/entities/WhitelistedIp.entity";
 
 export default new DataSource({
   type: "postgres",
@@ -33,10 +34,9 @@ export default new DataSource({
     ManagerEntity,
     ConnectionLogEntity,
     CounterEntity,
-    InvitationEntity
+    InvitationEntity,
+    WhitelistedIpEntity,
   ],
-  subscribers:[TicketSubscriber, CompanySubscriber],
+  subscribers: [TicketSubscriber, CompanySubscriber, ManagerSubscriber],
   synchronize: true,
 });
-
-

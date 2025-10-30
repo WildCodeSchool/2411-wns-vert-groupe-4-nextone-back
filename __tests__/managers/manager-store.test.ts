@@ -26,10 +26,7 @@ import {
   TOGGLE_GLOBAL_ACCESS_MANAGER,
 } from "../../src/queries/manager.query";
 import typeDefs from "../../src/typeDefs";
-import {
-  fakeManagerInput,
-  fakeManagerStore,
-} from "../../src/utils/dataTest";
+import { fakeManagerInput, fakeManagerStore } from "../../src/utils/dataTest";
 
 type StatusResponse = {
   message: string;
@@ -41,7 +38,7 @@ type ResponseListManager = {
 };
 
 type ResponseCreateManager = {
-  createManager: Manager;
+  createManager: Partial<Manager>;
 };
 
 type ResponseLoginManager = {
@@ -131,11 +128,11 @@ beforeAll(async () => {
     },
     Mutation: {
       createManager: (_: any, { infos }: { infos: InputRegister }) => {
-        const { companyId,password, ...rest } = infos;
+        const { password,confirmPassword,invitationToken, ...rest } = infos;
         store.set("Manager", "3", rest);
         const manager = store.get("Manager", "3") as Manager;
-        const {  company, ...result } = manager;
-        return { ...result, id: 3 };
+        const { company, ...result } = manager;
+        return { ...infos, id: 3 };
       },
       deleteManager: (_: null, { id }: { id: string }) => {
         store.get("Manager", id);
@@ -177,6 +174,12 @@ describe("Test sur les managers", () => {
   });
 
   it("Inscription d'un manager", async () => {
+    const {
+      password,
+      confirmPassword,
+      invitationToken,
+      ...managerWithoutPassword
+    } = fakeManagerInput;
     const response = await server.executeOperation<
       ResponseCreateManager,
       MutationCreateManagerArgs
@@ -187,8 +190,8 @@ describe("Test sur les managers", () => {
       },
     });
     assert(response.body.kind === "single");
-    expect(response.body.singleResult.errors).toBeUndefined()
-    const { password, companyId, ...managerWithoutPassword } = fakeManagerInput;
+    expect(response.body.singleResult.errors).toBeUndefined();
+    // const { password, confirmPassword, invitationToken,  ...managerWithoutPassword } = fakeManagerInput;
     expect(response.body.singleResult.data).toEqual({
       createManager: {
         id: "3",
@@ -209,7 +212,8 @@ describe("Test sur les managers", () => {
       },
     });
     assert(response.body.kind === "single");
-    const { authorizations, company,connectionLogs,ticketLogs, ...rest } = fakeManagerStore;
+    const { authorizations, company, connectionLogs, ticketLogs, ...rest } =
+      fakeManagerStore;
     expect(response.body.singleResult.data).toEqual({
       login: {
         manager: rest,
@@ -245,7 +249,7 @@ describe("Test sur les managers", () => {
     });
 
     assert(response.body.kind === "single");
-    const { authorizations, company, connectionLogs,ticketLogs, ...rest } =
+    const { authorizations, company, connectionLogs, ticketLogs, ...rest } =
       fakeManagerStore;
     expect(response.body.singleResult.data).toEqual({
       manager: rest,

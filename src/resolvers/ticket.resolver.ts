@@ -13,6 +13,7 @@ import { MyContext } from "..";
 import ServicesService from "@/services/services.service";
 import { In, Not } from "typeorm";
 import { TICKET_ADDED, pubsub } from "../pub_sub/ticketsByProperties";
+import WhitelistedIpService from "@/services/whitelistedIp.service";
 
 type TicketDeleted = {
   message: string;
@@ -32,7 +33,27 @@ export default {
       // return { items: ticketsList, totalCount };
       return await ticketService.findAllPaginated(pagination);
     },
+    ticketsForTVDisplay: async (
+      _: any,
+      { pagination }: QueryTicketsArgs,
+      { ip }: MyContext
+    ): Promise<TicketEntity[] | null> => {
+      console.log("IP du client :", ip);
+      const whitelistedIpService = new WhitelistedIpService();
 
+      const whitelistedIPs = await whitelistedIpService.getAllWhitelistedIps();
+
+      const ipIsWhitelisted = whitelistedIPs.some(
+        (ipEntry) => ipEntry.ipAddress === ip
+      );
+
+      if (!ipIsWhitelisted) {
+        return null;
+      }
+
+      const ticketsList = await ticketService.findAll(pagination);
+      return ticketsList;
+    },
     ticket: async (
       _: any,
       { id }: QueryTicketArgs

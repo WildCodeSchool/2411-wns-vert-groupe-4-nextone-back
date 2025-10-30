@@ -24,6 +24,7 @@ export interface MyContext {
   res: Response;
   manager: ManagerEntity | null;
   loaders: Loaders;
+  ip: string | null | undefined;
 }
 
 const app = express();

@@ -7,10 +7,12 @@ enum ManagerRole {
 }
 
 type CheckToken {
-  email: String
   id: ID
+  email: String
   firstName: String
   lastName: String
+  role: ManagerRole
+  companyId: String
 }
 
 type Manager {
@@ -46,6 +48,11 @@ type Message {
 #   totalCount: Int!
 # }
 
+type SortedManagers {
+  active: [Manager!]!
+  disable: [Manager!]!
+}
+
 
 type Query {
   # 👉 VERSION AVEC PAGINATION - décommenter cette ligne et commenter celle du dessous
@@ -56,6 +63,7 @@ type Query {
   login(infos: InputLogin!): Auth
   logout: Message!
   checkToken: CheckToken
+  SortedManagers: SortedManagers!
 }
 
 type Mutation {
@@ -74,9 +82,11 @@ input InputRegister {
   lastName: String!
   email: String!
   password: String!
-  role: ManagerRole = OPERATOR
+  confirmPassword: String!
+  invitationToken: String!
+  # role: ManagerRole = OPERATOR
   isGloballyActive: Boolean = FALSE
-  companyId: UUID!
+  # companyId: UUID!
 }
 
 input InputLogin {
