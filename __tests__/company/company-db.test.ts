@@ -37,7 +37,6 @@ import {
 let server: ApolloServer;
 const schema = makeExecutableSchema({ typeDefs, resolvers });
 
-
 beforeAll(async () => {
   server = new ApolloServer({
     schema,

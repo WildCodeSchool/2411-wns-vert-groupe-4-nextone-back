@@ -91,19 +91,38 @@ export default {
         "Authorization not found or already deleted."
       );
     },
+
+    addBulkAuthorization: async (
+      _: any,
+      { input }: MutationAddAuthorizationArgs,
+      { manager }: MyContext
+    ): Promise<AuthorizationResponse> => {
+      if (!manager) {
+        throw new Error("Manager non authentifié");
+      }
+      const success = await authorizationService.addAuthorization(
+        input,
+        manager
+      );
+      return buildResponse(
+        success,
+        "Authorizations successfully created.",
+        "Authorizations already exist."
+      );
+    },
   },
   Authorization: {
     service: async (parent: AuthorizationEntity) => {
       return await new ServicesService().db.findOne({
         where: {
           authorizations: {
-            serviceId: parent.serviceId
-          }
-        }
-      })
+            serviceId: parent.serviceId,
+          },
+        },
+      });
     },
     manager: async (parent: AuthorizationEntity) => {
-      return await new ManagerService().getManagerById(parent.managerId)
+      return await new ManagerService().getManagerById(parent.managerId);
     },
   },
 };

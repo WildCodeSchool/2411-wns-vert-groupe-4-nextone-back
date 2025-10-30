@@ -12,15 +12,11 @@
     "strict": true, /* Enable all strict type-checking options. */
     "strictPropertyInitialization": false, /* Check for class properties that are declared but not set in the constructor. */
     /* Skip type checking .d.ts files that are included with TypeScript. */
-    "skipLibCheck": true, /* Skip type checking all .d.ts files. */
+    "skipLibCheck": true /* Skip type checking all .d.ts files. */,
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     }
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }

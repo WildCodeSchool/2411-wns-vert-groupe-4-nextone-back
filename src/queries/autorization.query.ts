@@ -10,7 +10,7 @@ query GetServiceAuthorizations($serviceId: UUID!) {
       firstName
       lastName
     }
-    isActive
+    isAdministrator
   }
 }
 `;
@@ -27,7 +27,7 @@ query GetEmployeeAuthorizations($managerId: UUID!) {
       lastName
       id
     }
-    isActive
+    isAdministrator
   }
 }
 `;
@@ -39,7 +39,7 @@ export const ADD_AUTHORIZATION = `#graphql
       success
     }
   }
-`
+`;
 
 export const UPDATE_AUTHORIZATION = `#graphql
   mutation Mutation($input: UpdateAuthInput!) {
@@ -48,7 +48,7 @@ export const UPDATE_AUTHORIZATION = `#graphql
       success
     }
   }
-`
+`;
 
 export const DELETE_AUTHORIZATION = `#graphql
   mutation Mutation($input: DeleteAuthInput!) {

@@ -16,6 +16,8 @@ import { In, Not } from "typeorm";
 import { composeResolvers } from "@graphql-tools/resolvers-composition";
 import { IResolvers } from "@graphql-tools/utils";
 import { GraphQLFieldResolver } from "graphql";
+import { TICKET_ADDED, pubsub } from "../pub_sub/ticketsByProperties";
+import WhitelistedIpService from "@/services/whitelistedIp.service";
 
 type TicketDeleted = {
   message: string;
@@ -35,7 +37,27 @@ const ticketResolver: IResolvers<any, MyContext> = {
       // return { items: ticketsList, totalCount };
       return await ticketService.findAllPaginated(pagination);
     },
+    ticketsForTVDisplay: async (
+      _: any,
+      { pagination }: QueryTicketsArgs,
+      { ip }: MyContext
+    ): Promise<TicketEntity[] | null> => {
+      console.log("IP du client :", ip);
+      const whitelistedIpService = new WhitelistedIpService();
 
+      const whitelistedIPs = await whitelistedIpService.getAllWhitelistedIps();
+
+      const ipIsWhitelisted = whitelistedIPs.some(
+        (ipEntry) => ipEntry.ipAddress === ip
+      );
+
+      if (!ipIsWhitelisted) {
+        return null;
+      }
+
+      const ticketsList = await ticketService.findAll(pagination);
+      return ticketsList;
+    },
     ticket: async (
       _: any,
       { id }: QueryTicketArgs
@@ -79,6 +101,7 @@ const ticketResolver: IResolvers<any, MyContext> = {
       }
       const creationData = { ...data, service };
       const newTicket = await ticketService.createOne(creationData);
+      await pubsub.publish(TICKET_ADDED, { ticketAdded: newTicket });
       return newTicket;
     },
 
@@ -88,7 +111,6 @@ const ticketResolver: IResolvers<any, MyContext> = {
       ctx: MyContext
     ): Promise<TicketDeleted> => {
       const isTicketDeleted = await ticketService.deleteOne(id);
-
       if (!isTicketDeleted) {
         return { message: "Ticket not found", success: isTicketDeleted };
       }
@@ -119,7 +141,6 @@ const ticketResolver: IResolvers<any, MyContext> = {
         args.data,
         ctx.manager
       );
-
       return updated;
     },
   },
@@ -130,6 +151,12 @@ const ticketResolver: IResolvers<any, MyContext> = {
     },
     ticketLogs: async (ticket: TicketEntity, _: any, ctx: MyContext) => {
       return await ctx.loaders.ticketLogByTicketIdLoader.load(ticket.id);
+    },
+  },
+
+  Subscription: {
+    ticketAdded: {
+      subscribe: () => { return pubsub.asyncIterableIterator([TICKET_ADDED])},
     },
   },
 };

@@ -5,7 +5,7 @@ export const LIST_MANAGERS = `#graphql
       id
       isGloballyActive
       authorizations {
-        isActive
+        isAdministrator
         createdAt
       }
     }
@@ -40,7 +40,7 @@ export const LOGIN_MANAGER = `#graphql
       token
     }
   }
-`
+`;
 
 export const LOGOUT_MANAGER = `#graphql
   query Logout {
@@ -49,7 +49,7 @@ export const LOGOUT_MANAGER = `#graphql
       success
     }
   }
-`
+`;
 
 export const FIND_MANAGER_BY_ID = `#graphql
   query manager($managerId: ID!) {
@@ -64,7 +64,7 @@ export const FIND_MANAGER_BY_ID = `#graphql
       updatedAt
     }
   }
-`
+`;
 
 export const DELETE_MANAGER = `#graphql
   mutation DeleteManager($deleteManagerId: ID!) {
@@ -73,7 +73,7 @@ export const DELETE_MANAGER = `#graphql
       success
     }
   }
-`
+`;
 
 export const UPDATE_MANAGER = `#graphql
   mutation updateManager($id: ID!, $data: UpdateManagerInput!) {
@@ -88,7 +88,7 @@ export const UPDATE_MANAGER = `#graphql
       updatedAt
     }
   }
-`
+`;
 
 export const TOGGLE_GLOBAL_ACCESS_MANAGER = `#graphql
   mutation Mutation($toggleGlobalAccessManagerId: UUID!) {
@@ -97,4 +97,4 @@ export const TOGGLE_GLOBAL_ACCESS_MANAGER = `#graphql
       message
     }
   }
-`
+`;
