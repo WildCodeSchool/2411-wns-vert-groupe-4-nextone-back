@@ -4,8 +4,6 @@ import { ServiceEntity } from "@/entities/Service.entity";
 import TicketEntity from "@/entities/Ticket.entity";
 import {
   CreateServiceInput,
-  GenerateTicketInput,
-  InputRegister,
   ManagerRole,
   Status,
   UpdateStatusTicketInput,
@@ -15,31 +13,41 @@ import CompanyService from "@/services/company.service";
 import ManagerService from "@/services/manager.service";
 import ServicesService from "@/services/services.service";
 import TicketService from "@/services/ticket.service";
-import { fakerFR as faker } from "@faker-js/faker";
+// import { fakerFR as faker } from "@faker-js/faker";
 import datasource from "./datasource";
 import { DeepPartial } from "typeorm";
-import CounterEntity from "@/entities/Counter.entity";
-import CounterService from "@/services/counter.service";
-import { exit } from "process";
 
-const createCompanyAndSuperAdmin = async (): Promise<CompanyEntity> => {
+const MANAGER_COUNT = 100
+const TICKET_COUNT = 500
+
+const createCompanyAndSuperAdmin = async (): Promise<CompanyEntity[]> => {
   console.log("🏚️ --> CREATION DE LA COMPANY...");
   const company = new CompanyEntity();
-  company.name = "Jambonneau CORPORATION";
-  company.address = "38, Rue de la saucisse";
+  company.name = "Apple Premium Partner";
+  company.address = "57 Rue d'Alsace Lorraine";
   company.postalCode = "31000";
   company.city = "TOULOUSE";
-  company.siret = "362 521 879 00034";
-  company.email = "jambo.no@gmail.com";
-  company.phone = "0123456789";
+  company.siret = "362 521 879 00728";
+  company.email = "contact@apple.com";
+  company.phone = "0581185252";
+
+  const google = new CompanyEntity()
+  google.name = "Google France";
+  google.address = "89, rue de Londres";
+  google.postalCode = "75009";
+  google.city = "PARIS";
+  google.siret = "362 521 879 00034";
+  google.email = "support@google.com";
+  google.phone = "0142685300";
 
   const created = await CompanyService.getService().createOne(company);
+  const created2 = await CompanyService.getService().createOne(google);
 
-  return created;
+  return [created, created2];
 };
 
 const createServices = async (
-  company: CompanyEntity
+  companies: CompanyEntity[]
 ): Promise<ServiceEntity[]> => {
   console.log("🐤 --> CREATION DES SERVICES...");
   const serviceNames: string[] = [
@@ -47,42 +55,46 @@ const createServices = async (
     "SAV",
     "Buvette",
     "Comptoir",
-    "Four",
+    "Réparation",
+    "Pièces détachées",
+    "Atelier"
   ];
-  const services = await Promise.all(
-    serviceNames.map(async (name) => {
-      // const service = new ServiceEntity();
-      // service.name = name;
-      // service.company = company;
-      // service.companyId = company.id
-      const data: CreateServiceInput = {
-        companyId: company.id,
-        name
-      }
-      const created = await new ServicesService().createService(data);
-      return created;
+  const res = await Promise.all(
+    companies.map(async (company) => {
+      const services = await Promise.all(
+        serviceNames.map(async (name) => {
+        const data: CreateServiceInput = {
+          companyId: company.id,
+          name: `${company.name.split(' ')[0].toUpperCase()}_${name}`
+        }
+        const created = await new ServicesService().createService(data);
+        return created;
+      }) 
+      ) 
+      return services
     })
   );
 
-  return services;
+  return res.flat(1);
 };
 
 const createManagers = async (
-  company: CompanyEntity
+  companies: CompanyEntity[]
 ): Promise<ManagerEntity[]> => {
   console.log("⛹️ --> CREATION DES MANAGERS...");
+  const { fakerFR: faker } = await import("@faker-js/faker");
   const createRandomUser = (): DeepPartial<ManagerEntity> => {
     return {
       email: faker.internet.email(),
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
       password: "salami",
-      role: ManagerRole.Admin,
-      companyId: company.id,
+      role: Math.random() > 0.7 ? ManagerRole.Admin : ManagerRole.Operator,
+      companyId: companies[Math.random() > 0.5 ? 0 : 1].id,
     };
   };
 
-  const users = faker.helpers.multiple(createRandomUser, { count: 20 });
+  const users = faker.helpers.multiple(createRandomUser, { count: MANAGER_COUNT });
 
   const managers = await Promise.all(
     users.map(async (user) => {
@@ -99,17 +111,18 @@ const assignManagersToService = async (
   services: ServiceEntity[]
 ) => {
   console.log("🤝 --> ASSIGNATION DES MANAGERS DANS LES SERVICES...");
-  const superAdmin = await new ManagerService().findManagerByEmail(
-    "jambo.no@gmail.com"
-  );
-
-  if (!superAdmin) {
-    throw new Error("Can't find super admin.");
-  }
-
+  
   services.map(async (service) => {
     managers.map(async (manager) => {
       const random = Math.random();
+      const superAdmin = await new ManagerService().db.findOne({
+        where: {
+          companyId: manager.companyId
+        }
+      })
+      if (!superAdmin) {
+        throw new Error("Can't find Super Admin.")
+      }
       if (random > 0.5) {
         await new AuthorizationService().addAuthorization(
           {
@@ -127,6 +140,7 @@ const createTicket = async (
   services: ServiceEntity[]
 ): Promise<TicketEntity[]> => {
   console.log("🎫 --> CREATION DES TICKETS...");
+  const { fakerFR: faker } = await import("@faker-js/faker");
   const createRandomTicket = () => {
     const randomIndex = Math.floor(Math.random() * services.length);
     const service = services[randomIndex];
@@ -143,7 +157,7 @@ const createTicket = async (
   };
 
   const randomTickets = faker.helpers.multiple(createRandomTicket, {
-    count: 50,
+    count: TICKET_COUNT,
   });
 
   const tickets: TicketEntity[] = [];
@@ -256,9 +270,9 @@ export const seedDB = async (): Promise<void> => {
 
     await initializeDataSource();
 
-    const company = await createCompanyAndSuperAdmin();
-    const services = await createServices(company);
-    const managers = await createManagers(company);
+    const companies = await createCompanyAndSuperAdmin();
+    const services = await createServices(companies);
+    const managers = await createManagers(companies);
     await assignManagersToService(managers, services);
     // await createCounter(services)
     const tickets = await createTicket(services);
