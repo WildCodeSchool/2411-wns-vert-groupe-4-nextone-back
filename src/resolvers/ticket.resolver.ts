@@ -26,7 +26,7 @@ type TicketDeleted = {
 
 const ticketService = TicketService.gettInstance();
 
-const ticketResolver: IResolvers<any, MyContext> = {
+const ticketResolver = {
   Query: {
     tickets: async (
       _: any,
