@@ -32,6 +32,10 @@ type Mutation {
   updateTicketStatus(data: UpdateStatusTicketInput!): Ticket!
 }
 
+type Subscription {
+  ticketAdded: Ticket!
+}
+
 enum Order {
   ASC
   DESC
