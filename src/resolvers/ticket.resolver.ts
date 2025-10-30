@@ -8,13 +8,16 @@ import {
   QueryTicketsArgs,
   QueryTicketsByPropertiesArgs,
   Status,
+  Ticket,
 } from "@/generated/graphql";
 import { MyContext } from "..";
 import ServicesService from "@/services/services.service";
 import { In, Not } from "typeorm";
 import { TICKET_ADDED, pubsub } from "../pub_sub/ticketsByProperties";
 import WhitelistedIpService from "@/services/whitelistedIp.service";
-import { composeResolvers } from "@graphql-tools/resolvers-composition"
+import { composeResolvers } from "@graphql-tools/resolvers-composition";
+import { IResolvers } from "@graphql-tools/utils";
+import { GraphQLFieldResolver } from "graphql";
 
 type TicketDeleted = {
   message: string;
@@ -23,7 +26,7 @@ type TicketDeleted = {
 
 const ticketService = TicketService.gettInstance();
 
-const ticketResolver =  {
+const ticketResolver: IResolvers<any, MyContext> = {
   Query: {
     tickets: async (
       _: any,
@@ -68,9 +71,6 @@ const ticketResolver =  {
       { fields, pagination }: QueryTicketsByPropertiesArgs
     ): Promise<{ items: TicketEntity[]; totalCount: number }> => {
       const { status, ...rest } = fields || {};
-      console.log("fields", fields);
-      console.log("rest", rest);
-      console.log("status", status);
       if (status) {
         return await ticketService.findByPropertiesAndCount(
           { ...rest, status: In(status) },
@@ -177,8 +177,25 @@ const ticketResolver =  {
   },
 };
 
+type ResolverWrapper<
+  TSource = any,
+  TArgs = any,
+  TResult = any
+> = (
+  next: GraphQLFieldResolver<TSource, MyContext, TArgs, TResult>
+) => GraphQLFieldResolver<TSource, MyContext, TArgs, TResult>;
+
+const isAuthenticated =
+  (): ResolverWrapper => (next) => (root, args, context, info) => {
+    if (!context.manager) {
+      throw new Error("You are not authenticated!");
+    }
+    
+    return next(root, args, context, info);
+  };
+
 const composition = {
-  "*":[]
-}
-const composedResolver = composeResolvers(ticketResolver, composition)
-export default ticketResolver
+  "*.*": [isAuthenticated()],
+};
+const composedResolver = composeResolvers(ticketResolver, composition);
+export default composedResolver;
