@@ -38,7 +38,10 @@ type Mutation {
 
 type Subscription {
   ticketAdded: Ticket!
+<<<<<<< HEAD
   ticketAddedByProperties(fields: TicketPropertiesInput): Ticket
+=======
+>>>>>>> d7a2820 (Add subscriptions for ticket by services)
 }
 
 enum Order {
