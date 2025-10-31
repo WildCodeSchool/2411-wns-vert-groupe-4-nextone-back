@@ -157,5 +157,21 @@ export default {
     ticketAdded: {
       subscribe: () => { return pubsub.asyncIterableIterator([TICKET_ADDED])},
     },
+
+    ticketAddedByProperties: {
+      subscribe: (_: any, { fields }: QueryTicketsByPropertiesArgs) => 
+        pubsub.asyncIterableIterator(TICKET_ADDED),
+      resolve: (payload: { ticketAdded: TicketEntity }, args: QueryTicketsByPropertiesArgs) => {
+        const { status, ...rest } = args.fields || {};
+        const ticket: any = payload.ticketAdded;
+        if (status && !status.includes(ticket.status)) return null;
+        const ticketAny = ticket as Record<string, any>;
+        const restAny = rest as Record<string, any>;
+        for (const key in restAny) {
+          if (ticketAny[key] !== restAny[key]) return null;
+        }
+        return ticket;
+      },
+    },
   },
 };

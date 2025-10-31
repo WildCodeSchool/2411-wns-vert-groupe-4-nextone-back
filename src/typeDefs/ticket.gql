@@ -38,6 +38,7 @@ type Mutation {
 
 type Subscription {
   ticketAdded: Ticket!
+  ticketAddedByProperties(fields: TicketPropertiesInput): Ticket
 }
 
 enum Order {
