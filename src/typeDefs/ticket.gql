@@ -26,6 +26,7 @@ type Query {
     fields: TicketPropertiesInput
     pagination: PaginationInput
   ): TicketsPaginatedResult!
+
   ticketsForTVDisplay: [Ticket!]
 }
 
@@ -36,6 +37,7 @@ type Mutation {
   updateTicketStatus(data: UpdateStatusTicketInput!): Ticket!
 }
 
+<<<<<<< HEAD
 type Subscription {
   ticketAdded: Ticket!
 <<<<<<< HEAD
@@ -44,6 +46,8 @@ type Subscription {
 >>>>>>> d7a2820 (Add subscriptions for ticket by services)
 }
 
+=======
+>>>>>>> d491557 (✨ New Feature: add and test all ticket subscriptions (create, update, delete, status, global))
 enum Order {
   ASC
   DESC
@@ -105,4 +109,16 @@ enum Status {
   ARCHIVED
   INPROGRESS
   DELETED
+}
+
+# ============================================================================
+#  SUBSCRIPTIONS (WebSocket)
+# ============================================================================
+type Subscription {
+  ticketAdded: Ticket!
+  ticketCreated: Ticket!
+  ticketUpdated: Ticket!
+  ticketStatusChanged(ticketId: ID!): Ticket!
+  ticketDeleted: ID!
+  ticketsChanged: Ticket!
 }

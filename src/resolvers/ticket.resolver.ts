@@ -12,12 +12,19 @@ import {
 } from "@/generated/graphql";
 import { MyContext } from "..";
 import ServicesService from "@/services/services.service";
-import { In, Not } from "typeorm";
-import { TICKET_ADDED, pubsub } from "../pub_sub/ticketsByProperties";
+import { In } from "typeorm";
+import {
+  TICKET_ADDED,
+  pubsub as localPubsub,
+} from "../pub_sub/ticketsByProperties";
 import WhitelistedIpService from "@/services/whitelistedIp.service";
 import { composeResolvers } from "@graphql-tools/resolvers-composition";
 import { IResolvers } from "@graphql-tools/utils";
 import { GraphQLFieldResolver } from "graphql";
+import { PubSub, withFilter } from "graphql-subscriptions";
+import { EVENTS } from "@/subscribers/events";
+
+const pubsub = new PubSub();
 
 type TicketDeleted = {
   message: string;
@@ -32,9 +39,6 @@ const ticketResolver = {
       _: any,
       { pagination }: QueryTicketsArgs
     ): Promise<{ items: TicketEntity[]; totalCount: number }> => {
-      // const ticketsList = await ticketService.findAll(pagination);
-      // const totalCount = await ticketService.countAll(pagination);
-      // return { items: ticketsList, totalCount };
       return await ticketService.findAllPaginated(pagination);
     },
     ticketsForTVDisplay: async (
@@ -77,11 +81,11 @@ const ticketResolver = {
           pagination
         );
       }
-      //return await ticketService.findByPropertiesAndCount(rest, pagination);
-      return await ticketService.findByPropertiesAndCount(
-        { ...rest, status: Not(Status.Archived) },
-        pagination
-      );
+      return await ticketService.findByPropertiesAndCount(rest, pagination);
+      // return await ticketService.findByPropertiesAndCount(
+      //   { ...rest, status: Not(Status.Archived) },
+      //   pagination
+      // );
     },
   },
 
@@ -101,7 +105,12 @@ const ticketResolver = {
       }
       const creationData = { ...data, service };
       const newTicket = await ticketService.createOne(creationData);
-      await pubsub.publish(TICKET_ADDED, { ticketAdded: newTicket });
+      await localPubsub.publish(TICKET_ADDED, { ticketAdded: newTicket });
+      await pubsub.publish(EVENTS.TICKET_CREATED, { ticketCreated: newTicket });
+      await pubsub.publish(EVENTS.TICKETS_CHANGED, {
+        ticketsChanged: newTicket,
+      });
+
       return newTicket;
     },
 
@@ -110,9 +119,19 @@ const ticketResolver = {
       { id }: QueryTicketArgs,
       ctx: MyContext
     ): Promise<TicketDeleted> => {
+      const ticketToDelete = await ticketService.findById(id);
       const isTicketDeleted = await ticketService.deleteOne(id);
       if (!isTicketDeleted) {
         return { message: "Ticket not found", success: isTicketDeleted };
+      }
+      // MR
+      if (ticketToDelete) {
+        ticketToDelete.status = Status.Deleted;
+        await pubsub.publish(EVENTS.TICKETS_CHANGED, {
+          ticketsChanged: ticketToDelete,
+        });
+
+        await pubsub.publish(EVENTS.TICKET_DELETED, { ticketDeleted: { id } });
       }
 
       return { message: "Ticket deleted", success: isTicketDeleted };
@@ -124,6 +143,13 @@ const ticketResolver = {
       ctx: MyContext
     ): Promise<TicketEntity | null> => {
       const updated = await ticketService.updateOne(data.id, data);
+      // MR
+      if (updated) {
+        await pubsub.publish(EVENTS.TICKET_UPDATED, { ticketUpdated: updated });
+        await pubsub.publish(EVENTS.TICKETS_CHANGED, {
+          ticketsChanged: updated,
+        });
+      }
       return updated;
     },
 
@@ -141,22 +167,66 @@ const ticketResolver = {
         args.data,
         ctx.manager
       );
+      // MR
+      await pubsub.publish(EVENTS.TICKET_STATUS_CHANGED, {
+        ticketStatusChanged: updated,
+      });
+      await pubsub.publish(EVENTS.TICKETS_CHANGED, {
+        ticketsChanged: updated,
+      });
       return updated;
     },
   },
 
-  Ticket: {
-    service: async (ticket: TicketEntity) => {
-      return await new ServicesService().getServiceById(ticket.serviceId);
-    },
-    ticketLogs: async (ticket: TicketEntity, _: any, ctx: MyContext) => {
-      return await ctx.loaders.ticketLogByTicketIdLoader.load(ticket.id);
-    },
-  },
-
+  // ============================================================================
+  //  SUBSCRIPTIONS (WebSocket)
+  // ============================================================================
   Subscription: {
+    ticketCreated: {
+      subscribe: () => {
+        console.log("✅ Subscription active : ticketCreated");
+        return pubsub.asyncIterableIterator([EVENTS.TICKET_CREATED]);
+      },
+    },
+
+    ticketUpdated: {
+      subscribe: () => {
+        console.log("✅ Subscription active : ticketUpdated");
+        return pubsub.asyncIterableIterator([EVENTS.TICKET_UPDATED]);
+      },
+    },
+
+    ticketDeleted: {
+      subscribe: () => {
+        console.log("✅ Subscription active : ticketDeleted");
+        return pubsub.asyncIterableIterator([EVENTS.TICKET_DELETED]);
+      },
+    },
+
+    ticketStatusChanged: {
+      subscribe: withFilter(
+        () => {
+          console.log("✅ Subscription active : ticketStatusChanged");
+          return pubsub.asyncIterableIterator([EVENTS.TICKET_STATUS_CHANGED]);
+        },
+        (payload, variables) => {
+          return payload.ticketStatusChanged.id === variables.ticketId;
+        }
+      ),
+    },
+
+    ticketsChanged: {
+      subscribe: () => {
+        console.log("✅ Subscription active : ticketsChanged (global refresh)");
+        return pubsub.asyncIterableIterator([EVENTS.TICKETS_CHANGED]);
+      },
+    },
+
     ticketAdded: {
-      subscribe: () => { return pubsub.asyncIterableIterator([TICKET_ADDED])},
+      subscribe: () => {
+        console.log("✅ Subscription active : ticketAdded (legacy system)");
+        return localPubsub.asyncIterableIterator([TICKET_ADDED]);
+      },
     },
 
     ticketAddedByProperties: {
@@ -175,13 +245,18 @@ const ticketResolver = {
       },
     },
   },
+
+  Ticket: {
+    service: async (ticket: TicketEntity) => {
+      return await new ServicesService().getServiceById(ticket.serviceId);
+    },
+    ticketLogs: async (ticket: TicketEntity, _: any, ctx: MyContext) => {
+      return await ctx.loaders.ticketLogByTicketIdLoader.load(ticket.id);
+    },
+  },
 };
 
-type ResolverWrapper<
-  TSource = any,
-  TArgs = any,
-  TResult = any
-> = (
+type ResolverWrapper<TSource = any, TArgs = any, TResult = any> = (
   next: GraphQLFieldResolver<TSource, MyContext, TArgs, TResult>
 ) => GraphQLFieldResolver<TSource, MyContext, TArgs, TResult>;
 
@@ -190,7 +265,7 @@ const isAuthenticated =
     if (!context.manager) {
       throw new Error("You are not authenticated!");
     }
-    
+
     return next(root, args, context, info);
   };
 
