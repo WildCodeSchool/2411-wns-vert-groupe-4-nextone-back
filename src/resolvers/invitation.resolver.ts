@@ -20,26 +20,28 @@ export default {
     invitation: async (_: any, { id }: { id: string }) => {
       return await InvitationService.getInstance().findById(id);
     },
+    invitationByToken: async (_: any, { token }: { token: string }) => {
+      return await InvitationService.getInstance().findByToken(token);
+    },
     invitations: async () => {
       return await InvitationService.getInstance().findAll();
     },
     sortedInvitations: async (): Promise<SortedInvitations> => {
-      const invitations = await InvitationService.getInstance().findAll()
+      const invitations = await InvitationService.getInstance().findAll();
       const sorted: SortedInvitations = {
         expired: [],
-        pending: []
-      }
-      invitations.forEach(invit => {
-        const now = Date.now()
+        pending: [],
+      };
+      invitations.forEach((invit) => {
+        const now = Date.now();
         if (now < invit.tokenExpiration.getTime()) {
-          return sorted.pending.push(invit)
+          return sorted.pending.push(invit);
         } else {
-          return sorted.expired.push(invit)
-          
+          return sorted.expired.push(invit);
         }
-      })
-      return sorted
-    }
+      });
+      return sorted;
+    },
   },
   Mutation: {
     createInvitation: async (
@@ -48,11 +50,11 @@ export default {
       { manager }: MyContext
     ): Promise<Invitation> => {
       if (!manager) {
-        throw new GraphQLError('NOT LOGGED IN', {
+        throw new GraphQLError("NOT LOGGED IN", {
           extensions: {
-            type: "AUTH_ERROR"
-          }
-        })
+            type: "AUTH_ERROR",
+          },
+        });
       }
       const existingEmail = await new ManagerService().findManagerByEmail(
         args.email
@@ -64,9 +66,16 @@ export default {
           },
         });
       }
-      const {companyId} = manager
-      const created = await InvitationService.getInstance().createOne({ ...args, companyId });
-      const mail = await sendMail(created.email, created.token, "CREATE_INVITATION")
+      const { companyId } = manager;
+      const created = await InvitationService.getInstance().createOne({
+        ...args,
+        companyId,
+      });
+      const mail = await sendMail(
+        created.email,
+        created.token,
+        "CREATE_INVITATION"
+      );
       return created;
     },
     updateInvitation: async (
@@ -82,25 +91,33 @@ export default {
       { id }: MutationRenewInvitationArgs
     ): Promise<Invitation> => {
       const renew = await InvitationService.getInstance().renewInvitation(id);
-      const sentMail = await sendMail(renew.email, renew.token, "RENEW_INVITATION")
+      const sentMail = await sendMail(
+        renew.email,
+        renew.token,
+        "RENEW_INVITATION"
+      );
       return renew;
     },
     deleteInvitation: async (
       _: any,
       { id }: MutationDeleteInvitationArgs
     ): Promise<DeleteResponse> => {
-      const deleted = await InvitationService.getInstance().deleteOne(id)
+      const deleted = await InvitationService.getInstance().deleteOne(id);
       const response: DeleteResponse = {
         success: deleted,
-        message: deleted ? "Invitation supprimée." : "Impossible de supprimer l'invitation"
-      }
-      return response
+        message: deleted
+          ? "Invitation supprimée."
+          : "Impossible de supprimer l'invitation",
+      };
+      return response;
     },
   },
   Invitation: {
     company: async (parent: InvitationEntity, _: any, context: MyContext) => {
-      const company=  await CompanyService.getService().findById(context.manager?.companyId!)
-      return company
-    }
-  }
+      const company = await CompanyService.getService().findById(
+        context.manager?.companyId!
+      );
+      return company;
+    },
+  },
 };
