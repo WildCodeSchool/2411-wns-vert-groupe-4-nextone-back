@@ -37,6 +37,17 @@ type Mutation {
   updateTicketStatus(data: UpdateStatusTicketInput!): Ticket!
 }
 
+
+type Subscription {
+  ticketAdded: Ticket!
+  ticketAddedByProperties(fields: TicketPropertiesInput): Ticket
+}
+
+type Subscription {
+  ticketAdded: Ticket!
+  ticketAddedByProperties(fields: TicketPropertiesInput): Ticket
+}
+
 enum Order {
   ASC
   DESC

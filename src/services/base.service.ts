@@ -23,6 +23,7 @@ export default abstract class BaseService<T extends ObjectLiteral> {
   protected getPagination(pagination?: PaginationInput) {
     const cursor = pagination?.cursor ? new Date(pagination.cursor) : undefined; 
     const limit = pagination?.limit || 20;
+
     const order: Order = pagination?.order || Order.Desc; 
     return { cursor, limit, order };
   }

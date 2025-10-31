@@ -16,8 +16,8 @@ import resolvers from "./resolvers";
 import ManagerEntity from "./entities/Manager.entity";
 import { authContext } from "./lib/authContext";
 import type { Loaders } from "./lib/dataLoaderContext";
-// import nodemailer from "nodemailer";
-// import { sendMail } from "./lib/mail";
+import nodemailer from "nodemailer";
+import { sendMail } from "./lib/mail";
 
 export interface MyContext {
   req: Request;
