@@ -26,6 +26,7 @@ type Query {
     fields: TicketPropertiesInput
     pagination: PaginationInput
   ): TicketsPaginatedResult!
+
   ticketsForTVDisplay: [Ticket!]
 }
 
@@ -34,10 +35,6 @@ type Mutation {
   deleteTicket(id: ID!): DeletedTicketResponse!
   updateTicket(data: UpdateTicketInput!): Ticket
   updateTicketStatus(data: UpdateStatusTicketInput!): Ticket!
-}
-
-type Subscription {
-  ticketAdded: Ticket!
 }
 
 enum Order {
@@ -101,4 +98,16 @@ enum Status {
   ARCHIVED
   INPROGRESS
   DELETED
+}
+
+# ============================================================================
+#  SUBSCRIPTIONS (WebSocket)
+# ============================================================================
+type Subscription {
+  ticketAdded: Ticket!
+  ticketCreated: Ticket!
+  ticketUpdated: Ticket!
+  ticketStatusChanged(ticketId: ID!): Ticket!
+  ticketDeleted: ID!
+  ticketsChanged: Ticket!
 }
