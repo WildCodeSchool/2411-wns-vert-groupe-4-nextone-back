@@ -2,10 +2,8 @@ import { CreateServiceInput, UpdateServiceInput } from "@/generated/graphql";
 import ServiceRepository from "@/repositories/Service.repository";
 import { ServiceEntity } from "@/entities/Service.entity";
 import CompanyService from "./company.service";
-import { PubSub } from "graphql-subscriptions";
-import { EVENTS } from "@/pub_sub/events";
-
-const pubsub = new PubSub();
+import { pubsub } from "@/lib/pubsub";
+import { EVENTS } from "@/subscriptions/events";
 
 export default class ServicesService {
   db: ServiceRepository;

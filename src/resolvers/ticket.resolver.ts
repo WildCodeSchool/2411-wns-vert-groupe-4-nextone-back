@@ -16,15 +16,15 @@ import { In } from "typeorm";
 import {
   TICKET_ADDED,
   pubsub as localPubsub,
-} from "../pub_sub/ticketsByProperties";
+} from "../subscriptions/ticketsByProperties";
 import WhitelistedIpService from "@/services/whitelistedIp.service";
 import { composeResolvers } from "@graphql-tools/resolvers-composition";
 import { IResolvers } from "@graphql-tools/utils";
 import { GraphQLFieldResolver } from "graphql";
-import { PubSub, withFilter } from "graphql-subscriptions";
-import { EVENTS } from "@/pub_sub/events";
+import { withFilter } from "graphql-subscriptions";
+import { pubsub } from "@/lib/pubsub";
+import { EVENTS } from "@/subscriptions/events";
 
-const pubsub = new PubSub();
 
 type TicketDeleted = {
   message: string;

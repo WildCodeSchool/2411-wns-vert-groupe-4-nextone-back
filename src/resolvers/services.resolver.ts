@@ -15,11 +15,10 @@ import AuthorizationService from "@/services/authorization.service";
 import { ServiceEntity } from "@/entities/Service.entity";
 import TicketService from "@/services/ticket.service";
 import CompanyService from "@/services/company.service";
-import { PubSub } from "graphql-subscriptions";
-import { EVENTS } from "@/pub_sub/events";
+import { pubsub } from "@/lib/pubsub";
+import { EVENTS } from "@/subscriptions/events";
 
 const servicesService = new ServicesService();
-const pubsub = new PubSub();
 
 export default {
   Query: {
