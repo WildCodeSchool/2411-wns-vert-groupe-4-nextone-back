@@ -6,7 +6,6 @@
 // }
 // `;
 
-
 export const TICKETLOGS = `#graphql
   query TicketLogs($pagination: PaginationInput) {  
     ticketLogs(pagination: $pagination) {          
@@ -66,19 +65,19 @@ query TicketLog($id: UUID!) {
 // }
 // `;
 
-// export const TICKETLOG_BY_PROPERTY = `#graphql
-// query TicketLogsByProperty($field: TicketLogPropertyInput!) {
-//   ticketLogs: ticketLogsByProperty(field: $field) {
-//     id
-//     status
-//     ticket {
-//       id
-//       firstName
-//       lastName
-//     }
-//   }
-// }
-// `;
+export const TICKETLOG_BY_PROPERTY = `#graphql
+query TicketLogsByProperty($field: TicketLogPropertyInput!) {
+  ticketLogs: ticketLogsByProperty(field: $field) {
+    id
+    status
+    ticket {
+      id
+      firstName
+      lastName
+    }
+  }
+}
+`;
 
 export const CREATE_TICKETLOG = `#graphql
 mutation CreateTicketLog($data: CreateTicketLogInput!) {
@@ -110,7 +109,7 @@ mutation DeleteTicketLog($id: UUID!) {
 `;
 
 // PAGINATION
-export const TICKETLOG_BY_PROPERTY = `#graphql
+export const TICKETLOG_BY_PROPERTY_PAGINATION = `#graphql
   query TicketLogsByProperty(
     $field: TicketLogPropertyInput!
     $pagination: PaginationInput
