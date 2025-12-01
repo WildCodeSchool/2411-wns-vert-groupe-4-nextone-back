@@ -185,21 +185,21 @@ const ticketResolver = {
     ticketCreated: {
       subscribe: () => {
         console.log("✅ Subscription active : ticketCreated");
-        return pubsub.asyncIterableIterator([EVENTS.TICKET_CREATED]);
+        return pubsub.asyncIterableIterator(EVENTS.TICKET_CREATED);
       },
     },
 
     ticketUpdated: {
       subscribe: () => {
         console.log("✅ Subscription active : ticketUpdated");
-        return pubsub.asyncIterableIterator([EVENTS.TICKET_UPDATED]);
+        return pubsub.asyncIterableIterator(EVENTS.TICKET_UPDATED);
       },
     },
 
     ticketDeleted: {
       subscribe: () => {
         console.log("✅ Subscription active : ticketDeleted");
-        return pubsub.asyncIterableIterator([EVENTS.TICKET_DELETED]);
+        return pubsub.asyncIterableIterator(EVENTS.TICKET_DELETED);
       },
     },
 
@@ -207,7 +207,7 @@ const ticketResolver = {
       subscribe: withFilter(
         () => {
           console.log("✅ Subscription active : ticketStatusChanged");
-          return pubsub.asyncIterableIterator([EVENTS.TICKET_STATUS_CHANGED]);
+          return pubsub.asyncIterableIterator(EVENTS.TICKET_STATUS_CHANGED);
         },
         (payload, variables) => {
           return payload.ticketStatusChanged.id === variables.ticketId;
@@ -218,21 +218,24 @@ const ticketResolver = {
     ticketsChanged: {
       subscribe: () => {
         console.log("✅ Subscription active : ticketsChanged (global refresh)");
-        return pubsub.asyncIterableIterator([EVENTS.TICKETS_CHANGED]);
+        return pubsub.asyncIterableIterator(EVENTS.TICKETS_CHANGED);
       },
     },
 
     ticketAdded: {
       subscribe: () => {
         console.log("✅ Subscription active : ticketAdded (legacy system)");
-        return localPubsub.asyncIterableIterator([TICKET_ADDED]);
+        return localPubsub.asyncIterableIterator(TICKET_ADDED);
       },
     },
 
     ticketAddedByProperties: {
-      subscribe: (_: any, { fields }: QueryTicketsByPropertiesArgs) => 
+      subscribe: (_: any, { fields }: QueryTicketsByPropertiesArgs) =>
         pubsub.asyncIterableIterator(TICKET_ADDED),
-      resolve: (payload: { ticketAdded: TicketEntity }, args: QueryTicketsByPropertiesArgs) => {
+      resolve: (
+        payload: { ticketAdded: TicketEntity },
+        args: QueryTicketsByPropertiesArgs
+      ) => {
         const { status, ...rest } = args.fields || {};
         const ticket: any = payload.ticketAdded;
         if (status && !status.includes(ticket.status)) return null;
@@ -270,7 +273,7 @@ const isAuthenticated =
   };
 
 const composition = {
-  "*.*": [isAuthenticated()],
+  // "*.*": [isAuthenticated()],
 };
 const composedResolver = composeResolvers(ticketResolver, composition);
 export default composedResolver;

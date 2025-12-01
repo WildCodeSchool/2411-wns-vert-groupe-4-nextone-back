@@ -21,7 +21,7 @@ import ManagerService from "../../src/services/manager.service";
 import {
   DELETE_TICKETLOG,
   TICKETLOG,
-  TICKETLOG_BY_PROPERTY,
+  TICKETLOG_BY_PROPERTY_PAGINATION,
 } from "../../src/queries/ticketlog.query";
 import assert from "assert";
 import { validate } from "uuid";
@@ -36,7 +36,6 @@ import {
 } from "../../src/utils/dataTest";
 import loaders, { Loaders } from "../../src/lib/dataLoaderContext";
 
-
 //ON MOCK LA DB AVEC CELLE DE TEST
 jest.mock("../../src/lib/datasource", () => {
   return {
@@ -49,17 +48,11 @@ type PartialTicketLog = Partial<Omit<TicketLog, "ticket">> & {
   ticket: Pick<Ticket, "id" | "firstName" | "lastName">;
 };
 
-// type TResponse = {
-//   ticketLogs: PartialTicketLog[] | null;
-// };
-
 type TResponse = {
-  ticketLogsByProperty:
-    | {
-        items: PartialTicketLog[];
-        totalCount: number;
-      }
-    | null;
+  ticketLogsByProperty: {
+    items: PartialTicketLog[];
+    totalCount: number;
+  } | null;
 };
 
 type TResponseDelete = {
@@ -67,8 +60,8 @@ type TResponseDelete = {
 };
 
 type ContextTest = {
-  loaders: Loaders
-}
+  loaders: Loaders;
+};
 
 let server: ApolloServer<ContextTest>;
 const schema = makeExecutableSchema({ typeDefs, resolvers });
@@ -76,9 +69,7 @@ const schema = makeExecutableSchema({ typeDefs, resolvers });
 beforeAll(async () => {
   server = new ApolloServer({
     schema,
-
   });
-
 
   try {
     if (!testDataSource.isInitialized) {
@@ -91,8 +82,6 @@ beforeAll(async () => {
     throw error;
   }
 });
-
-
 
 afterAll(async () => {
   //ON VIDE LA DB DE TEST
@@ -112,62 +101,54 @@ describe("TEST TICKETLOG DANS LA DB", () => {
   let baseServiceId: string;
 
   it("CREATION D'UN TICKETLOG", async () => {
-
     //CREATION D'UNE COMPANY
     const newCompany: CompanyEntity =
       await CompanyService.getService().createOne(fakeCompanyInput);
     baseCompanyId = newCompany.id;
 
-    // console.log("COMPANY DANS LE TEST : ", newCompany)
-
     //CREATION DU SERVICE
-    const newService = await new ServicesService().createService(
-      {...fakeServiceInput, companyId: baseCompanyId}
-
-    );
-    baseServiceId = newService.id
-
-    // console.log("SERVICE DANS LE TEST : ", newService)
+    const newService = await new ServicesService().createService({
+      ...fakeServiceInput,
+      companyId: baseCompanyId,
+    });
+    baseServiceId = newService.id;
 
     //CREATION D'UN TICKET
     const newTicket: TicketEntity =
-      await TicketService.gettInstance().createOne({...fakeTicketInput, service: newService});
+      await TicketService.gettInstance().createOne({
+        ...fakeTicketInput,
+        service: newService,
+      });
     baseTicketId = newTicket.id;
 
-    // console.log("TICKET DANS LE TEST : ", newTicket)
-
-    // //ET ENFIN, ON RECUPERE LE TICKETLOG QUI A ETE CREE VIA
-    // LE SUBSCRIBER SUR TICKETENTITY👍
+    // //ET ENFIN, ON RECUPERE LE TICKETLOG QUI A ETE CREE VIA LE SUBSCRIBER SUR TICKETENTITY
     const response = await server.executeOperation<
       TResponse,
       QueryTicketLogsByPropertyArgs
-    >({
-      query: TICKETLOG_BY_PROPERTY,
-      variables: {
-        field: {
-          ticketId: baseTicketId,
-        }
+    >(
+      {
+        query: TICKETLOG_BY_PROPERTY_PAGINATION,
+        variables: {
+          field: {
+            ticketId: baseTicketId,
+          },
+        },
+      },
+      {
+        contextValue: {
+          loaders,
+        },
       }
-    }, { 
-      contextValue: {
-        loaders
-      }
-    });
+    );
     assert(response.body.kind === "single");
-
-
 
     expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data).not.toBeNull();
     expect(response.body.singleResult.data).not.toBeUndefined();
 
-   // expect(response.body.singleResult.data?.ticketLogs).toHaveLength(1);
-   // const { id, ...rest } = response.body.singleResult.data?.ticketLogs![0]!;
-   // expect(validate(id)).toBeTruthy;
-
-    const logs = response.body.singleResult.data!.ticketLogsByProperty!.items; 
-    expect(logs).toHaveLength(1); 
-    const { id, ...rest } = logs[0]!; 
+    const logs = response.body.singleResult.data!.ticketLogsByProperty!.items;
+    expect(logs).toHaveLength(1);
+    const { id, ...rest } = logs[0]!;
 
     expect(validate(id!)).toBeTruthy();
     baseId = id!;
@@ -182,51 +163,45 @@ describe("TEST TICKETLOG DANS LA DB", () => {
   });
 
   it("UPDATE DU TICKET CREE", async () => {
-
     const manager: any = await new ManagerService().db.findOne({
       where: {
-        email: "jambo.no@gmail.com"
-      }
-    })
+        email: "jambo.no@gmail.com",
+      },
+    });
 
     //ON MET A JOUR LE TICKET
     const updateData: UpdateStatusTicketInput = {
       id: baseTicketId,
       status: Status.Pending,
     };
-    await TicketService.gettInstance().updateTicketStatus(
-      updateData,
-      manager
-    );
+    await TicketService.gettInstance().updateTicketStatus(updateData, manager);
 
     //ON RECUPERE LE TICKETLOG QUI A ETE CREE
     const response = await server.executeOperation<
       TResponse,
       QueryTicketLogsByPropertyArgs
-    >({
-      query: TICKETLOG_BY_PROPERTY,
-      variables: {
-        field: {
-          ticketId: baseTicketId,
+    >(
+      {
+        query: TICKETLOG_BY_PROPERTY_PAGINATION,
+        variables: {
+          field: {
+            ticketId: baseTicketId,
+          },
         },
       },
-    }, {
-      contextValue: {
-        loaders
+      {
+        contextValue: {
+          loaders,
+        },
       }
-    });
+    );
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.errors).toBeUndefined();
-  
-    // expect(response.body.singleResult.data?.ticketLogs).toHaveLength(2);
-    // const { id, ...rest } = response.body.singleResult.data
-    //   ?.ticketLogs![1] as PartialTicketLog;
 
-    const logs = response.body.singleResult.data!.ticketLogsByProperty!.items; 
-    expect(logs).toHaveLength(2); 
-    const { id, ...rest } = logs[1] as PartialTicketLog; 
-
+    const logs = response.body.singleResult.data!.ticketLogsByProperty!.items;
+    expect(logs).toHaveLength(2);
+    const { id, ...rest } = logs[1] as PartialTicketLog;
 
     expect(validate(id)).toBeTruthy();
     expect(rest).toEqual<PartialTicketLog>({
@@ -243,16 +218,19 @@ describe("TEST TICKETLOG DANS LA DB", () => {
     const response = await server.executeOperation<
       TResponseDelete,
       MutationDeleteTicketLogArgs
-    >({
-      query: DELETE_TICKETLOG,
-      variables: {
-        id: baseId,
+    >(
+      {
+        query: DELETE_TICKETLOG,
+        variables: {
+          id: baseId,
+        },
       },
-    },
       {
         contextValue: {
-      loaders
-    }});
+          loaders,
+        },
+      }
+    );
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.errors).toBeUndefined();
@@ -265,16 +243,19 @@ describe("TEST TICKETLOG DANS LA DB", () => {
   });
 
   it("RECUPERATION DU TICKET QUI N'EXISTE PLUS", async () => {
-    const response = await server.executeOperation<null, QueryTicketLogArgs>({
-      query: TICKETLOG,
-      variables: {
-        id: baseId,
+    const response = await server.executeOperation<null, QueryTicketLogArgs>(
+      {
+        query: TICKETLOG,
+        variables: {
+          id: baseId,
+        },
       },
-    }, {
-      contextValue: {
-        loaders
+      {
+        contextValue: {
+          loaders,
+        },
       }
-    });
+    );
 
     assert(response.body.kind === "single");
     expect(response.body.singleResult.errors).toBeUndefined();
