@@ -15,8 +15,11 @@ import AuthorizationService from "@/services/authorization.service";
 import { ServiceEntity } from "@/entities/Service.entity";
 import TicketService from "@/services/ticket.service";
 import CompanyService from "@/services/company.service";
+import { PubSub } from "graphql-subscriptions";
+import { EVENTS } from "@/pub_sub/events";
 
 const servicesService = new ServicesService();
+const pubsub = new PubSub();
 
 export default {
   Query: {
@@ -99,15 +102,26 @@ export default {
       );
     },
   },
+
+  // ============================================================================
+  //  SUBSCRIPTIONS (WebSocket)
+  // ============================================================================
+  Subscription: {
+    serviceToggled: {
+      subscribe: () => {
+        console.log("✅ Subscription active : serviceToggled");
+        return pubsub.asyncIterableIterator(EVENTS.SERVICE_TOGGLED);
+      },
+    },
+  },
+
   Service: {
-    authorizations: async (
-      { id }: { id: string }) => {
+    authorizations: async ({ id }: { id: string }) => {
       return await new AuthorizationService().getByService(id);
     },
-    tickets: async (
-      { id }: { id: string }) => {
+    tickets: async ({ id }: { id: string }) => {
       return await TicketService.gettInstance().findByProperties({
-        serviceId: id
+        serviceId: id,
       });
     },
     company: async ({ id }: { id: string }) => {

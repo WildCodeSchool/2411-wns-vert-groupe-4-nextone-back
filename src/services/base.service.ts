@@ -21,10 +21,10 @@ export default abstract class BaseService<T extends ObjectLiteral> {
   }
 
   protected getPagination(pagination?: PaginationInput) {
-    const cursor = pagination?.cursor ? new Date(pagination.cursor) : undefined; 
+    const cursor = pagination?.cursor ? new Date(pagination.cursor) : undefined;
     const limit = pagination?.limit || 20;
 
-    const order: Order = pagination?.order || Order.Desc; 
+    const order: Order = pagination?.order || Order.Desc;
     return { cursor, limit, order };
   }
 
@@ -44,8 +44,7 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     const where: FindOptionsWhere<T> = {};
 
     if (cursor) {
-       (where as any).createdAt = LessThan(cursor);
-
+      (where as any).createdAt = LessThan(cursor);
     }
 
     const list = await this.repo.find({
@@ -72,10 +71,10 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     const { cursor, limit, order } = this.getPagination(pag);
     console.log("cursor", cursor);
     console.log("limit", limit);
-    console.log("order", order); 
+    console.log("order", order);
     const where: FindOptionsWhere<T> = { [fields]: value } as any;
     if (cursor) {
-       (where as any).createdAt = LessThan(cursor);
+      (where as any).createdAt = LessThan(cursor);
     }
 
     const [items, totalCount] = await this.repo.findAndCount({
@@ -95,10 +94,10 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     const { cursor, limit, order } = this.getPagination(pag);
     // console.log("cursor", cursor);
     // console.log("limit", limit);
-    // console.log("order", order); 
+    // console.log("order", order);
     const where: FindOptionsWhere<T> = { ...fields };
     if (cursor) {
-       (where as any).createdAt = LessThan(cursor); 
+      (where as any).createdAt = LessThan(cursor);
     }
 
     const [items, totalCount] = await this.repo.findAndCount({
@@ -113,7 +112,7 @@ export default abstract class BaseService<T extends ObjectLiteral> {
   // RECUPERER ENTRE 2 DATES DE CREATION
   public async findByCreationSlot(data: ByCreationSlotInput): Promise<T[]> {
     const { start, end, name, pagination } = data;
-    const startDate = pagination?.cursor || start; 
+    const startDate = pagination?.cursor || start;
 
     const result = await this.repo
       .createQueryBuilder(name)
