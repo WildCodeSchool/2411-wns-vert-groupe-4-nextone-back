@@ -22,7 +22,7 @@ import { composeResolvers } from "@graphql-tools/resolvers-composition";
 import { IResolvers } from "@graphql-tools/utils";
 import { GraphQLFieldResolver } from "graphql";
 import { PubSub, withFilter } from "graphql-subscriptions";
-import { EVENTS } from "@/subscribers/events";
+import { EVENTS } from "@/pub_sub/events";
 
 const pubsub = new PubSub();
 
