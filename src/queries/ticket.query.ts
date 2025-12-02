@@ -10,7 +10,6 @@ export const LIST_TICKETS = `#graphql
       }
 `;
 
-
 export const GENERATE_TICKET = `#graphql
     mutation generateTicket($data: GenerateTicketInput!) {
       generateTicket(data: $data) {
@@ -64,6 +63,7 @@ export const TICKETS_BY_PROPERTIES = `#graphql
           code
           status
           createdAt
+          updatedAt 
         }
         totalCount
       }

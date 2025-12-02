@@ -5,8 +5,13 @@ export const LIST_SERVICES = `#graphql
       id
       name
       isGloballyActive
+      tickets {          
+        id
+        code
+        status
     }
   }
+}
 `;
 
 export const FIND_SERVICE_BY_ID = `#graphql
