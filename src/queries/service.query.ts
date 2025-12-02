@@ -1,15 +1,9 @@
-
 export const LIST_SERVICES = `#graphql
   query Services {
     services {
       id
       name
       isGloballyActive
-      tickets {          
-        id
-        code
-        status
-    }
   }
 }
 `;
@@ -58,4 +52,4 @@ export const TOGGLE_GLOBAL_ACCESS_SERVICE = `#graphql
       message
     }
   }
-`
+`;
