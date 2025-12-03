@@ -1,10 +1,9 @@
-import {
-  CreateServiceInput,
-  UpdateServiceInput,
-} from "@/generated/graphql";
+import { CreateServiceInput, UpdateServiceInput } from "@/generated/graphql";
 import ServiceRepository from "@/repositories/Service.repository";
 import { ServiceEntity } from "@/entities/Service.entity";
 import CompanyService from "./company.service";
+import { pubsub } from "@/lib/pubsub";
+import { EVENTS } from "@/subscriptions/events";
 
 export default class ServicesService {
   db: ServiceRepository;
@@ -17,20 +16,19 @@ export default class ServicesService {
     const services = await this.db.find();
     return services;
   }
-  
+
   async getServiceById(id: string): Promise<ServiceEntity | null> {
     return this.db.findOne({
       where: { id },
-
     });
   }
 
   async createService(data: CreateServiceInput): Promise<ServiceEntity> {
-    const company = await CompanyService.getService().findById(data.companyId)
+    const company = await CompanyService.getService().findById(data.companyId);
     if (!company) {
-      throw new Error("No Company with this id. Impossible to create service.")
+      throw new Error("No Company with this id. Impossible to create service.");
     }
-    const service = this.db.create({...data, company});
+    const service = this.db.create({ ...data, company });
     return this.db.save(service);
   }
 
@@ -53,8 +51,10 @@ export default class ServicesService {
 
   async toggleGlobalAccess(service: ServiceEntity): Promise<boolean> {
     service.isGloballyActive = !service.isGloballyActive;
-    await this.db.save(service);
+    const savedService = await this.db.save(service);
+    await pubsub.publish(EVENTS.SERVICE_TOGGLED, {
+      serviceToggled: savedService,
+    });
     return service.isGloballyActive;
   }
-  
 }

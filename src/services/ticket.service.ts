@@ -49,7 +49,7 @@ export default class TicketService extends BaseService<TicketEntity> {
   }
 
   // PAGINATION TEMPS REEL
-  async findByPropertiesAndCount(
+ async findByPropertiesAndCount(
     fields: FindOptionsWhere<TicketEntity>,
     pagination?: PaginationInput
   ): Promise<{ items: TicketEntity[]; totalCount: number }> {

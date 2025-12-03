@@ -19,6 +19,8 @@ import { composeResolvers } from "@graphql-tools/resolvers-composition";
 import { isAuthenticated } from "./ticket.resolver";
 import appDataSource from "../lib/datasource"
 import { GraphQLError } from "graphql";
+import { pubsub } from "@/lib/pubsub";
+import { EVENTS } from "@/subscriptions/events";
 
 const servicesService = new ServicesService();
 
@@ -106,15 +108,26 @@ const serviceResolver = {
       );
     },
   },
+
+  // ============================================================================
+  //  SUBSCRIPTIONS (WebSocket)
+  // ============================================================================
+  Subscription: {
+    serviceToggled: {
+      subscribe: () => {
+        console.log("✅ Subscription active : serviceToggled");
+        return pubsub.asyncIterableIterator(EVENTS.SERVICE_TOGGLED);
+      },
+    },
+  },
+
   Service: {
-    authorizations: async (
-      { id }: { id: string }) => {
+    authorizations: async ({ id }: { id: string }) => {
       return await new AuthorizationService().getByService(id);
     },
-    tickets: async (
-      { id }: { id: string }) => {
+    tickets: async ({ id }: { id: string }) => {
       return await TicketService.gettInstance().findByProperties({
-        serviceId: id
+        serviceId: id,
       });
     },
     company: async ({ id }: { id: string }) => {

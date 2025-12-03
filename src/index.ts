@@ -111,7 +111,9 @@ async function main() {
     httpServer.listen({ port: 4005 }, resolve)
   );
   console.log("✅ Serveur HTTP en écoute sur le port 4005");
-  console.log("🔌 Subscriptions WebSocket prêtes sur ws://localhost:4005/graphql"); // MR
+  console.log(
+    "🔌 Subscriptions WebSocket prêtes sur ws://localhost:4005/graphql"
+  ); // MR
 }
 
 main();

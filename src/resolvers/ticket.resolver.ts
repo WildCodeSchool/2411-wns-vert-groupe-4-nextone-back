@@ -12,12 +12,20 @@ import {
 } from "@/generated/graphql";
 import { MyContext, ResolverWrapper } from "..";
 import ServicesService from "@/services/services.service";
-import { In, Not } from "typeorm";
-import { TICKET_ADDED, pubsub } from "../pub_sub/ticketsByProperties";
+import { In } from "typeorm";
+import {
+  TICKET_ADDED,
+  pubsub as localPubsub,
+} from "../subscriptions/ticketsByProperties";
 import WhitelistedIpService from "@/services/whitelistedIp.service";
 import { composeResolvers } from "@graphql-tools/resolvers-composition";
 import { IResolvers } from "@graphql-tools/utils";
-import { GraphQLError, GraphQLFieldResolver } from "graphql";
+import { GraphQLError } from "graphql";
+import { GraphQLFieldResolver } from "graphql";
+import { withFilter } from "graphql-subscriptions";
+import { pubsub } from "@/lib/pubsub";
+import { EVENTS } from "@/subscriptions/events";
+
 
 type TicketDeleted = {
   message: string; 
@@ -108,8 +116,22 @@ const ticketResolver = {
       { data }: MutationGenerateTicketArgs,
       ctx: MyContext
     ): Promise<TicketEntity> => {
-      const newTicket = await ticketService.createOne(data);
-      await pubsub.publish(TICKET_ADDED, { ticketAdded: newTicket });
+      const service = await new ServicesService().findOne({
+        where: {
+          id: data.serviceId,
+        },
+      });
+      if (!service) {
+        throw new Error("No service with this id.");
+      }
+      const creationData = { ...data, service };
+      const newTicket = await ticketService.createOne(creationData);
+      await localPubsub.publish(TICKET_ADDED, { ticketAdded: newTicket });
+      await pubsub.publish(EVENTS.TICKET_CREATED, { ticketCreated: newTicket });
+      await pubsub.publish(EVENTS.TICKETS_CHANGED, {
+        ticketsChanged: newTicket,
+      });
+
       return newTicket;
     },
 
@@ -118,9 +140,19 @@ const ticketResolver = {
       { id }: QueryTicketArgs,
       ctx: MyContext
     ): Promise<TicketDeleted> => {
+      const ticketToDelete = await ticketService.findById(id);
       const isTicketDeleted = await ticketService.deleteOne(id);
       if (!isTicketDeleted) {
         return { message: "Ticket not found", success: false };
+      }
+      // MR
+      if (ticketToDelete) {
+        ticketToDelete.status = Status.Deleted;
+        await pubsub.publish(EVENTS.TICKETS_CHANGED, {
+          ticketsChanged: ticketToDelete,
+        });
+
+        await pubsub.publish(EVENTS.TICKET_DELETED, { ticketDeleted: { id } });
       }
 
       return { message: "Ticket deleted", success: isTicketDeleted };
@@ -132,6 +164,13 @@ const ticketResolver = {
       ctx: MyContext
     ): Promise<TicketEntity | null> => {
       const updated = await ticketService.updateOne(data.id, data);
+      // MR
+      if (updated) {
+        await pubsub.publish(EVENTS.TICKET_UPDATED, { ticketUpdated: updated });
+        await pubsub.publish(EVENTS.TICKETS_CHANGED, {
+          ticketsChanged: updated,
+        });
+      }
       return updated;
     },
 
@@ -144,7 +183,85 @@ const ticketResolver = {
         args.data,
         ctx.manager!
       );
+      // MR
+      await pubsub.publish(EVENTS.TICKET_STATUS_CHANGED, {
+        ticketStatusChanged: updated,
+      });
+      await pubsub.publish(EVENTS.TICKETS_CHANGED, {
+        ticketsChanged: updated,
+      });
       return updated;
+    },
+  },
+
+  // ============================================================================
+  //  SUBSCRIPTIONS (WebSocket)
+  // ============================================================================
+  Subscription: {
+    ticketCreated: {
+      subscribe: () => {
+        console.log("✅ Subscription active : ticketCreated");
+        return pubsub.asyncIterableIterator(EVENTS.TICKET_CREATED);
+      },
+    },
+
+    ticketUpdated: {
+      subscribe: () => {
+        console.log("✅ Subscription active : ticketUpdated");
+        return pubsub.asyncIterableIterator(EVENTS.TICKET_UPDATED);
+      },
+    },
+
+    ticketDeleted: {
+      subscribe: () => {
+        console.log("✅ Subscription active : ticketDeleted");
+        return pubsub.asyncIterableIterator(EVENTS.TICKET_DELETED);
+      },
+    },
+
+    ticketStatusChanged: {
+      subscribe: withFilter(
+        () => {
+          console.log("✅ Subscription active : ticketStatusChanged");
+          return pubsub.asyncIterableIterator(EVENTS.TICKET_STATUS_CHANGED);
+        },
+        (payload, variables) => {
+          return payload.ticketStatusChanged.id === variables.ticketId;
+        }
+      ),
+    },
+
+    ticketsChanged: {
+      subscribe: () => {
+        console.log("✅ Subscription active : ticketsChanged (global refresh)");
+        return pubsub.asyncIterableIterator(EVENTS.TICKETS_CHANGED);
+      },
+    },
+
+    ticketAdded: {
+      subscribe: () => {
+        console.log("✅ Subscription active : ticketAdded (legacy system)");
+        return localPubsub.asyncIterableIterator(TICKET_ADDED);
+      },
+    },
+
+    ticketAddedByProperties: {
+      subscribe: (_: any, { fields }: QueryTicketsByPropertiesArgs) =>
+        pubsub.asyncIterableIterator(TICKET_ADDED),
+      resolve: (
+        payload: { ticketAdded: TicketEntity },
+        args: QueryTicketsByPropertiesArgs
+      ) => {
+        const { status, ...rest } = args.fields || {};
+        const ticket: any = payload.ticketAdded;
+        if (status && !status.includes(ticket.status)) return null;
+        const ticketAny = ticket as Record<string, any>;
+        const restAny = rest as Record<string, any>;
+        for (const key in restAny) {
+          if (ticketAny[key] !== restAny[key]) return null;
+        }
+        return ticket;
+      },
     },
   },
 
@@ -166,7 +283,12 @@ const ticketResolver = {
   },
 };
 
-export const isAuthenticated =
+
+type ResolverWrapper<TSource = any, TArgs = any, TResult = any> = (
+  next: GraphQLFieldResolver<TSource, MyContext, TArgs, TResult>
+) => GraphQLFieldResolver<TSource, MyContext, TArgs, TResult>;
+
+const isAuthenticated =
   (): ResolverWrapper => (next) => (root, args, context, info) => {
     if (!context.manager) {
       throw new Error("You are not authenticated!");
