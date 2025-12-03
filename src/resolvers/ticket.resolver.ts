@@ -7,6 +7,7 @@ import {
   QueryTicketArgs,
   QueryTicketsArgs,
   QueryTicketsByPropertiesArgs,
+  QueryTicketsForTvDisplayArgs,
   Status,
   Ticket,
 } from "@/generated/graphql";
@@ -40,27 +41,36 @@ const ticketResolver = {
     ): Promise<{ items: TicketEntity[]; totalCount: number }> => {
       return await ticketService.findAllPaginated(pagination);
     },
+
     ticketsForTVDisplay: async (
       _: any,
-      { pagination }: QueryTicketsArgs,
+      { pagination, serviceId }: QueryTicketsForTvDisplayArgs,
       { ip }: MyContext
     ): Promise<TicketEntity[] | null> => {
       console.log("IP du client :", ip);
       const whitelistedIpService = new WhitelistedIpService();
-
       const whitelistedIPs = await whitelistedIpService.getAllWhitelistedIps();
-
       const ipIsWhitelisted = whitelistedIPs.some(
         (ipEntry) => ipEntry.ipAddress === ip
       );
-
       if (!ipIsWhitelisted) {
         return null;
       }
-
-      const ticketsList = await ticketService.findAll(pagination);
+      let ticketsList = await ticketService.findAll(pagination);
+      ticketsList = ticketsList.filter(
+        (ticket) => ticket.status === "PENDING"
+      );
+      if (serviceId) {
+        ticketsList = ticketsList.filter(
+          (ticket) => ticket.serviceId === serviceId
+        );
+      }
+      ticketsList = ticketsList.sort(
+        (a, b) => a.updatedAt.getTime() - b.updatedAt.getTime()
+      );
       return ticketsList;
-    },
+  },
+
     ticket: async (
       _: any,
       { id }: QueryTicketArgs
@@ -273,7 +283,7 @@ const isAuthenticated =
   };
 
 const composition = {
-  // "*.*": [isAuthenticated()],
+  "Query.*": [isAuthenticated()],
 };
 const composedResolver = composeResolvers(ticketResolver, composition);
 export default composedResolver;
