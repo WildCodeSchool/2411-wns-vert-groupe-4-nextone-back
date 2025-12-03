@@ -42,9 +42,9 @@ const settingResolver = {
     ) => {
       const { pagination, ...rest } = fields;
       if (rest.companyId && rest.companyId !== ctx.manager?.companyId) {
-        throw new GraphQLError("Forbidden")
+        throw new GraphQLError("Forbidden");
       }
-      rest.companyId = ctx.manager?.companyId!
+      rest.companyId = ctx.manager?.companyId!;
       return await SettingService.findByProperties(rest, pagination);
     },
   },
@@ -77,9 +77,9 @@ const settingResolver = {
       ctx: MyContext
     ): Promise<SettingEntity | null> => {
       const { id } = args.data;
-      const service = await SettingService.findById(id)
+      const service = await SettingService.findById(id);
       if (!service || service.companyId !== ctx.manager?.companyId) {
-        throw new GraphQLError("Forbidden.")
+        throw new GraphQLError("Forbidden.");
       }
       const updated = await SettingService.updateOne(id, args.data);
       return updated;
@@ -99,16 +99,12 @@ const settingResolver = {
 const isSettingFromCompany =
   (): ResolverWrapper<{ id: string }> =>
   (next) =>
-  async (root, args, context, info) => {
-    const service = await SettingService.findById(args.id);
-    if (!service || service.companyId !== context.manager?.companyId) {
-      throw new GraphQLError("Forbidden.");
-    }
+    async (root, args, context, info) => {
+    await SettingService.checkSetting(args.id, context?.manager?.companyId!)
     return next(root, args, context, info);
   };
 const composition = {
-  "Query.*": [isAuthenticated()],
-  "Mutation.*": [isAuthenticated()],
+  "*.*": [isAuthenticated()],
   "Mutation.deleteSetting": [isSettingFromCompany()],
   "Query.setting": [isSettingFromCompany()],
 };

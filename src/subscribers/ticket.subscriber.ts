@@ -22,7 +22,6 @@ export class TicketSubscriber
   }
 
   async beforeInsert(event: InsertEvent<TicketEntity>): Promise<void> {
-    console.log("envet eniotyt", event.entity)
 
     const service = await new ServicesService().db.findOne({
       where: {

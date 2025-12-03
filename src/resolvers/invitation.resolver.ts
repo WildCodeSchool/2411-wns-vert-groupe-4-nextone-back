@@ -16,7 +16,6 @@ import CompanyService from "@/services/company.service";
 import { sendMail } from "@/lib/mail";
 import { composeResolvers } from "@graphql-tools/resolvers-composition";
 import { isAuthenticated } from "./ticket.resolver";
-import appDataSource from "../lib/datasource";
 
 const invitationResolver = {
   Query: {
@@ -136,20 +135,13 @@ const isInvitationFromCompany =
   (): ResolverWrapper<MutationRenewInvitationArgs> =>
   (next) =>
   async (root, args, context, info) => {
-    const invit = await appDataSource.getRepository(InvitationEntity).findOne({
-      where: {
-        id: args.id,
-      },
-    });
-    if (invit?.companyId !== context.manager?.companyId) {
-      throw new GraphQLError("Forbidden.");
-    }
+    await InvitationService.getInstance().checkInvitation(args.id, context.manager?.companyId!)
     return next(root, args, context, info);
   };
 
 const composition = {
-  "Query.*": [isAuthenticated()],
-  "Mutation.*": [isAuthenticated()],
+  "*.*": [isAuthenticated()],
+
   "Mutation.{deleteInvitation, renewInvitation}": [isInvitationFromCompany()]
 };
 

@@ -13,6 +13,7 @@ import crypto from "crypto";
 import * as argon2 from "argon2";
 import { createTokenAndExpiration } from "@/utils/tokens.utils";
 import { DeepPartial } from "typeorm";
+import { GraphQLError } from "graphql";
 
 export default class ManagerService {
   db: ManagerRepository;
@@ -198,5 +199,16 @@ export default class ManagerService {
       success: true,
       message: "Le mot de passe a été réinitialisé.",
     };
+  }
+
+  public async checkManager(managerId: string, companyId: string): Promise<void> {
+    const manager = await this.db.findOne({
+        where: {
+          id: managerId,
+        },
+      });
+      if (!manager || manager.companyId !== companyId) {
+        throw new GraphQLError("Forbidden.");
+      }
   }
 }

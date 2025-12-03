@@ -10,6 +10,7 @@ import ManagerEntity from "@/entities/Manager.entity";
 import BaseService from "./base.service";
 import { FindOptionsWhere, In, MoreThanOrEqual } from "typeorm";
 import CompanyService from "./company.service";
+import { GraphQLError } from "graphql";
 
 export default class TicketService extends BaseService<TicketEntity> {
   private static instance: TicketService | null = null;
@@ -100,5 +101,22 @@ export default class TicketService extends BaseService<TicketEntity> {
       where.createdAt = MoreThanOrEqual(new Date(pagination.cursor));
     }
     return await this.repo.count({ where });
+  }
+
+  public async checkTicket(ticketId: string, companyId: string): Promise<void> {
+    const ticket = await this.repo.findOne({
+      where: {
+        id: ticketId,
+      },
+      relations: {
+        service: true,
+      },
+    });
+    if (!ticket) {
+      return
+    }
+    if (ticket.service.companyId !== companyId) {
+      throw new GraphQLError("Forbidden.");
+    }
   }
 }

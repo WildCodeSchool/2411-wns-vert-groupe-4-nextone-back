@@ -12,7 +12,6 @@ import ManagerService from "@/services/manager.service";
 import { MyContext, ResolverWrapper } from "..";
 import { composeResolvers } from "@graphql-tools/resolvers-composition";
 import { isAuthenticated } from "./ticket.resolver";
-import appDataSource from "../lib/datasource"
 import ManagerEntity from "@/entities/Manager.entity";
 import { GraphQLError } from "graphql";
 
@@ -98,22 +97,13 @@ const isEmployeeFromCompany =
   > =>
   (next) =>
     async (root, args, context, info) => {
-      const employee = await appDataSource.getRepository(ManagerEntity).findOne({
-        where: {
-         id: args.managerId
-        }
-       
-      })
-      if (!employee || employee.companyId !== context.manager?.companyId) {
-        throw new GraphQLError("Forbidden.")
-      }
+    await new ManagerService().checkManager(args.managerId, context.manager?.companyId!)
     return next(root, args, context, info);
   };
 
 const composition = {
-  "Query:*": [isAuthenticated()],
+  "*.*": [isAuthenticated()],
   "Query.employeeConnectionLogs": [isEmployeeFromCompany()],
-  "Mutation.*": [isAuthenticated()],
   "Mutation.createConnectionLog": [isEmployeeFromCompany()],
 };
 

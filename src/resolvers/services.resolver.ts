@@ -17,7 +17,6 @@ import TicketService from "@/services/ticket.service";
 import CompanyService from "@/services/company.service";
 import { composeResolvers } from "@graphql-tools/resolvers-composition";
 import { isAuthenticated } from "./ticket.resolver";
-import appDataSource from "../lib/datasource"
 import { GraphQLError } from "graphql";
 import { pubsub } from "@/lib/pubsub";
 import { EVENTS } from "@/subscriptions/events";
@@ -31,7 +30,7 @@ const serviceResolver = {
       __: any,
       ctx: MyContext
     ): Promise<ServiceEntity[]> => {
-      const services = await new ServicesService().getAllServices();
+      const services = await new ServicesService().getAllServices(ctx.manager?.companyId!);
       return services;
     },
 
@@ -53,7 +52,7 @@ const serviceResolver = {
     ): Promise<ServiceEntity> => {
       checkStrictRole(manager?.role, "SUPER_ADMIN");
       if (data.companyId !== manager?.companyId) {
-        throw new GraphQLError('Forbidden.')
+        throw new GraphQLError("Forbidden.");
       }
       const newService = await servicesService.createService(data);
       return newService;
@@ -143,19 +142,20 @@ const serviceResolver = {
   },
 };
 
-const isServiceFromCompany = (): ResolverWrapper<MutationUpdateServiceArgs> => (next) => async (root, args, context, info) => {
-  const service = await servicesService.getServiceById(args.id)
-  if (!service || service.companyId !== context.manager?.companyId) {
-    throw new GraphQLError("Forbidden")
-  }
-  return next(root, args, context, info)
-}
+const isServiceFromCompany =
+  (): ResolverWrapper<MutationUpdateServiceArgs> =>
+  (next) =>
+  async (root, args, context, info) => {
+    await servicesService.checkService(args.id, context.manager?.companyId!)
+    return next(root, args, context, info);
+  };
 
 const composition = {
-  "Query.*": [isAuthenticated()],
-  "Mutation.*": [isAuthenticated()],
-  "Query.service": [isAuthenticated()],
-  "Mutation.{updateService, deleteService, toggleGlobalAccessService}": [isServiceFromCompany()]
-}
+  "*.*": [isAuthenticated()],
+  "Query.service": [isServiceFromCompany()],
+  "Mutation.{updateService, deleteService, toggleGlobalAccessService}": [
+    isServiceFromCompany(),
+  ],
+};
 
-export default composeResolvers(serviceResolver,composition)
+export default composeResolvers(serviceResolver, composition);

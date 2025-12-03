@@ -22,6 +22,11 @@ export const fakeTicketInput: GenerateTicketInput = {
   serviceId: "",
 };
 
+export const fakeManagerContext = {
+  id: "c5057602-1f4b-4c39-bfb7-8a5642668f64",
+  companyId: ""
+}
+
 export const fakeCompanyInput: CreateCompanyInput = {
   name: "Jambonneau CORPORATION",
   address: "38, Rue de la saucisse",

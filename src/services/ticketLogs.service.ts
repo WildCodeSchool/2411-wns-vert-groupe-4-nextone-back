@@ -2,6 +2,7 @@ import TicketLogsEntity from "@/entities/TicketLog.entity";
 import BaseService from "./base.service";
 import { FindOptionsWhere, MoreThanOrEqual } from "typeorm";
 import { PaginationInput } from "@/generated/graphql";
+import { GraphQLError } from "graphql";
 
 export default class TicketLogService extends BaseService<TicketLogsEntity> {
   private static instance: TicketLogService | null = null;
@@ -61,5 +62,24 @@ export default class TicketLogService extends BaseService<TicketLogsEntity> {
         }
       }
     }, pagination);
+  }
+
+  public async checkTicketLog(ticketLogId: string, companyId: string): Promise<void> {
+    const ticketLog = await this.repo.findOne({
+        where: {
+          id: ticketLogId,
+        },
+        relations: {
+          ticket: {
+            service: true,
+          },
+        },
+    });
+    if (
+      !ticketLog ||
+      ticketLog.ticket.service.companyId !== companyId
+    ) {
+      throw new GraphQLError("Forbidden.");
+    }
   }
 }

@@ -13,7 +13,6 @@ import { buildResponse } from "@/utils/authorization";
 import CompanyService from "@/services/company.service";
 import { composeResolvers } from "@graphql-tools/resolvers-composition";
 import { isAuthenticated } from "./ticket.resolver";
-import appDataSource from "../lib/datasource";
 import { GraphQLError } from "graphql";
 
 const whitelistedIpService = new WhitelistedIpService();
@@ -89,13 +88,9 @@ const isWhiteIpFromCompany =
   (): ResolverWrapper<MutationDeleteWhitelistedIpArgs> =>
   (next) =>
   async (root, args, context, info) => {
-    const whiteIp = await appDataSource
-      .getRepository(WhitelistedIpEntity)
-      .findOne({
-        where: { id: args.id },
-      });
+    const whiteIp = await whitelistedIpService.findOne(args.id)
     if (!whiteIp || whiteIp.companyId !== context.manager?.companyId) {
-      throw new GraphQLError("Forbidden.");
+      throw new GraphQLError("Forbidden.")
     }
     return next(root, args, context, info);
   };

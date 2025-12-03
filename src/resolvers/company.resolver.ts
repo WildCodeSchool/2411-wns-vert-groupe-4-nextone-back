@@ -13,7 +13,6 @@ import { buildResponse } from "@/utils/authorization";
 import ServicesService from "@/services/services.service";
 import ManagerService from "@/services/manager.service";
 import SettingService from "@/services/setting.service";
-import appDataSource from "../lib/datasource"
 import { composeResolvers } from "@graphql-tools/resolvers-composition";
 import { isAuthenticated } from "./ticket.resolver";
 import { GraphQLError } from "graphql";
@@ -104,8 +103,8 @@ const companyResolver = {
 
 
 const composition = {
-  "Query.*": [isAuthenticated()],
-  "Mutation.*": [isAuthenticated()]
+  "*.*": [isAuthenticated()],
+
 }
 
 export default composeResolvers(companyResolver, composition)

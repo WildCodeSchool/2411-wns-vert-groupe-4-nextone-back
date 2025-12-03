@@ -10,6 +10,7 @@ import {
   MutationResetPasswordArgs,
   SortedManagers,
   Manager,
+  MutationDeleteManagerArgs,
   // 👉 PAGINATION : Décommenter cet import pour activer la pagination
   // QueryManagersArgs,
 } from "@/generated/graphql";
@@ -52,19 +53,25 @@ const managerResolver = {
       verifyCreatorPermission(manager?.role);
       return managerService.listManagersFromCompany(manager.companyId);
     },
-    SortedManagers: async (_: any, __: any, ctx: MyContext): Promise<SortedManagers> => {
-      const managers = await managerService.listManagersFromCompany(ctx.manager?.companyId!);
+    SortedManagers: async (
+      _: any,
+      __: any,
+      ctx: MyContext
+    ): Promise<SortedManagers> => {
+      const managers = await managerService.listManagersFromCompany(
+        ctx.manager?.companyId!
+      );
       const sorted: SortedManagers = {
         active: [],
-        disable: []
-      }
-      managers.forEach(m => {
+        disable: [],
+      };
+      managers.forEach((m) => {
         if (m.isGloballyActive) {
-          return sorted.active.push(m)
+          return sorted.active.push(m);
         }
-        return sorted.disable.push(m)
-      })
-      return sorted
+        return sorted.disable.push(m);
+      });
+      return sorted;
     },
 
     // 👉 VERSION AVEC PAGINATION - Décommenter cette version et commenter celle du dessus
@@ -162,21 +169,28 @@ const managerResolver = {
       // await validateOrThrow(newManager);
 
       //LINVITATION EXISTE
-      const invitations = await InvitationService.getInstance().findByProperties({
-        email: infos.email,
-        token: infos.invitationToken
-      })
+      const invitations =
+        await InvitationService.getInstance().findByProperties({
+          email: infos.email,
+          token: infos.invitationToken,
+        });
       if (invitations.totalCount !== 1) {
-        throw new GraphQLError('No invitation match.')
+        throw new GraphQLError("No invitation match.");
       }
       //ELLE EST ENCORE VALIDE
-      const invit = invitations.items[0]
-      const now = Date.now()
+      const invit = invitations.items[0];
+      const now = Date.now();
       if (now > new Date(invit.tokenExpiration).getTime()) {
-        throw new GraphQLError('The invitation expired. Please ask your N+1 for renew.')
+        throw new GraphQLError(
+          "The invitation expired. Please ask your N+1 for renew."
+        );
       }
 
-      return await managerService.create({...infos,companyId: invit.companyId, role: invit.role});
+      return await managerService.create({
+        ...infos,
+        companyId: invit.companyId,
+        role: invit.role,
+      });
     },
 
     deleteManager: async (
@@ -295,14 +309,24 @@ const managerResolver = {
   },
 };
 
-const isManagerFromCompany = (): ResolverWrapper => (next) => (root, args, context, info) => {
-  
-  next(root, args, context, info)
-}
+const isManagerFromCompany =
+  (): ResolverWrapper<
+    | MutationUpdateManagerArgs
+    | MutationDeleteManagerArgs
+    | MutationToggleGlobalAccessManagerArgs
+  > =>
+  (next) =>
+  async (root, args, context, info) => {
+    await new ManagerService().checkManager(args.id, context.manager?.companyId!)
+    next(root, args, context, info);
+  };
 
 const composition = {
-  "Query.*": [isAuthenticated()],
-  "Mutation.{}": [isAuthenticated()]
-}
+  "Query.!login": [isAuthenticated()],
+  "Mutation.{toggleGlobalAccessManager, deleteManager, updateManager}": [
+    isAuthenticated(),
+    isManagerFromCompany(),
+  ],
+};
 
-export default composeResolvers(managerResolver, composition)
+export default composeResolvers(managerResolver, composition);

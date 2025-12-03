@@ -14,10 +14,7 @@ import ServicesService from "@/services/services.service";
 import ManagerService from "@/services/manager.service";
 import { composeResolvers } from "@graphql-tools/resolvers-composition";
 import { isAuthenticated } from "./ticket.resolver";
-import appDataSource from "../lib/datasource";
-import { ServiceEntity } from "@/entities/Service.entity";
-import ManagerEntity from "@/entities/Manager.entity";
-import { GraphQLError } from "graphql";
+
 
 const authorizationService = new AuthorizationService();
 
@@ -28,14 +25,8 @@ const authorizationResovler = {
       { serviceId }: QueryGetServiceAuthorizationsArgs,
       ctx: MyContext
     ) => {
-      const service = await appDataSource.getRepository(ServiceEntity).findOne({
-        where: {
-          id: serviceId,
-        }
-      })
-      if (!service || service?.companyId !== ctx.manager?.companyId) {
-        throw new GraphQLError("Forbidden.")
-      }
+      await new ServicesService().checkService(serviceId, ctx.manager?.companyId!)
+
       return await authorizationService.getByService(serviceId);
     },
 
@@ -44,14 +35,7 @@ const authorizationResovler = {
       { managerId }: QueryGetEmployeeAuthorizationsArgs,
       ctx: MyContext
     ) => {
-      const manager = await appDataSource.getRepository(ManagerEntity).findOne({
-        where: {
-          id: managerId
-        }
-      })
-      if (!manager || manager.companyId !== ctx.manager?.companyId) {
-        throw new GraphQLError("Forbidden.")
-      }
+      await new ManagerService().checkManager(managerId, ctx.manager?.companyId!)
       return await authorizationService.getByManager(managerId);
     },
   },
@@ -153,21 +137,8 @@ const isFromCompany =
   (): ResolverWrapper<MutationUpdateAuthorizationArgs> =>
   (next) =>
   async (root, args, context, info) => {
-    const service = await appDataSource.getRepository(ServiceEntity).findOne({
-      where: {
-        companyId: context.manager?.companyId,
-        id: args.input.serviceId 
-      },
-    });
-    const manager = await appDataSource.getRepository(ManagerEntity).findOne({
-      where: {
-        companyId: context.manager?.companyId,
-        id: args.input.serviceId
-      },
-    });
-    if (!manager || !service) {
-      throw new GraphQLError("Forbidden.");
-    }
+    await new ServicesService().checkService(args.input.serviceId, context.manager?.companyId!)
+    await new ManagerService().checkManager(args.input.managerId, context.manager?.companyId!)
     return next(root, args, context, info);
   };
 

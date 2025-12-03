@@ -16,10 +16,7 @@ import TicketService from "@/services/ticket.service";
 import { composeResolvers } from "@graphql-tools/resolvers-composition";
 import { isAuthenticated } from "./ticket.resolver";
 import { MyContext, ResolverWrapper } from "..";
-import appDataSource from "../lib/datasource";
-import { GraphQLError } from "graphql";
-import TicketEntity from "@/entities/Ticket.entity";
-import ManagerEntity from "@/entities/Manager.entity";
+
 
 const ticketLogService = TicketLogService.getInstance();
 
@@ -139,52 +136,19 @@ const isUpdateAuthorized =
   (): ResolverWrapper<MutationCreateTicketLogArgs> =>
   (next) =>
   async (root, args, context, info) => {
-    const ticketLog = await appDataSource
-      .getRepository(TicketLogEntity)
-      .findOne({
-        where: {
-          id: args.data.ticketId,
-        },
-        relations: {
-          ticket: {
-            service: true,
-          },
-        },
-      });
-    if (
-      !ticketLog ||
-      ticketLog.ticket.service.companyId !== context.manager?.companyId
-    ) {
-      throw new GraphQLError("Forbidden.");
-    }
+    await TicketLogService.getInstance().checkTicketLog(args.data.ticketId, context.manager?.companyId!)
     return next(root, args, context, info);
   };
 
-const isTicketCreationAuthorized =
+const isTicketLogCreationAuthorized =
   (): ResolverWrapper<MutationCreateTicketLogArgs> =>
   (next) =>
-  async (root, args, context, info) => {
-    const ticket = await appDataSource.getRepository(TicketEntity).findOne({
-      where: {
-        id: args.data.ticketId,
-      },
-      relations: {
-        service: true,
-      },
-    });
-    if (!ticket || ticket.service.companyId !== context.manager?.companyId) {
-      throw new GraphQLError("Forbidden.");
-    }
+    async (root, args, context, info) => {
+
+    await TicketService.gettInstance().checkTicket(args.data.ticketId, context.manager?.companyId!)
 
     if (args.data.managerId) {
-      const manager = await appDataSource.getRepository(ManagerEntity).findOne({
-        where: {
-          id: args.data.managerId,
-        },
-      });
-      if (!manager || manager.companyId !== context.manager.companyId) {
-        throw new GraphQLError("Forbidden.");
-      }
+      await new ManagerService().checkManager(args.data.managerId, context.manager?.companyId!)
     }
 
     return next(root, args, context, info);
@@ -194,24 +158,7 @@ const isTicketLogFromCompany =
   (): ResolverWrapper<MutationDeleteTicketLogArgs> =>
   (next) =>
   async (root, args, context, info) => {
-    const ticketLog = await appDataSource
-      .getRepository(TicketLogEntity)
-      .findOne({
-        where: {
-          id: args.id,
-        },
-        relations: {
-          ticket: {
-            service: true,
-          },
-        },
-      });
-    if (
-      !ticketLog ||
-      ticketLog.ticket.service.companyId !== context.manager?.companyId
-    ) {
-      throw new GraphQLError("Forbidden.");
-    }
+    await TicketLogService.getInstance().checkTicketLog(args.id, context.manager?.companyId!)
 
     return next(root, args, context, info);
   };
@@ -219,7 +166,7 @@ const isTicketLogFromCompany =
 const composition = {
   "*.*": [isAuthenticated()],
   "Mutation.deleteTicketLog": [isTicketLogFromCompany()],
-  "Mutation.createTicketLog": [isTicketCreationAuthorized()],
+  "Mutation.createTicketLog": [isTicketLogCreationAuthorized()],
   "Mutation.updateTicketLog": [isUpdateAuthorized()],
   "Query.ticketlog": [isTicketLogFromCompany()],
 };

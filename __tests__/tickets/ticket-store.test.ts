@@ -6,7 +6,6 @@ import {
 } from "@graphql-tools/mock";
 import { ApolloServer } from "@apollo/server";
 import { makeExecutableSchema } from "@graphql-tools/schema";
-import TicketResolver from "../../src/resolvers/ticket.resolver";
 import {
   GenerateTicketInput,
   MutationGenerateTicketArgs,
@@ -23,6 +22,7 @@ import {
 } from "../../src/queries/ticket.query";
 import typeDefs from "../../src/typeDefs";
 import { fakeService } from "../../src/utils/dataTest";
+import TicketResolver from "../../src/resolvers/ticket.resolver";
 
 type ResponseData = {
   tickets: {
