@@ -16,8 +16,7 @@ import resolvers from "./resolvers";
 import ManagerEntity from "./entities/Manager.entity";
 import { authContext } from "./lib/authContext";
 import type { Loaders } from "./lib/dataLoaderContext";
-import nodemailer from "nodemailer";
-import { sendMail } from "./lib/mail";
+import { GraphQLResolveInfo } from "graphql";
 
 export interface MyContext {
   req: Request;
@@ -26,6 +25,19 @@ export interface MyContext {
   loaders: Loaders;
   ip: string | null | undefined;
 }
+
+export type ResolverFn<TArgs = {}> = (
+  source: any,
+  args: TArgs,
+  context: MyContext,
+  info: GraphQLResolveInfo,
+) => any;
+
+
+export type ResolverWrapper<TArgs = {}> = (
+  next: ResolverFn<TArgs>,
+) => ResolverFn<TArgs>;
+
 
 const app = express();
 const httpServer = http.createServer(app);

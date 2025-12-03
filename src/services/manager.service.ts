@@ -26,6 +26,14 @@ export default class ManagerService {
     return managers;
   }
 
+  public async listManagersFromCompany(companyId: string): Promise<ManagerEntity[]> {
+    return await this.db.find({
+      where: {
+        companyId
+      }
+    })
+  }
+
   // 👉 VERSION AVEC PAGINATION - Décommenter cette méthode pour activer la pagination
   // async listManagersPaginated(
   //   pagination?: PaginationInput

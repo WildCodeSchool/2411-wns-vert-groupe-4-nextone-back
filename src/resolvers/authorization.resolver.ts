@@ -7,21 +7,35 @@ import {
   QueryGetServiceAuthorizationsArgs,
   AuthorizationResponse,
 } from "@/generated/graphql";
-import { MyContext } from "..";
+import { MyContext, ResolverWrapper } from "..";
 import { buildResponse } from "@/utils/authorization";
 import AuthorizationEntity from "@/entities/Authorization.entity";
 import ServicesService from "@/services/services.service";
 import ManagerService from "@/services/manager.service";
+import { composeResolvers } from "@graphql-tools/resolvers-composition";
+import { isAuthenticated } from "./ticket.resolver";
+import appDataSource from "../lib/datasource";
+import { ServiceEntity } from "@/entities/Service.entity";
+import ManagerEntity from "@/entities/Manager.entity";
+import { GraphQLError } from "graphql";
 
 const authorizationService = new AuthorizationService();
 
-export default {
+const authorizationResovler = {
   Query: {
     getServiceAuthorizations: async (
       _: any,
       { serviceId }: QueryGetServiceAuthorizationsArgs,
       ctx: MyContext
     ) => {
+      const service = await appDataSource.getRepository(ServiceEntity).findOne({
+        where: {
+          id: serviceId,
+        }
+      })
+      if (!service || service?.companyId !== ctx.manager?.companyId) {
+        throw new GraphQLError("Forbidden.")
+      }
       return await authorizationService.getByService(serviceId);
     },
 
@@ -30,6 +44,14 @@ export default {
       { managerId }: QueryGetEmployeeAuthorizationsArgs,
       ctx: MyContext
     ) => {
+      const manager = await appDataSource.getRepository(ManagerEntity).findOne({
+        where: {
+          id: managerId
+        }
+      })
+      if (!manager || manager.companyId !== ctx.manager?.companyId) {
+        throw new GraphQLError("Forbidden.")
+      }
       return await authorizationService.getByManager(managerId);
     },
   },
@@ -126,3 +148,32 @@ export default {
     },
   },
 };
+
+const isFromCompany =
+  (): ResolverWrapper<MutationUpdateAuthorizationArgs> =>
+  (next) =>
+  async (root, args, context, info) => {
+    const service = await appDataSource.getRepository(ServiceEntity).findOne({
+      where: {
+        companyId: context.manager?.companyId,
+        id: args.input.serviceId 
+      },
+    });
+    const manager = await appDataSource.getRepository(ManagerEntity).findOne({
+      where: {
+        companyId: context.manager?.companyId,
+        id: args.input.serviceId
+      },
+    });
+    if (!manager || !service) {
+      throw new GraphQLError("Forbidden.");
+    }
+    return next(root, args, context, info);
+  };
+
+const composition = {
+  "Query.*": [isAuthenticated()],
+  "Mutation.*": [isAuthenticated(), isFromCompany()],
+};
+
+export default composeResolvers(authorizationResovler, composition);

@@ -48,8 +48,18 @@ export default class TicketLogService extends BaseService<TicketLogsEntity> {
   }
 
   async findAllPaginated(
+    companyId: string,
     pagination?: PaginationInput
   ): Promise<{ items: TicketLogsEntity[]; totalCount: number }> {
-    return this.findByPropertiesAndCount({}, pagination);
+    return this.findByPropertiesAndCount({
+      manager: {
+        companyId
+      },
+      ticket: {
+        service: {
+          companyId
+        }
+      }
+    }, pagination);
   }
 }

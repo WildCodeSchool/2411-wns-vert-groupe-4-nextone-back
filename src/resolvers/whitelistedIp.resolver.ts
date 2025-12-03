@@ -1,5 +1,5 @@
 import WhitelistedIpService from "@/services/whitelistedIp.service";
-import { MyContext } from "..";
+import { MyContext, ResolverWrapper } from "..";
 import { WhitelistedIpEntity } from "@/entities/WhitelistedIp.entity";
 import {
   MutationCreateWhitelistedIpArgs,
@@ -11,17 +11,23 @@ import {
 import { checkStrictRole } from "@/utils/manager";
 import { buildResponse } from "@/utils/authorization";
 import CompanyService from "@/services/company.service";
+import { composeResolvers } from "@graphql-tools/resolvers-composition";
+import { isAuthenticated } from "./ticket.resolver";
+import appDataSource from "../lib/datasource";
+import { GraphQLError } from "graphql";
 
 const whitelistedIpService = new WhitelistedIpService();
 
-export default {
+const wihteListedIpResolver = {
   Query: {
     whitelistedIps: async (
       _: any,
       __: any,
       ctx: MyContext
     ): Promise<WhitelistedIpEntity[]> => {
-      const whitelistedIps = await whitelistedIpService.getAllWhitelistedIps();
+      const whitelistedIps = await whitelistedIpService.getAllWhitelistedIps(
+        ctx.manager?.companyId!
+      );
       return whitelistedIps;
     },
 
@@ -33,6 +39,9 @@ export default {
       const whitelistedIp = await whitelistedIpService.getWhitelistedIpByIp(
         ipAddress
       );
+      if (whitelistedIp && whitelistedIp.companyId !== ctx.manager?.companyId) {
+        throw new GraphQLError("Forbidden.");
+      }
       return whitelistedIp;
     },
   },
@@ -44,6 +53,9 @@ export default {
       { manager }: MyContext
     ): Promise<WhitelistedIpEntity> => {
       checkStrictRole(manager?.role, "SUPER_ADMIN");
+      if (data.companyId !== manager?.companyId) {
+        throw new GraphQLError("Forbidden.");
+      }
       const newWhitelistedIp = await whitelistedIpService.createWhitelistedIp(
         data
       );
@@ -72,3 +84,25 @@ export default {
     },
   },
 };
+
+const isWhiteIpFromCompany =
+  (): ResolverWrapper<MutationDeleteWhitelistedIpArgs> =>
+  (next) =>
+  async (root, args, context, info) => {
+    const whiteIp = await appDataSource
+      .getRepository(WhitelistedIpEntity)
+      .findOne({
+        where: { id: args.id },
+      });
+    if (!whiteIp || whiteIp.companyId !== context.manager?.companyId) {
+      throw new GraphQLError("Forbidden.");
+    }
+    return next(root, args, context, info);
+  };
+
+const composition = {
+  "*.*": [isAuthenticated()],
+  "Mutation.deleteWhitelistedIp": [isWhiteIpFromCompany()],
+};
+
+export default composeResolvers(wihteListedIpResolver, composition);

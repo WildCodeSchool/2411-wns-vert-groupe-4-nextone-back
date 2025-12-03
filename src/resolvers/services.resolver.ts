@@ -8,17 +8,21 @@ import {
   ServiceResponse,
   Service,
 } from "@/generated/graphql";
-import { MyContext } from "..";
+import { MyContext, ResolverWrapper } from "..";
 import { canAccessAuthorization, checkStrictRole } from "@/utils/manager";
 import { buildResponse } from "@/utils/authorization";
 import AuthorizationService from "@/services/authorization.service";
 import { ServiceEntity } from "@/entities/Service.entity";
 import TicketService from "@/services/ticket.service";
 import CompanyService from "@/services/company.service";
+import { composeResolvers } from "@graphql-tools/resolvers-composition";
+import { isAuthenticated } from "./ticket.resolver";
+import appDataSource from "../lib/datasource"
+import { GraphQLError } from "graphql";
 
 const servicesService = new ServicesService();
 
-export default {
+const serviceResolver = {
   Query: {
     services: async (
       _: any,
@@ -46,6 +50,9 @@ export default {
       { manager }: MyContext
     ): Promise<ServiceEntity> => {
       checkStrictRole(manager?.role, "SUPER_ADMIN");
+      if (data.companyId !== manager?.companyId) {
+        throw new GraphQLError('Forbidden.')
+      }
       const newService = await servicesService.createService(data);
       return newService;
     },
@@ -122,3 +129,20 @@ export default {
     },
   },
 };
+
+const isServiceFromCompany = (): ResolverWrapper<MutationUpdateServiceArgs> => (next) => async (root, args, context, info) => {
+  const service = await servicesService.getServiceById(args.id)
+  if (!service || service.companyId !== context.manager?.companyId) {
+    throw new GraphQLError("Forbidden")
+  }
+  return next(root, args, context, info)
+}
+
+const composition = {
+  "Query.*": [isAuthenticated()],
+  "Mutation.*": [isAuthenticated()],
+  "Query.service": [isAuthenticated()],
+  "Mutation.{updateService, deleteService, toggleGlobalAccessService}": [isServiceFromCompany()]
+}
+
+export default composeResolvers(serviceResolver,composition)

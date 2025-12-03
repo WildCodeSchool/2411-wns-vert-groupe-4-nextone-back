@@ -13,7 +13,7 @@ import {
   // 👉 PAGINATION : Décommenter cet import pour activer la pagination
   // QueryManagersArgs,
 } from "@/generated/graphql";
-import { MyContext } from "..";
+import { MyContext, ResolverWrapper } from "..";
 import Cookies from "cookies";
 import { plainToInstance } from "class-transformer";
 import ManagerEntity, {
@@ -33,10 +33,12 @@ import CompanyService from "@/services/company.service";
 import { sendMail } from "@/lib/mail";
 import InvitationService from "@/services/invitation.service";
 import { GraphQLError } from "graphql";
+import { composeResolvers } from "@graphql-tools/resolvers-composition";
+import { isAuthenticated } from "./ticket.resolver";
 
 const managerService = new ManagerService();
 
-export default {
+const managerResolver = {
   Query: {
     managers: async (
       _: any,
@@ -48,10 +50,10 @@ export default {
         throw new Error("Manager non authentifié");
       }
       verifyCreatorPermission(manager?.role);
-      return managerService.listManagers();
+      return managerService.listManagersFromCompany(manager.companyId);
     },
-    SortedManagers: async (): Promise<SortedManagers> => {
-      const managers = await managerService.listManagers();
+    SortedManagers: async (_: any, __: any, ctx: MyContext): Promise<SortedManagers> => {
+      const managers = await managerService.listManagersFromCompany(ctx.manager?.companyId!);
       const sorted: SortedManagers = {
         active: [],
         disable: []
@@ -292,3 +294,15 @@ export default {
     },
   },
 };
+
+const isManagerFromCompany = (): ResolverWrapper => (next) => (root, args, context, info) => {
+  
+  next(root, args, context, info)
+}
+
+const composition = {
+  "Query.*": [isAuthenticated()],
+  "Mutation.{}": [isAuthenticated()]
+}
+
+export default composeResolvers(managerResolver, composition)

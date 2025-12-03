@@ -9,6 +9,7 @@ import TicketLogEntity from "@/entities/TicketLog.entity";
 import ManagerEntity from "@/entities/Manager.entity";
 import BaseService from "./base.service";
 import { FindOptionsWhere, In, MoreThanOrEqual } from "typeorm";
+import CompanyService from "./company.service";
 
 export default class TicketService extends BaseService<TicketEntity> {
   private static instance: TicketService | null = null;
@@ -82,9 +83,14 @@ export default class TicketService extends BaseService<TicketEntity> {
   }
 
   async findAllPaginated(
+    companyId: string,
     pagination?: PaginationInput
   ): Promise<{ items: TicketEntity[]; totalCount: number }> {
-    return this.findByPropertiesAndCount({}, pagination);
+    return this.findByPropertiesAndCount({
+      service: {
+        companyId
+      }
+    }, pagination);
   }
 
   public async countAll(pagination?: PaginationInput): Promise<number> {
