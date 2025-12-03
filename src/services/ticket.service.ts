@@ -8,7 +8,14 @@ import TicketLogService from "./ticketLogs.service";
 import TicketLogEntity from "@/entities/TicketLog.entity";
 import ManagerEntity from "@/entities/Manager.entity";
 import BaseService from "./base.service";
-import { FindOptionsWhere, In, MoreThanOrEqual } from "typeorm";
+import {
+  FindOptionsWhere,
+  ILike,
+  In,
+  LessThan,
+  MoreThan,
+  MoreThanOrEqual,
+} from "typeorm";
 
 export default class TicketService extends BaseService<TicketEntity> {
   private static instance: TicketService | null = null;
@@ -48,35 +55,61 @@ export default class TicketService extends BaseService<TicketEntity> {
   }
 
   // PAGINATION TEMPS REEL
- async findByPropertiesAndCount(
+  async findByPropertiesAndCount(
     fields: FindOptionsWhere<TicketEntity>,
     pagination?: PaginationInput
   ): Promise<{ items: TicketEntity[]; totalCount: number }> {
-    console.log("fields", fields);
-    console.log("pagination", pagination);
+    const totalCount = await this.repo.count({ where: fields });
 
-    const totalCount = await this.repo.count({
-      where: fields,
-    });
-
-    const where: FindOptionsWhere<TicketEntity> = { ...fields };
-
-    if (pagination?.cursor) {
-      where.createdAt = MoreThanOrEqual(new Date(pagination.cursor));
-    }
+    const baseWhere: FindOptionsWhere<TicketEntity> = { ...fields };
 
     if (fields.status && Array.isArray(fields.status)) {
-      where.status = In(fields.status as Status[]);
+      baseWhere.status = In(fields.status as Status[]);
+    }
+
+    if (fields.lastName && typeof fields.lastName === "string") {
+      baseWhere.lastName = ILike(`%${fields.lastName}%`);
+    }
+
+    let where:
+      | FindOptionsWhere<TicketEntity>
+      | FindOptionsWhere<TicketEntity>[];
+
+    if (!pagination?.cursor) {
+      where = baseWhere;
+    } else {
+      const cursorTicket = await this.repo.findOne({
+        where: { id: pagination.cursor },
+        select: ["updatedAt", "id"],
+      });
+
+      if (!cursorTicket) {
+        throw new Error("Invalid cursor");
+      }
+
+      const { updatedAt, id } = cursorTicket;
+
+      if (pagination.order === "ASC") {
+        where = [
+          { ...baseWhere, updatedAt: MoreThan(updatedAt) },
+          { ...baseWhere, updatedAt, id: MoreThan(id) },
+        ];
+      } else {
+        where = [
+          { ...baseWhere, updatedAt: LessThan(updatedAt) },
+          { ...baseWhere, updatedAt, id: LessThan(id) },
+        ];
+      }
     }
 
     const items = await this.repo.find({
       where,
-      order: { createdAt: pagination?.order ?? "ASC", id: "ASC" },
-      take: pagination?.limit ?? 10,
+      order: {
+        updatedAt: pagination?.order ?? "DESC",
+      },
+      take: pagination?.limit ?? 50,
+      skip: pagination?.offset ?? 0,
     });
-
-    console.log("totalCount (global):", totalCount);
-    console.log("items.length:", items.length);
 
     return { items, totalCount };
   }

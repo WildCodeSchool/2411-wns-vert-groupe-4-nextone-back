@@ -25,7 +25,6 @@ import { withFilter } from "graphql-subscriptions";
 import { pubsub } from "@/lib/pubsub";
 import { EVENTS } from "@/subscriptions/events";
 
-
 type TicketDeleted = {
   message: string;
   success: boolean;
@@ -171,6 +170,7 @@ const ticketResolver = {
       await pubsub.publish(EVENTS.TICKET_STATUS_CHANGED, {
         ticketStatusChanged: updated,
       });
+      await pubsub.publish(EVENTS.TICKET_UPDATED, { ticketUpdated: updated });
       await pubsub.publish(EVENTS.TICKETS_CHANGED, {
         ticketsChanged: updated,
       });
