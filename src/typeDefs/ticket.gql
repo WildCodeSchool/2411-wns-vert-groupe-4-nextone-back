@@ -37,7 +37,6 @@ type Mutation {
   updateTicketStatus(data: UpdateStatusTicketInput!): Ticket!
 }
 
-
 type Subscription {
   ticketAdded: Ticket!
   ticketAddedByProperties(fields: TicketPropertiesInput): Ticket
@@ -54,10 +53,11 @@ enum Order {
 }
 
 input PaginationInput {
-  cursor: DateTime
+  cursor: String
   created: DateTime
   limit: Int
   order: Order
+  offset: Int
 }
 
 input TicketPropertiesInput {
@@ -66,7 +66,7 @@ input TicketPropertiesInput {
   email: String
   phone: String
   status: [Status!]
-  serviceId: ID
+  serviceId: [ID]
   createdAt: DateTime
   updatedAt: DateTime
 }
