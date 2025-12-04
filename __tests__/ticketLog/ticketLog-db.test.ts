@@ -34,6 +34,7 @@ import {
   fakeTicketInput,
 } from "../../src/utils/dataTest";
 import loaders, { Loaders } from "../../src/lib/dataLoaderContext";
+import { constraintDirectiveTypeDefs } from "graphql-constraint-directive";
 
 //ON MOCK LA DB AVEC CELLE DE TEST
 jest.mock("../../src/lib/datasource", () => {
@@ -66,7 +67,7 @@ type ContextTest = {
 };
 
 let server: ApolloServer<ContextTest>;
-const schema = makeExecutableSchema({ typeDefs, resolvers });
+const schema = makeExecutableSchema({ typeDefs:[constraintDirectiveTypeDefs, typeDefs], resolvers });
 
 beforeAll(async () => {
   server = new ApolloServer({

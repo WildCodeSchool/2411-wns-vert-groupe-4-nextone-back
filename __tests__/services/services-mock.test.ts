@@ -8,7 +8,7 @@ import { LIST_SERVICES, FIND_SERVICE_BY_ID,
 } from "../../src/queries/service.query"
 import typeDefs from '../../src/typeDefs';
 import { MutationCreateServiceArgs } from '../../src/generated/graphql';
-
+import { constraintDirectiveTypeDefs } from "graphql-constraint-directive";
 
 type Service = {
   id: string;
@@ -109,7 +109,7 @@ beforeAll(async () => {
   };
 
   const schema = makeExecutableSchema({
-    typeDefs,
+    typeDefs:[constraintDirectiveTypeDefs, typeDefs],
     resolvers: serviceResolvers,
   });
 

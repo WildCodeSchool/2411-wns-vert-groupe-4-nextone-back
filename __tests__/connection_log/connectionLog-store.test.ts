@@ -13,6 +13,7 @@ import {
 } from "../../src/generated/graphql";
 
 import typeDefs from "../../src/typeDefs";
+import { constraintDirectiveTypeDefs } from "graphql-constraint-directive";
 
 const CREATE_LOG = `#graphql
   mutation createConnectionLog($type: ConnectionEnum!, $managerId: String!) {
@@ -28,7 +29,7 @@ const CREATE_LOG = `#graphql
 let server: ApolloServer;
 
 const schema = makeExecutableSchema({
-  typeDefs,
+  typeDefs:[constraintDirectiveTypeDefs, typeDefs],
   resolvers: {},
 });
 

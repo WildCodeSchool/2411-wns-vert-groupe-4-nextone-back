@@ -47,24 +47,24 @@ input CompanyByPropertiesInput {
 }
 
 input CreateCompanyInput {
-  name: String!
-  address: String!
-  postalCode: String!
-  city: String!
-  siret: String!
-  email: String!
-  phone: String!
+  name: String! @constraint(pattern: "^[0-9a-zA-Z]*$", maxLength: 50, minLength: 3)
+  address: String! @constraint(pattern: "^[0-9a-zA-Z ]*$", maxLength: 255, minLength: 3)
+  postalCode: String! @constraint(pattern: "^[0-9]*$", maxLength: 5, minLength: 5)
+  city: String! @constraint(pattern: "^[a-zA-Z]*$", maxLength: 50, minLength: 3)
+  siret: String! @constraint(pattern: "^[0-9 ]*$", maxLength: 17, minLength: 15)
+  email: String! @constraint(format: "email", maxLength: 50)
+  phone: String! @constraint(pattern: "^[0-9]*$", maxLength: 15, minLength: 10)
 }
 
 input UpdateCompanyInput {
-  id: ID!
-  name: String
-  address: String
-  postalCode: String
-  city: String
-  siret: String
-  email: String
-  phone: String
+  id: ID! @constraint(pattern: "uuid")
+  name: String @constraint(pattern: "^[0-9a-zA-Z]*$", maxLength: 50, minLength: 3)
+  address: String @constraint(pattern: "^[0-9a-zA-Z ]*$", maxLength: 255, minLength: 3)
+  postalCode: String @constraint(pattern: "^[0-9]*$", maxLength: 5, minLength: 5)
+  city: String @constraint(pattern: "^[a-zA-Z]*$", maxLength: 50, minLength: 3)
+  siret: String @constraint(pattern: "^[0-9 ]*$", maxLength: 17, minLength: 15)
+  email: String @constraint(format: "email", maxLength: 50)
+  phone: String @constraint(pattern: "^[0-9]*$", maxLength: 15, minLength: 10)
 }
 
 

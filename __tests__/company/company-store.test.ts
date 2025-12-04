@@ -25,6 +25,7 @@ import {
   UPDATE_COMPANY,
 } from "../../src/queries/company.query";
 import { fakeCompanyInput } from "../../src/utils/dataTest";
+import { constraintDirectiveTypeDefs } from "graphql-constraint-directive";
 
 
 const fakeCompanies: Partial<CompanyEntity>[] = [
@@ -52,7 +53,7 @@ type TResponseDelete = {
 ;
 
 let server: ApolloServer;
-const schema = makeExecutableSchema({ typeDefs, resolvers });
+const schema = makeExecutableSchema({ typeDefs:[constraintDirectiveTypeDefs, typeDefs], resolvers });
 const store = createMockStore({ schema });
 
 store.set("Query", "ROOT", "companies", fakeCompanies);

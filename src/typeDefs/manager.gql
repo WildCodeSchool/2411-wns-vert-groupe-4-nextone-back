@@ -4,6 +4,7 @@ enum ManagerRole {
   OPERATOR
   ADMIN
   SUPER_ADMIN
+  NEXTONE_ADMIN
 }
 
 type CheckToken {
@@ -78,11 +79,11 @@ type Mutation {
 }
 
 input InputRegister {
-  firstName: String!
-  lastName: String!
-  email: String!
-  password: String!
-  confirmPassword: String!
+  firstName: String! @constraint(pattern: "^[a-zA-Z]*$", maxLength: 50, minLength: 3)
+  lastName: String! @constraint(pattern: "^[a-zA-Z]*$", maxLength: 50, minLength: 3)
+  email: String! @constraint(format: "email", maxLength: 50)
+  password: String! @constraint(maxLength: 100, minLength: 6)
+  confirmPassword: String! @constraint(maxLength: 100, minLength: 6)
   invitationToken: String!
   # role: ManagerRole = OPERATOR
   isGloballyActive: Boolean = FALSE
@@ -95,15 +96,15 @@ input InputLogin {
 }
 
 input UpdateManagerInput {
-  firstName: String
-  lastName: String
+  firstName: String @constraint(pattern: "^[a-zA-Z]*$", maxLength: 50, minLength: 3)
+  lastName: String @constraint(pattern: "^[a-zA-Z]*$", maxLength: 50, minLength: 3)
   role: ManagerRole
 }
 
 input ResetPasswordInput {
   resetToken : String!
-  newPassword: String!
-  confirmNewPassword: String!
-  email: String!
+  newPassword: String! @constraint(maxLength: 100, minLength: 6)
+  confirmNewPassword: String! @constraint(maxLength: 100, minLength: 6)
+  email: String! @constraint(format: "email", maxLength: 50)
 }
 

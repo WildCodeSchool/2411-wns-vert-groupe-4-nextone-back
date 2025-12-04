@@ -1,5 +1,6 @@
 import {
   DeleteResponseCompany,
+  ManagerRole,
   MutationCreateCompanyArgs,
   MutationDeleteCompanyArgs,
   MutationUpdateCompanyArgs,
@@ -27,10 +28,11 @@ const companyResolver = {
     },
     company: async (
       _: any,
-      { id }: QueryCompanyArgs, ctx: MyContext
+      { id }: QueryCompanyArgs,
+      ctx: MyContext
     ): Promise<CompanyEntity | null> => {
       if (id !== ctx.manager?.companyId) {
-        throw new GraphQLError("Forbidden.")
+        throw new GraphQLError("Forbidden.");
       }
       const company = await companyService.findById(id);
       return company;
@@ -52,7 +54,7 @@ const companyResolver = {
       ctx: MyContext
     ): Promise<DeleteResponseCompany> => {
       if (args.id !== ctx.manager?.companyId) {
-        throw new GraphQLError("Forbidden.")
+        throw new GraphQLError("Forbidden.");
       }
       const isDeleted = await companyService.deleteOne(args.id);
       return buildResponse(
@@ -67,7 +69,7 @@ const companyResolver = {
       { manager }: MyContext
     ): Promise<CompanyEntity | null> => {
       if (args.data.id !== manager?.companyId) {
-        throw new GraphQLError("Forbidden.")
+        throw new GraphQLError("Forbidden.");
       }
       checkStrictRole(manager?.role, "SUPER_ADMIN");
       const partialCompany: Partial<CompanyEntity> = { ...args.data };
@@ -101,10 +103,18 @@ const companyResolver = {
   },
 };
 
+const isUserFromNextOne =
+  (): ResolverWrapper => (next) => (root, args,context, info) => {
+    const { manager } = context
+    if (manager?.role !== ManagerRole.NextoneAdmin || manager.companyId !== process.env.NEXTONE_COMPANY_ID) {
+      throw new GraphQLError('Forbidden.')
+    }
+    return next(root, args, context, info);
+  };
 
 const composition = {
   "*.*": [isAuthenticated()],
+  "Mutation.createCompany": [isUserFromNextOne()]
+};
 
-}
-
-export default composeResolvers(companyResolver, composition)
+export default composeResolvers(companyResolver, composition);

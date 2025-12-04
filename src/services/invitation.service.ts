@@ -5,6 +5,8 @@ import {
   createTokenAndExpiration,
 } from "@/utils/tokens.utils";
 import { GraphQLError } from "graphql";
+import { CreateInvitationInput, ManagerRole } from "@/generated/graphql";
+import { sendMail } from "@/lib/mail";
 
 export default class InvitationService extends BaseService<InvitationEntity> {
   private static instance: InvitationService | null = null;
@@ -46,5 +48,15 @@ export default class InvitationService extends BaseService<InvitationEntity> {
     if (invit?.companyId !== companyId) {
       throw new GraphQLError("Forbidden.");
     }
+  }
+
+  public async createInvitation(
+    args: CreateInvitationInput,
+    companyId: string,
+  ) {
+    console.log("CREATONE INVIT : ", args, companyId)
+    const created = await super.createOne({...args, companyId})
+    await sendMail(created.email, created.token, "CREATE_INVITATION")
+    return created
   }
 }

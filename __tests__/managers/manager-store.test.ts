@@ -27,6 +27,7 @@ import {
 } from "../../src/queries/manager.query";
 import typeDefs from "../../src/typeDefs";
 import { fakeManagerInput, fakeManagerStore } from "../../src/utils/dataTest";
+import { constraintDirectiveTypeDefs } from "graphql-constraint-directive";
 
 type StatusResponse = {
   message: string;
@@ -94,7 +95,8 @@ const listManagers: Partial<Manager>[] = [
 let server: ApolloServer;
 
 const schema = makeExecutableSchema({
-  typeDefs,
+  typeDefs: [constraintDirectiveTypeDefs, typeDefs],
+
 });
 
 const store = createMockStore({ schema });

@@ -40,11 +40,47 @@ const createCompanyAndSuperAdmin = async (): Promise<CompanyEntity[]> => {
   google.email = "support@google.com";
   google.phone = "0142685300";
 
+  const nextOne = new CompanyEntity()
+  nextOne.id = process.env.NEXTONE_COMPANY_ID!
+  nextOne.name = "NextONE"
+  nextOne.address = "52, Avenue de la rigole"
+  nextOne.postalCode = "31000"
+  nextOne.city = "TOULOUSE"
+  nextOne.siret = "362 521 879 00089"
+  nextOne.email = "contact@nextone.com"
+  nextOne.phone = "0134562347"
+
   const created = await CompanyService.getService().createOne(company);
   const created2 = await CompanyService.getService().createOne(google);
+  const created3 = await CompanyService.getService().createOne(nextOne)
+  
+  await createNextOneAdmin(created3)
 
   return [created, created2];
 };
+
+const createNextOneAdmin = async (company: CompanyEntity): Promise<void> => {
+  const users = [
+    ["Corentin", 'TOURNIER'],
+    ["Oceane", "BERTRAND"],
+    ["Maeva", "RODRIGUEZ"],
+    ["William", "MIBELLI"]
+  ] as const;
+
+  await Promise.all(users.map(async (u) => {
+    const [firstname, lastname] = u
+    const user = new ManagerEntity()
+    user.firstName = firstname
+    user.lastName = lastname
+    user.companyId = company.id
+    user.role = ManagerRole.NextoneAdmin
+    user.email = `${firstname.toLowerCase()}.${lastname.toLowerCase()}@nextone.com`
+    user.password = "nextone"
+    user.isGloballyActive = true
+
+    await new ManagerService().create(user)
+  }))
+}
 
 const createServices = async (
   companies: CompanyEntity[]

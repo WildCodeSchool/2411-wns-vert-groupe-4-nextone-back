@@ -34,9 +34,10 @@ import {
   fakeCompanyDataUpdateInput,
   fakeManagerContext,
 } from "../../src/utils/dataTest";
+import { constraintDirectiveTypeDefs } from "graphql-constraint-directive";
 
 let server: ApolloServer;
-const schema = makeExecutableSchema({ typeDefs, resolvers });
+const schema = makeExecutableSchema({ typeDefs:[constraintDirectiveTypeDefs, typeDefs], resolvers });
 
 beforeAll(async () => {
   server = new ApolloServer({
@@ -93,7 +94,7 @@ describe("TEST COMPANY AVEC DB", () => {
     });
 
     assert(response.body.kind === "single");
-
+    console.log('FAKE MANAGER : ', fakeManagerContext)
     expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data).not.toBeNull();
     const { id, ...rest } = response.body.singleResult.data?.company!;
