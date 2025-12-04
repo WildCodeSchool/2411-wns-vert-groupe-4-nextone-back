@@ -72,28 +72,28 @@ input TicketPropertiesInput {
 }
 
 input UpdateStatusTicketInput {
-  id: ID!
+  id: ID! @constraint(pattern: "uuid")
   status: Status!
 }
 
 input GenerateTicketInput {
-  firstName: String
-  lastName: String
-  email: String!
-  phone: String
+  firstName: String @constraint(pattern: "^[0-9a-zA-Z]*$", maxLength: 50, minLength: 3)
+  lastName: String @constraint(pattern: "^[0-9a-zA-Z]*$", maxLength: 50, minLength: 3)
+  email: String! @constraint(format: "email", maxLength: 50)
+  phone: String @constraint(pattern: "^[0-9]*$", maxLength: 15, minLength: 10)
   status: Status
-  serviceId: ID!
+  serviceId: ID! @constraint(pattern: "uuid")
 }
 
 input UpdateTicketInput {
-  id: ID!
-  code: String
-  firstName: String
-  lastName: String
-  email: String
-  phone: String
+  id: ID! @constraint(pattern: "uuid")
+  code: String @constraint(pattern: "^[0-9a-zA-Z]*$", maxLength: 50, minLength: 3)
+  firstName: String @constraint(pattern: "^[0-9a-zA-Z]*$", maxLength: 50, minLength: 3)
+  lastName: String @constraint(pattern: "^[0-9a-zA-Z]*$", maxLength: 50, minLength: 3)
+  email: String @constraint(format: "email", maxLength: 50)
+  phone: String @constraint(pattern: "^[0-9]*$", maxLength: 15, minLength: 10)
   status: Status
-  serviceId: ID
+  serviceId: ID @constraint(pattern: "uuid")
 }
 
 type DeletedTicketResponse {

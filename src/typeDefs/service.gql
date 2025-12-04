@@ -33,13 +33,13 @@ type ServiceResponse {
 
 ### Input
 input CreateServiceInput {
-  name: String!
-  companyId: UUID!
+  name: String! @constraint(pattern: "^[0-9a-zA-Z]*$", maxLength: 50, minLength: 3)
+  companyId: UUID! @constraint(pattern: "uuid")
   isGloballyActive: Boolean
 }
 
 input UpdateServiceInput {
-  name: String
+  name: String @constraint(pattern: "^[0-9a-zA-Z]*$", maxLength: 50, minLength: 3)
 }
 
 # ============================================================================

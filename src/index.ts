@@ -17,6 +17,7 @@ import ManagerEntity from "./entities/Manager.entity";
 import { authContext } from "./lib/authContext";
 import type { Loaders } from "./lib/dataLoaderContext";
 import { GraphQLResolveInfo } from "graphql";
+import { createApollo4QueryValidationPlugin, constraintDirectiveTypeDefs } from "graphql-constraint-directive/apollo4"
 
 export interface MyContext {
   req: Request;
@@ -49,7 +50,7 @@ const authorizedCorsUrls = [
 ];
 
 // MR
-const schema = makeExecutableSchema({ typeDefs, resolvers });
+const schema = makeExecutableSchema({ typeDefs:[constraintDirectiveTypeDefs, typeDefs], resolvers });
 
 const wsServer = new WebSocketServer({
   server: httpServer,
@@ -70,6 +71,7 @@ const server = new ApolloServer<MyContext>({
   schema,
   validationRules: [depthLimit(5)],
   plugins: [
+    createApollo4QueryValidationPlugin(),
     ApolloServerPluginDrainHttpServer({ httpServer }),
     {
       async serverWillStart() {
