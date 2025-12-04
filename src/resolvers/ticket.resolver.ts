@@ -11,17 +11,15 @@ import {
   Status,
   Ticket,
 } from "@/generated/graphql";
-import { MyContext } from "..";
+import { MyContext, ResolverWrapper } from "..";
 import ServicesService from "@/services/services.service";
-import { In } from "typeorm";
+import { In, Not } from "typeorm";
 import {
   TICKET_ADDED,
   pubsub as localPubsub,
 } from "../subscriptions/ticketsByProperties";
 import WhitelistedIpService from "@/services/whitelistedIp.service";
 import { composeResolvers } from "@graphql-tools/resolvers-composition";
-import { IResolvers } from "@graphql-tools/utils";
-import { GraphQLFieldResolver } from "graphql";
 import { withFilter } from "graphql-subscriptions";
 import { pubsub } from "@/lib/pubsub";
 import { EVENTS } from "@/subscriptions/events";
@@ -31,25 +29,35 @@ type TicketDeleted = {
   success: boolean;
 };
 
-const ticketService = TicketService.gettInstance();
 
 const ticketResolver = {
   Query: {
     tickets: async (
       _: any,
-      { pagination }: QueryTicketsArgs
+      { pagination }: QueryTicketsArgs,
+      ctx: MyContext
     ): Promise<{ items: TicketEntity[]; totalCount: number }> => {
-      return await ticketService.findAllPaginated(pagination);
+      // const ticketsList = await ticketService.findAll(pagination);
+      // const totalCount = await ticketService.countAll(pagination);
+      // return { items: ticketsList, totalCount };
+      return await TicketService.gettInstance().findAllPaginated(
+        ctx.manager?.companyId!,
+        pagination
+      );
     },
 
     ticketsForTVDisplay: async (
       _: any,
-      { pagination, serviceId }: QueryTicketsForTvDisplayArgs,
-      { ip }: MyContext
+      { pagination }: QueryTicketsArgs,
+      { ip, manager }: MyContext
     ): Promise<TicketEntity[] | null> => {
       console.log("IP du client :", ip);
       const whitelistedIpService = new WhitelistedIpService();
-      const whitelistedIPs = await whitelistedIpService.getAllWhitelistedIps();
+
+      const whitelistedIPs = await whitelistedIpService.getAllWhitelistedIps(
+        manager?.companyId!
+      );
+
       const ipIsWhitelisted = whitelistedIPs.some(
         (ipEntry) => ipEntry.ipAddress === ip
       );
@@ -73,28 +81,41 @@ const ticketResolver = {
 
     ticket: async (
       _: any,
-      { id }: QueryTicketArgs
+      { id }: QueryTicketArgs,
+      ctx: MyContext
     ): Promise<TicketEntity | null> => {
-      const ticket = await ticketService.findById(id);
+      const ticket = await TicketService.gettInstance().findById(id);
+      if (ticket?.service.companyId !== ctx.manager?.companyId) {
+        return null;
+      }
       return ticket;
     },
 
     ticketsByProperties: async (
       _: any,
-      { fields, pagination }: QueryTicketsByPropertiesArgs
+      { fields, pagination }: QueryTicketsByPropertiesArgs,
+      ctx: MyContext
     ): Promise<{ items: TicketEntity[]; totalCount: number }> => {
       const { status, ...rest } = fields || {};
       if (status) {
-        return await ticketService.findByPropertiesAndCount(
-          { ...rest, status: In(status) },
+        return await TicketService.gettInstance().findByPropertiesAndCount(
+          {
+            ...rest,
+            status: In(status),
+            service: { companyId: ctx.manager?.companyId! },
+          },
           pagination
         );
       }
-      return await ticketService.findByPropertiesAndCount(rest, pagination);
-      // return await ticketService.findByPropertiesAndCount(
-      //   { ...rest, status: Not(Status.Archived) },
-      //   pagination
-      // );
+      //return await ticketService.findByPropertiesAndCount(rest, pagination);
+      return await TicketService.gettInstance().findByPropertiesAndCount(
+        {
+          ...rest,
+          status: Not(Status.Archived),
+          service: { companyId: ctx.manager?.companyId! },
+        },
+        pagination
+      );
     },
   },
 
@@ -113,7 +134,7 @@ const ticketResolver = {
         throw new Error("No service with this id.");
       }
       const creationData = { ...data, service };
-      const newTicket = await ticketService.createOne(creationData);
+      const newTicket = await TicketService.gettInstance().createOne(creationData);
       await localPubsub.publish(TICKET_ADDED, { ticketAdded: newTicket });
       await pubsub.publish(EVENTS.TICKET_CREATED, { ticketCreated: newTicket });
       await pubsub.publish(EVENTS.TICKETS_CHANGED, {
@@ -128,10 +149,10 @@ const ticketResolver = {
       { id }: QueryTicketArgs,
       ctx: MyContext
     ): Promise<TicketDeleted> => {
-      const ticketToDelete = await ticketService.findById(id);
-      const isTicketDeleted = await ticketService.deleteOne(id);
+      const ticketToDelete = await TicketService.gettInstance().findById(id);
+      const isTicketDeleted = await TicketService.gettInstance().deleteOne(id);
       if (!isTicketDeleted) {
-        return { message: "Ticket not found", success: isTicketDeleted };
+        return { message: "Ticket not found", success: false };
       }
       // MR
       if (ticketToDelete) {
@@ -151,7 +172,7 @@ const ticketResolver = {
       { data }: MutationUpdateTicketArgs,
       ctx: MyContext
     ): Promise<TicketEntity | null> => {
-      const updated = await ticketService.updateOne(data.id, data);
+      const updated = await TicketService.gettInstance().updateOne(data.id, data);
       // MR
       if (updated) {
         await pubsub.publish(EVENTS.TICKET_UPDATED, { ticketUpdated: updated });
@@ -167,14 +188,9 @@ const ticketResolver = {
       args: MutationUpdateTicketStatusArgs,
       ctx: MyContext
     ): Promise<TicketEntity> => {
-      if (!ctx.manager) {
-        throw new Error(
-          "Vous devez etre connecté pour mettre à jour le status d'un ticket."
-        );
-      }
-      const updated = await ticketService.updateTicketStatus(
+      const updated = await TicketService.gettInstance().updateTicketStatus(
         args.data,
-        ctx.manager
+        ctx.manager!
       );
       // MR
       await pubsub.publish(EVENTS.TICKET_STATUS_CHANGED, {
@@ -267,13 +283,10 @@ const ticketResolver = {
       return await ctx.loaders.ticketLogByTicketIdLoader.load(ticket.id);
     },
   },
+
 };
 
-type ResolverWrapper<TSource = any, TArgs = any, TResult = any> = (
-  next: GraphQLFieldResolver<TSource, MyContext, TArgs, TResult>
-) => GraphQLFieldResolver<TSource, MyContext, TArgs, TResult>;
-
-const isAuthenticated =
+export const isAuthenticated =
   (): ResolverWrapper => (next) => (root, args, context, info) => {
     if (!context.manager) {
       throw new Error("You are not authenticated!");
@@ -282,8 +295,25 @@ const isAuthenticated =
     return next(root, args, context, info);
   };
 
+const isTicketFromThisCompany =
+  (): ResolverWrapper<MutationUpdateTicketArgs> =>
+  (next) =>
+  async (root, args, context, info) => {
+    await TicketService.gettInstance().checkTicket(args.data.id, context.manager?.companyId!)
+    if (args.data.serviceId) {
+      await new ServicesService().checkService(args.data.serviceId, context.manager?.companyId!)
+    }
+    return next(root, args, context, info);
+  };
+
+
 const composition = {
   "Query.*": [isAuthenticated()],
+  "Mutation.{updateTicket, updateTicketStatus, deleteTicket}": [
+    isAuthenticated(),
+    isTicketFromThisCompany(),
+  ],
+  // "Mutation.generateTicket": [isAuthenticated(), isServiceFromThisCompany()],
 };
 const composedResolver = composeResolvers(ticketResolver, composition);
 export default composedResolver;

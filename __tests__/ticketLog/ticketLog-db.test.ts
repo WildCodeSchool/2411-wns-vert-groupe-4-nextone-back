@@ -1,7 +1,6 @@
 import { ApolloServer } from "@apollo/server";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import typeDefs from "../../src/typeDefs";
-import resolvers from "../../src/resolvers";
 import testDataSource from "../../src/lib/datasource_test";
 import {
   DeleteResponse,
@@ -44,6 +43,8 @@ jest.mock("../../src/lib/datasource", () => {
   };
 });
 
+import resolvers from "../../src/resolvers";
+
 type PartialTicketLog = Partial<Omit<TicketLog, "ticket">> & {
   ticket: Pick<Ticket, "id" | "firstName" | "lastName">;
 };
@@ -61,6 +62,7 @@ type TResponseDelete = {
 
 type ContextTest = {
   loaders: Loaders;
+  manager: Partial<ManagerEntity>
 };
 
 let server: ApolloServer<ContextTest>;
@@ -137,6 +139,9 @@ describe("TEST TICKETLOG DANS LA DB", () => {
       {
         contextValue: {
           loaders,
+          manager: {
+            companyId: baseCompanyId
+          }
         },
       }
     );
@@ -192,6 +197,9 @@ describe("TEST TICKETLOG DANS LA DB", () => {
       {
         contextValue: {
           loaders,
+          manager: {
+            companyId: baseCompanyId
+          }
         },
       }
     );
@@ -228,6 +236,9 @@ describe("TEST TICKETLOG DANS LA DB", () => {
       {
         contextValue: {
           loaders,
+          manager: {
+            companyId: baseCompanyId
+          }
         },
       }
     );
@@ -253,6 +264,9 @@ describe("TEST TICKETLOG DANS LA DB", () => {
       {
         contextValue: {
           loaders,
+          manager: {
+            companyId: baseCompanyId
+          }
         },
       }
     );

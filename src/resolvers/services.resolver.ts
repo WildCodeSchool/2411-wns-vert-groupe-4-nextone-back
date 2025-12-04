@@ -8,26 +8,29 @@ import {
   ServiceResponse,
   Service,
 } from "@/generated/graphql";
-import { MyContext } from "..";
+import { MyContext, ResolverWrapper } from "..";
 import { canAccessAuthorization, checkStrictRole } from "@/utils/manager";
 import { buildResponse } from "@/utils/authorization";
 import AuthorizationService from "@/services/authorization.service";
 import { ServiceEntity } from "@/entities/Service.entity";
 import TicketService from "@/services/ticket.service";
 import CompanyService from "@/services/company.service";
+import { composeResolvers } from "@graphql-tools/resolvers-composition";
+import { isAuthenticated } from "./ticket.resolver";
+import { GraphQLError } from "graphql";
 import { pubsub } from "@/lib/pubsub";
 import { EVENTS } from "@/subscriptions/events";
 
 const servicesService = new ServicesService();
 
-export default {
+const serviceResolver = {
   Query: {
     services: async (
       _: any,
       __: any,
       ctx: MyContext
     ): Promise<ServiceEntity[]> => {
-      const services = await new ServicesService().getAllServices();
+      const services = await new ServicesService().getAllServices(ctx.manager?.companyId!);
       return services;
     },
 
@@ -48,6 +51,9 @@ export default {
       { manager }: MyContext
     ): Promise<ServiceEntity> => {
       checkStrictRole(manager?.role, "SUPER_ADMIN");
+      if (data.companyId !== manager?.companyId) {
+        throw new GraphQLError("Forbidden.");
+      }
       const newService = await servicesService.createService(data);
       return newService;
     },
@@ -135,3 +141,21 @@ export default {
     },
   },
 };
+
+const isServiceFromCompany =
+  (): ResolverWrapper<MutationUpdateServiceArgs> =>
+  (next) =>
+  async (root, args, context, info) => {
+    await servicesService.checkService(args.id, context.manager?.companyId!)
+    return next(root, args, context, info);
+  };
+
+const composition = {
+  "*.*": [isAuthenticated()],
+  "Query.service": [isServiceFromCompany()],
+  "Mutation.{updateService, deleteService, toggleGlobalAccessService}": [
+    isServiceFromCompany(),
+  ],
+};
+
+export default composeResolvers(serviceResolver, composition);

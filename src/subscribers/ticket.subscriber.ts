@@ -11,6 +11,7 @@ import { MyContext } from "..";
 import { Status } from "@/generated/graphql";
 import TicketService from "@/services/ticket.service";
 import ManagerEntity from "@/entities/Manager.entity";
+import ServicesService from "@/services/services.service";
 
 @EventSubscriber()
 export class TicketSubscriber
@@ -21,7 +22,13 @@ export class TicketSubscriber
   }
 
   async beforeInsert(event: InsertEvent<TicketEntity>): Promise<void> {
-    const { name, id } = event.entity.service;
+
+    const service = await new ServicesService().db.findOne({
+      where: {
+        id: event.entity.serviceId
+      }
+    })
+    const { name } = service!
     // const totalTicket = await TicketService.gettInstance().TodayTicket(id);
     const now = new Date();
 
@@ -45,7 +52,7 @@ export class TicketSubscriber
     );
     const totalTicket = await event.manager.getRepository(TicketEntity).count({
       where: {
-        service: { id },
+        service: { id: event.entity.serviceId },
         createdAt: Between(start, end),
       },
     });

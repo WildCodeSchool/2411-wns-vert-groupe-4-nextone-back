@@ -7,21 +7,26 @@ import {
   QueryGetServiceAuthorizationsArgs,
   AuthorizationResponse,
 } from "@/generated/graphql";
-import { MyContext } from "..";
+import { MyContext, ResolverWrapper } from "..";
 import { buildResponse } from "@/utils/authorization";
 import AuthorizationEntity from "@/entities/Authorization.entity";
 import ServicesService from "@/services/services.service";
 import ManagerService from "@/services/manager.service";
+import { composeResolvers } from "@graphql-tools/resolvers-composition";
+import { isAuthenticated } from "./ticket.resolver";
+
 
 const authorizationService = new AuthorizationService();
 
-export default {
+const authorizationResovler = {
   Query: {
     getServiceAuthorizations: async (
       _: any,
       { serviceId }: QueryGetServiceAuthorizationsArgs,
       ctx: MyContext
     ) => {
+      await new ServicesService().checkService(serviceId, ctx.manager?.companyId!)
+
       return await authorizationService.getByService(serviceId);
     },
 
@@ -30,6 +35,7 @@ export default {
       { managerId }: QueryGetEmployeeAuthorizationsArgs,
       ctx: MyContext
     ) => {
+      await new ManagerService().checkManager(managerId, ctx.manager?.companyId!)
       return await authorizationService.getByManager(managerId);
     },
   },
@@ -126,3 +132,19 @@ export default {
     },
   },
 };
+
+const isFromCompany =
+  (): ResolverWrapper<MutationUpdateAuthorizationArgs> =>
+  (next) =>
+  async (root, args, context, info) => {
+    await new ServicesService().checkService(args.input.serviceId, context.manager?.companyId!)
+    await new ManagerService().checkManager(args.input.managerId, context.manager?.companyId!)
+    return next(root, args, context, info);
+  };
+
+const composition = {
+  "Query.*": [isAuthenticated()],
+  "Mutation.*": [isAuthenticated(), isFromCompany()],
+};
+
+export default composeResolvers(authorizationResovler, composition);

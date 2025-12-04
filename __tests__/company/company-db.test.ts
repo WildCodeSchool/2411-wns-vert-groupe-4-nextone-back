@@ -32,6 +32,7 @@ import { validate } from "uuid";
 import {
   fakeCompanyInput,
   fakeCompanyDataUpdateInput,
+  fakeManagerContext,
 } from "../../src/utils/dataTest";
 
 let server: ApolloServer;
@@ -85,6 +86,10 @@ describe("TEST COMPANY AVEC DB", () => {
       variables: {
         data: fakeCompanyInput,
       },
+    }, {
+      contextValue: {
+        manager: fakeManagerContext
+      }
     });
 
     assert(response.body.kind === "single");
@@ -112,7 +117,7 @@ describe("TEST COMPANY AVEC DB", () => {
       },
       {
         contextValue: {
-          manager: { role: "SUPER_ADMIN" },
+          manager: { role: "SUPER_ADMIN", companyId: baseId },
         },
       }
     );
@@ -130,6 +135,10 @@ describe("TEST COMPANY AVEC DB", () => {
   it("RECUPERATION DE L'ENSEMBLE DES COMPANIES", async () => {
     const response = await server.executeOperation<TResponseALL>({
       query: COMPANIES,
+    }, {
+      contextValue: {
+        manager: fakeManagerContext
+      }
     });
 
     assert(response.body.kind === "single");
@@ -153,6 +162,12 @@ describe("TEST COMPANY AVEC DB", () => {
       variables: {
         id: baseId,
       },
+    }, {
+      contextValue: {
+        manager: {
+          companyId: baseId
+        }
+      }
     });
 
     assert(response.body.kind === "single");
@@ -172,6 +187,12 @@ describe("TEST COMPANY AVEC DB", () => {
         variables: {
           id: baseId,
         },
+      }, {
+        contextValue: {
+          manager: {
+            companyId: baseId
+          }
+        }
       }
     );
 

@@ -6,18 +6,17 @@ import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHt
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import { WebSocketServer } from "ws";
 import { useServer } from "graphql-ws/use/ws";
-import datasource from "./lib/datasource";
 import "dotenv/config";
 import depthLimit from "graphql-depth-limit";
 import cors from "cors";
 import { expressMiddleware } from "@apollo/server/express4";
 import typeDefs from "./typeDefs";
 import resolvers from "./resolvers";
+import datasource from "./lib/datasource";
 import ManagerEntity from "./entities/Manager.entity";
 import { authContext } from "./lib/authContext";
 import type { Loaders } from "./lib/dataLoaderContext";
-import nodemailer from "nodemailer";
-import { sendMail } from "./lib/mail";
+import { GraphQLResolveInfo } from "graphql";
 
 export interface MyContext {
   req: Request;
@@ -26,6 +25,19 @@ export interface MyContext {
   loaders: Loaders;
   ip: string | null | undefined;
 }
+
+export type ResolverFn<TArgs = {}> = (
+  source: any,
+  args: TArgs,
+  context: MyContext,
+  info: GraphQLResolveInfo,
+) => any;
+
+
+export type ResolverWrapper<TArgs = {}> = (
+  next: ResolverFn<TArgs>,
+) => ResolverFn<TArgs>;
+
 
 const app = express();
 const httpServer = http.createServer(app);

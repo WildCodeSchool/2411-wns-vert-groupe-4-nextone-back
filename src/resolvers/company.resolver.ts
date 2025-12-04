@@ -5,7 +5,7 @@ import {
   MutationUpdateCompanyArgs,
   QueryCompanyArgs,
 } from "@/generated/graphql";
-import { MyContext } from "..";
+import { MyContext, ResolverWrapper } from "..";
 import CompanyService from "@/services/company.service";
 import CompanyEntity from "@/entities/Company.entity";
 import { checkStrictRole } from "@/utils/manager";
@@ -13,10 +13,13 @@ import { buildResponse } from "@/utils/authorization";
 import ServicesService from "@/services/services.service";
 import ManagerService from "@/services/manager.service";
 import SettingService from "@/services/setting.service";
+import { composeResolvers } from "@graphql-tools/resolvers-composition";
+import { isAuthenticated } from "./ticket.resolver";
+import { GraphQLError } from "graphql";
 
 const companyService = CompanyService.getService();
 
-export default {
+const companyResolver = {
   Query: {
     companies: async (_: any): Promise<CompanyEntity[]> => {
       const companies = await companyService.findAll();
@@ -24,8 +27,11 @@ export default {
     },
     company: async (
       _: any,
-      { id }: QueryCompanyArgs
+      { id }: QueryCompanyArgs, ctx: MyContext
     ): Promise<CompanyEntity | null> => {
+      if (id !== ctx.manager?.companyId) {
+        throw new GraphQLError("Forbidden.")
+      }
       const company = await companyService.findById(id);
       return company;
     },
@@ -45,6 +51,9 @@ export default {
       args: MutationDeleteCompanyArgs,
       ctx: MyContext
     ): Promise<DeleteResponseCompany> => {
+      if (args.id !== ctx.manager?.companyId) {
+        throw new GraphQLError("Forbidden.")
+      }
       const isDeleted = await companyService.deleteOne(args.id);
       return buildResponse(
         isDeleted,
@@ -57,6 +66,9 @@ export default {
       args: MutationUpdateCompanyArgs,
       { manager }: MyContext
     ): Promise<CompanyEntity | null> => {
+      if (args.data.id !== manager?.companyId) {
+        throw new GraphQLError("Forbidden.")
+      }
       checkStrictRole(manager?.role, "SUPER_ADMIN");
       const partialCompany: Partial<CompanyEntity> = { ...args.data };
       const updatedCompany = await companyService.updateOne(
@@ -88,3 +100,11 @@ export default {
     },
   },
 };
+
+
+const composition = {
+  "*.*": [isAuthenticated()],
+
+}
+
+export default composeResolvers(companyResolver, composition)
