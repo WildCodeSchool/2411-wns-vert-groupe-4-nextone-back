@@ -8,7 +8,6 @@ import TicketLogService from "./ticketLogs.service";
 import TicketLogEntity from "@/entities/TicketLog.entity";
 import ManagerEntity from "@/entities/Manager.entity";
 import BaseService from "./base.service";
-import { FindOptionsWhere, In, MoreThanOrEqual } from "typeorm";
 import CompanyService from "./company.service";
 import { GraphQLError } from "graphql";
 import {

@@ -48,7 +48,7 @@ const ticketResolver = {
 
     ticketsForTVDisplay: async (
       _: any,
-      { pagination }: QueryTicketsArgs,
+      { pagination, serviceId  }: QueryTicketsForTvDisplayArgs,
       { ip, manager }: MyContext
     ): Promise<TicketEntity[] | null> => {
       console.log("IP du client :", ip);
@@ -64,7 +64,7 @@ const ticketResolver = {
       if (!ipIsWhitelisted) {
         return null;
       }
-      let ticketsList = await ticketService.findAll(pagination);
+      let ticketsList = await TicketService.gettInstance().findAll(pagination);
       ticketsList = ticketsList.filter(
         (ticket) => ticket.status === "PENDING"
       );
