@@ -56,7 +56,7 @@ export default class TicketService extends BaseService<TicketEntity> {
     return found;
   }
 
-  // PAGINATION TEMPS REEL
+  // PAGINATION TEMPS REEL  = A ENLEVER OU MODIFIER
   async findByPropertiesAndCount(
     fields: FindOptionsWhere<TicketEntity>,
     pagination?: PaginationInput

@@ -124,11 +124,20 @@ const serviceResolver = {
     authorizations: async ({ id }: { id: string }) => {
       return await new AuthorizationService().getByService(id);
     },
+    // tickets: async ({ id }: { id: string }) => {
+    //   return await TicketService.gettInstance().findByProperties({
+    //     serviceId: id,
+    //   });
+    // },
+
     tickets: async ({ id }: { id: string }) => {
-      return await TicketService.gettInstance().findByProperties({
-        serviceId: id,
-      });
+      const result =
+        await TicketService.gettInstance().findByPropertiesAndCount({
+          serviceId: id,
+        });
+      return result.items || [];
     },
+
     company: async ({ id }: { id: string }) => {
       const service = await new ServicesService().getServiceById(id);
       if (!service) {
