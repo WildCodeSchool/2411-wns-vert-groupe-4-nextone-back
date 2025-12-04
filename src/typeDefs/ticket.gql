@@ -27,7 +27,7 @@ type Query {
     pagination: PaginationInput
   ): TicketsPaginatedResult!
 
-  ticketsForTVDisplay: [Ticket!]
+ ticketsForTVDisplay(pagination: PaginationInput, serviceId: ID): [Ticket]
 }
 
 type Mutation {
@@ -36,7 +36,6 @@ type Mutation {
   updateTicket(data: UpdateTicketInput!): Ticket
   updateTicketStatus(data: UpdateStatusTicketInput!): Ticket!
 }
-
 
 type Subscription {
   ticketAdded: Ticket!
@@ -54,10 +53,11 @@ enum Order {
 }
 
 input PaginationInput {
-  cursor: DateTime
+  cursor: String
   created: DateTime
   limit: Int
   order: Order
+  offset: Int
 }
 
 input TicketPropertiesInput {

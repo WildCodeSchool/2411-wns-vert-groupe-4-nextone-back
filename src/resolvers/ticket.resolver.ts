@@ -7,6 +7,7 @@ import {
   QueryTicketArgs,
   QueryTicketsArgs,
   QueryTicketsByPropertiesArgs,
+  QueryTicketsForTvDisplayArgs,
   Status,
   Ticket,
 } from "@/generated/graphql";
@@ -44,6 +45,7 @@ const ticketResolver = {
         pagination
       );
     },
+
     ticketsForTVDisplay: async (
       _: any,
       { pagination }: QueryTicketsArgs,
@@ -59,14 +61,24 @@ const ticketResolver = {
       const ipIsWhitelisted = whitelistedIPs.some(
         (ipEntry) => ipEntry.ipAddress === ip
       );
-
       if (!ipIsWhitelisted) {
         return null;
       }
-
-      const ticketsList = await TicketService.gettInstance().findAll(pagination);
+      let ticketsList = await ticketService.findAll(pagination);
+      ticketsList = ticketsList.filter(
+        (ticket) => ticket.status === "PENDING"
+      );
+      if (serviceId) {
+        ticketsList = ticketsList.filter(
+          (ticket) => ticket.serviceId === serviceId
+        );
+      }
+      ticketsList = ticketsList.sort(
+        (a, b) => a.updatedAt.getTime() - b.updatedAt.getTime()
+      );
       return ticketsList;
-    },
+  },
+
     ticket: async (
       _: any,
       { id }: QueryTicketArgs,
@@ -184,6 +196,7 @@ const ticketResolver = {
       await pubsub.publish(EVENTS.TICKET_STATUS_CHANGED, {
         ticketStatusChanged: updated,
       });
+      await pubsub.publish(EVENTS.TICKET_UPDATED, { ticketUpdated: updated });
       await pubsub.publish(EVENTS.TICKETS_CHANGED, {
         ticketsChanged: updated,
       });
