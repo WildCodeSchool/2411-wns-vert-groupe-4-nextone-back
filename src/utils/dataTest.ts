@@ -24,7 +24,8 @@ export const fakeTicketInput: GenerateTicketInput = {
 
 export const fakeManagerContext = {
   id: "c5057602-1f4b-4c39-bfb7-8a5642668f64",
-  companyId: ""
+  companyId: process.env.NEXTONE_COMPANY_ID!,
+  role: ManagerRole.NextoneAdmin
 }
 
 export const fakeCompanyInput: CreateCompanyInput = {

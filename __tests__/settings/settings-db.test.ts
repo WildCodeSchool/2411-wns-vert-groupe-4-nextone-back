@@ -29,9 +29,10 @@ import { validate } from "uuid";
 import CompanyEntity from "../../src/entities/Company.entity";
 import CompanyService from "../../src/services/company.service";
 import { fakeCompanyInput, fakeManagerContext } from "../../src/utils/dataTest";
+import { constraintDirectiveTypeDefs } from "graphql-constraint-directive";
 
 let server: ApolloServer;
-const schema = makeExecutableSchema({ typeDefs, resolvers });
+const schema = makeExecutableSchema({ typeDefs:[constraintDirectiveTypeDefs, typeDefs], resolvers });
 
 type TresponseALL = {
   settings: Setting[];

@@ -30,6 +30,7 @@ import {
   fakeService,
   fakeManager,
 } from "../../src/utils/dataTest";
+import { constraintDirectiveTypeDefs } from "graphql-constraint-directive";
 
 // Types de réponse
 type TMappedAuthorization = {
@@ -111,7 +112,7 @@ const fakeResolvers = (store: IMockStore) => ({
 let server: ApolloServer;
 
 beforeAll(async () => {
-  const schema = makeExecutableSchema({ typeDefs, resolvers: {} });
+  const schema = makeExecutableSchema({ typeDefs:[constraintDirectiveTypeDefs, typeDefs], resolvers: {} });
   const store = createMockStore({ schema });
 
   store.set("Query", "ROOT", "getServiceAuthorizations", authData);

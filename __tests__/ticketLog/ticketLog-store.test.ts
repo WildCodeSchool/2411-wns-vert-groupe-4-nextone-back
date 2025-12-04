@@ -21,6 +21,7 @@ import {
 } from "../../src/generated/graphql";
 import assert from "assert";
 import { fakeTicketLog, fakeData } from "../../src/utils/dataTest";
+import { constraintDirectiveTypeDefs } from "graphql-constraint-directive";
 
 // type TResponse = {
 //   ticketLogs: Partial<TicketLog>[];
@@ -40,7 +41,7 @@ type TResponseCreate = {
 type TResponseDelete = {};
 
 let server: ApolloServer;
-const schema = makeExecutableSchema({ typeDefs, resolvers });
+const schema = makeExecutableSchema({ typeDefs:[constraintDirectiveTypeDefs, typeDefs], resolvers });
 const store = createMockStore({ schema });
 
 // store.set("Query", "ROOT", "ticketLogs", fakeData);

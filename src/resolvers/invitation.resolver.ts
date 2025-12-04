@@ -1,6 +1,7 @@
 import {
   DeleteResponse,
   Invitation,
+  ManagerRole,
   MutationCreateInvitationArgs,
   MutationDeleteInvitationArgs,
   MutationRenewInvitationArgs,
@@ -23,15 +24,20 @@ const invitationResolver = {
       return await InvitationService.getInstance().findById(id);
     },
     invitations: async (_: any, __: any, ctx: MyContext) => {
-      const res =  await InvitationService.getInstance().findByProperties({
-        companyId: ctx.manager?.companyId
+      const res = await InvitationService.getInstance().findByProperties({
+        companyId: ctx.manager?.companyId,
       });
-      return res.items
+      return res.items;
     },
-    sortedInvitations: async (_:any, __: any, ctx: MyContext): Promise<SortedInvitations> => {
-      const invitations = await InvitationService.getInstance().findByProperties({
-        companyId: ctx.manager?.companyId!
-      });
+    sortedInvitations: async (
+      _: any,
+      __: any,
+      ctx: MyContext
+    ): Promise<SortedInvitations> => {
+      const invitations =
+        await InvitationService.getInstance().findByProperties({
+          companyId: ctx.manager?.companyId!,
+        });
       const sorted: SortedInvitations = {
         expired: [],
         pending: [],
@@ -54,13 +60,6 @@ const invitationResolver = {
       { args }: MutationCreateInvitationArgs,
       { manager }: MyContext
     ): Promise<Invitation> => {
-      if (!manager) {
-        throw new GraphQLError("NOT LOGGED IN", {
-          extensions: {
-            type: "AUTH_ERROR",
-          },
-        });
-      }
       const existingEmail = await new ManagerService().findManagerByEmail(
         args.email
       );
@@ -71,25 +70,22 @@ const invitationResolver = {
           },
         });
       }
-      const { companyId } = manager;
-      const created = await InvitationService.getInstance().createOne({
-        ...args,
+      const { companyId } = manager!;
+
+      const created = await InvitationService.getInstance().createInvitation(
+        args,
         companyId,
-      });
-      const mail = await sendMail(
-        created.email,
-        created.token,
-        "CREATE_INVITATION"
       );
       return created;
     },
     updateInvitation: async (
       _: any,
-      { args }: MutationUpdateInvitationArgs, ctx: MyContext
+      { args }: MutationUpdateInvitationArgs,
+      ctx: MyContext
     ): Promise<Invitation | null> => {
-      const invit = await InvitationService.getInstance().findById(args.id)
+      const invit = await InvitationService.getInstance().findById(args.id);
       if (!invit || invit.companyId !== ctx.manager?.companyId!) {
-        throw new GraphQLError("Forbidden.")
+        throw new GraphQLError("Forbidden.");
       }
       const { id, ...rest } = args;
       const updated = await InvitationService.getInstance().updateOne(id, rest);
@@ -135,14 +131,17 @@ const isInvitationFromCompany =
   (): ResolverWrapper<MutationRenewInvitationArgs> =>
   (next) =>
   async (root, args, context, info) => {
-    await InvitationService.getInstance().checkInvitation(args.id, context.manager?.companyId!)
+    await InvitationService.getInstance().checkInvitation(
+      args.id,
+      context.manager?.companyId!
+    );
     return next(root, args, context, info);
   };
 
 const composition = {
   "*.*": [isAuthenticated()],
 
-  "Mutation.{deleteInvitation, renewInvitation}": [isInvitationFromCompany()]
+  "Mutation.{deleteInvitation, renewInvitation}": [isInvitationFromCompany()],
 };
 
 export default composeResolvers(invitationResolver, composition);

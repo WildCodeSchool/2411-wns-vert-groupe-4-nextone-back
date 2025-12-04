@@ -24,9 +24,10 @@ import {
   UPDATE_SETTING,
 } from "../../src/queries/setting.query";
 import assert from "assert";
+import { constraintDirectiveTypeDefs } from "graphql-constraint-directive";
 
 let server: ApolloServer;
-const schema = makeExecutableSchema({ typeDefs, resolvers });
+const schema = makeExecutableSchema({ typeDefs:[constraintDirectiveTypeDefs, typeDefs], resolvers });
 const store = createMockStore({ schema });
 
 const fakeSettings: Setting[] = [

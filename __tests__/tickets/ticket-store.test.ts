@@ -23,6 +23,7 @@ import {
 import typeDefs from "../../src/typeDefs";
 import { fakeService } from "../../src/utils/dataTest";
 import TicketResolver from "../../src/resolvers/ticket.resolver";
+import { constraintDirectiveTypeDefs } from "graphql-constraint-directive";
 
 type ResponseData = {
   tickets: {
@@ -71,7 +72,7 @@ const generateTicketExample: GenerateTicketInput = {
 let server: ApolloServer;
 
 const schema = makeExecutableSchema({
-  typeDefs: typeDefs,
+  typeDefs: [constraintDirectiveTypeDefs, typeDefs],
   resolvers: TicketResolver,
 });
 

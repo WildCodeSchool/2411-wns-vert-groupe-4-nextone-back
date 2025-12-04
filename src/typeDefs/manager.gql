@@ -4,6 +4,7 @@ enum ManagerRole {
   OPERATOR
   ADMIN
   SUPER_ADMIN
+  NEXTONE_ADMIN
 }
 
 type CheckToken {
