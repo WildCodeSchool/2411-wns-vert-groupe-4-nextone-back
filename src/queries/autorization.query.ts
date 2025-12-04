@@ -21,6 +21,12 @@ query GetEmployeeAuthorizations($managerId: UUID!) {
     service {
       id
       name
+      isGloballyActive    
+      tickets {          
+        id
+        code
+        status
+      }
     }
     manager {
       firstName
