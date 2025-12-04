@@ -107,7 +107,6 @@ const ticketResolver = {
           pagination
         );
       }
-      //return await ticketService.findByPropertiesAndCount(rest, pagination);
       return await TicketService.gettInstance().findByPropertiesAndCount(
         {
           ...rest,
