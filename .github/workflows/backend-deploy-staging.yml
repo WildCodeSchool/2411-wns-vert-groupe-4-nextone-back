@@ -17,7 +17,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: "18"
       - name: Install dependencies
         run: npm install --legacy-peer-deps
       - name: Run codegen
@@ -57,4 +57,17 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/nextone-back-staging:latest
           platforms: linux/amd64,linux/arm64,linux/x86_64
-  #Add scan zap job
+  zap-scan:
+    needs: docker
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/staging'
+    steps:
+      - name: Wait for webhook deployment
+        run: sleep 120
+
+      - name: Run OWASP ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: ${{ secrets.BACKEND_STAGING_URL }}
+          fail_action: true
+          cmd_options: "-I"

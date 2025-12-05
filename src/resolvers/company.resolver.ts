@@ -104,17 +104,20 @@ const companyResolver = {
 };
 
 const isUserFromNextOne =
-  (): ResolverWrapper => (next) => (root, args,context, info) => {
-    const { manager } = context
-    if (manager?.role !== ManagerRole.NextoneAdmin || manager.companyId !== process.env.NEXTONE_COMPANY_ID) {
-      throw new GraphQLError('Forbidden.')
+  (): ResolverWrapper => (next) => (root, args, context, info) => {
+    const { manager } = context;
+    if (
+      manager?.role !== ManagerRole.NextoneAdmin ||
+      manager.companyId !== process.env.NEXTONE_COMPANY_ID
+    ) {
+      throw new GraphQLError("Forbidden.");
     }
     return next(root, args, context, info);
   };
 
 const composition = {
   "*.*": [isAuthenticated()],
-  "Mutation.createCompany": [isUserFromNextOne()]
+  "Mutation.createCompany": [isUserFromNextOne()],
 };
 
 export default composeResolvers(companyResolver, composition);
