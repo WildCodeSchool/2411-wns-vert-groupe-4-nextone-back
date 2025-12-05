@@ -18,6 +18,7 @@ import { authContext } from "./lib/authContext";
 import type { Loaders } from "./lib/dataLoaderContext";
 import nodemailer from "nodemailer";
 import { sendMail } from "./lib/mail";
+import uploadImage from "./routes/uploadImage";
 
 export interface MyContext {
   req: Request;
@@ -28,6 +29,9 @@ export interface MyContext {
 }
 
 const app = express();
+
+uploadImage(app)
+
 const httpServer = http.createServer(app);
 
 const authorizedCorsUrls = [
@@ -73,7 +77,7 @@ const server = new ApolloServer<MyContext>({
 // END MR
 
 async function main() {
-  await server.start();
+      await server.start();
   console.log("🚀 Apollo Server démarré sur /graphql");
 
   await datasource

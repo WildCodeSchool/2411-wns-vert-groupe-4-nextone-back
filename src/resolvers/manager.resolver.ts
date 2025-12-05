@@ -132,6 +132,7 @@ export default {
             firstName: ctx.manager.firstName,
             lastName: ctx.manager.lastName,
             role: ctx.manager.role,
+            profileImage: ctx.manager.profileImage,
             companyId: ctx.manager.companyId,
           }
         : null;

@@ -116,7 +116,7 @@ export default class ManagerService {
 
   async updateManager(
     id: string,
-    data: Partial<Pick<ManagerEntity, "firstName" | "lastName" | "role">>
+    data: Partial<Pick<ManagerEntity, "firstName" | "lastName" | "role" |  "profileImage">>
   ) {
     const managerFound = await this.getManagerById(id);
     const updatedManager = this.db.merge(managerFound, data);
