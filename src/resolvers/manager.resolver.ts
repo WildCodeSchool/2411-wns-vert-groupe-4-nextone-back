@@ -33,10 +33,16 @@ import CompanyService from "@/services/company.service";
 import { sendMail } from "@/lib/mail";
 import InvitationService from "@/services/invitation.service";
 import { GraphQLError } from "graphql";
+//OBER
+import path from "path";
+import fs from 'fs-extra';
+import { GraphQLUpload } from 'graphql-upload-minimal';
+//OBER
 
 const managerService = new ManagerService();
 
 export default {
+  Upload: GraphQLUpload, //OBER
   Query: {
     managers: async (
       _: any,
@@ -215,9 +221,22 @@ export default {
       if (!isManagerUpdatingSelf) {
         checkRoleInHierarchy(manager.role, targetManager.role);
       }
+      //OBER
+      let file = ""
+      if(data.profileImage) {
+        file = await updateProfileImage(data.profileImage);
+      }    
+      const { profileImage, ...restUpdateManager } = data; // on retire profilePicture de data
+      const finalObject = {
+        ...targetManager,       // ancien objet
+        ...restUpdateManager,            // le reste des clés de data
+        profileImage: file, // nouvelle clé avec l’ancien contenu
+      };
+      //OBER
+
       const updatedManager = plainToInstance(
         UpdateInput,
-        { ...targetManager, ...data },
+        finalObject, //OBER
         { exposeDefaultValues: true }
       );
       await validateOrThrow(updatedManager);
@@ -292,3 +311,34 @@ export default {
     },
   },
 };
+
+//OBER
+async function updateProfileImage(profileImage:any) {
+   const { createReadStream, filename, mimetype, encoding } = await profileImage;
+
+      // Validation simple
+      if (!['image/png', 'image/jpeg'].includes(mimetype)) {
+        throw new Error('Type de fichier non autorisé.');
+      }
+
+      const safeName = Date.now() + '-' + filename;
+      const filePath = path.join(process.cwd(), 'public', 'profilePicture', safeName);
+      await fs.ensureDir(path.join(process.cwd(), 'public', 'profilePicture'));
+
+      await new Promise<void>((resolve, reject) => {
+        const stream = createReadStream();
+        const out = fs.createWriteStream(filePath);
+        stream.pipe(out);
+        out.on('finish', resolve);
+        out.on('error', reject);
+      });
+
+      // return {
+      //   filename: safeName,
+      //   mimetype,
+      //   encoding,
+      //   url: `/public/profilePicture/${safeName}`,
+      // };
+      return `/public/profilePicture/${safeName}`;
+}
+//OBER

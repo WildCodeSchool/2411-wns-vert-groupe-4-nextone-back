@@ -1,4 +1,6 @@
 scalar DateTime
+#OBER
+scalar Upload
 
 enum ManagerRole {
   OPERATOR
@@ -20,6 +22,7 @@ type Manager {
   firstName: String!
   lastName: String!
   email: String!
+  profileImage: String #OBER
   role: ManagerRole!
   isGloballyActive: Boolean!
   authorizations: [Authorization!]!
@@ -69,7 +72,9 @@ type Query {
 type Mutation {
   createManager(infos: InputRegister!): Manager!
   deleteManager(id: ID!): Message!
+
   updateManager(id: ID!, data: UpdateManagerInput!): Manager!
+
   # associateManagerAtService(managerId: ID!, serviceId: ID!): Message!
   # dissociateManagerFromService(managerId: ID!, serviceId: ID!): Message!
   toggleGlobalAccessManager(id: UUID!): Message!
@@ -98,6 +103,7 @@ input UpdateManagerInput {
   firstName: String
   lastName: String
   role: ManagerRole
+  profileImage: Upload #OBER
 }
 
 input ResetPasswordInput {
@@ -106,4 +112,3 @@ input ResetPasswordInput {
   confirmNewPassword: String!
   email: String!
 }
-

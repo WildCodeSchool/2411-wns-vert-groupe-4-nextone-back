@@ -97,6 +97,10 @@ export default class ManagerEntity {
   })
   ticketLogs: TicketLogEntity[];
 
+  //OBER
+  @Column({ nullable: true })
+  profileImage?: string;
+
   @CreateDateColumn()
   createdAt: Date;
 
@@ -120,4 +124,7 @@ export class UpdateInput {
 
   @Length(2, 50, { message: "Le nom est requis." })
   lastName: string;
+
+  //OBER
+  profileImage?: string;
 }
