@@ -79,8 +79,8 @@ type Mutation {
 }
 
 input InputRegister {
-  firstName: String! @constraint(pattern: "^[a-zA-Z]*$", maxLength: 50, minLength: 3)
-  lastName: String! @constraint(pattern: "^[a-zA-Z]*$", maxLength: 50, minLength: 3)
+  firstName: String! @constraint(pattern: "^[a-zA-Zà-öø-ÿÀ-ÖØ-ß' -]{2,50}$", maxLength: 50, minLength: 2)
+  lastName: String! @constraint(pattern: "^[a-zA-Zà-öø-ÿÀ-ÖØ-ß' -]{2,50}$", maxLength: 50, minLength: 2)
   email: String! @constraint(format: "email", maxLength: 50)
   password: String! @constraint(maxLength: 100, minLength: 6)
   confirmPassword: String! @constraint(maxLength: 100, minLength: 6)
@@ -96,8 +96,8 @@ input InputLogin {
 }
 
 input UpdateManagerInput {
-  firstName: String @constraint(pattern: "^[a-zA-Z]*$", maxLength: 50, minLength: 3)
-  lastName: String @constraint(pattern: "^[a-zA-Z]*$", maxLength: 50, minLength: 3)
+  firstName: String @constraint(pattern: "^[a-zA-Zà-öø-ÿÀ-ÖØ-ß' -]{2,50}$", maxLength: 50, minLength: 2)
+  lastName: String @constraint(pattern: "^[a-zA-Zà-öø-ÿÀ-ÖØ-ß' -]{2,50}$", maxLength: 50, minLength: 2)
   role: ManagerRole
 }
 

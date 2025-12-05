@@ -39,11 +39,11 @@ type Mutation {
 input CreateSettingInput {
   name: String! @constraint(pattern: "^[0-9a-zA-Z]*$", maxLength: 50, minLength: 3)
   value: String! @constraint(pattern: "^[0-9a-zA-Z]*$", maxLength: 50, minLength: 3)
-  companyId: UUID! @constraint(pattern: "uuid")
+  companyId: UUID!
 }
 
 input UpdateSettingInput {
-  id: ID! @constraint(pattern: "uuid")
+  id: ID!
   name: String @constraint(pattern: "^[0-9a-zA-Z]*$", maxLength: 50, minLength: 3)
   value: String @constraint(pattern: "^[0-9a-zA-Z]*$", maxLength: 50, minLength: 3)
 }
