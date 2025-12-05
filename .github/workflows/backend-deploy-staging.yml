@@ -57,3 +57,4 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/nextone-back-staging:latest
           platforms: linux/amd64,linux/arm64,linux/x86_64
+  #Add scan zap job
