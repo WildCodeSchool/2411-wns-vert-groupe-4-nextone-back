@@ -21,6 +21,7 @@ type Manager {
   lastName: String!
   email: String!
   role: ManagerRole!
+  pictureImage: String
   isGloballyActive: Boolean!
   authorizations: [Authorization!]!
   company: Company!

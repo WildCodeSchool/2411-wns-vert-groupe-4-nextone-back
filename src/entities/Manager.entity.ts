@@ -46,6 +46,9 @@ export default class ManagerEntity {
   })
   password: string;
 
+  @Column()
+  profileImage: string;
+
   @Column({ nullable: true})
   resetToken?: string
 
