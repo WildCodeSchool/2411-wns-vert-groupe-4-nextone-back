@@ -1,50 +1,3 @@
-// import { ServiceEntity } from "../entities/Service.entity";
-// import TicketEntity from "@/entities/Ticket.entity";
-// import CompanyEntity from "@/entities/Company.entity";
-// import AuthorizationEntity from "@/entities/Authorization.entity";
-// import { DataSource } from "typeorm";
-// import ConnectionLogEntity from "@/entities/ConnectionLog.entity";
-// import SettingEntity from "@/entities/setting.entity";
-// import TicketLogEntity from "@/entities/TicketLog.entity";
-// import ManagerEntity from "@/entities/Manager.entity";
-// import CounterEntity from "@/entities/Counter.entity";
-
-// import { TicketSubscriber } from "@/subscribers/ticket.subscriber";
-// import CompanySubscriber from "@/subscribers/company.subscriber";
-// import InvitationEntity from "@/entities/Invitation.entity";
-// import ManagerSubscriber from "@/subscribers/manager.subscriber";
-// import { WhitelistedIpEntity } from "@/entities/WhitelistedIp.entity";
-
-// export default new DataSource({
-//   type: "postgres",
-//   host: "db",
-//   port: 5432,
-//   username: process.env.POSTGRES_USER,
-//   password: process.env.POSTGRES_PASSWORD,
-//   database: process.env.POSTGRES_DB,
-//   logging: ["error"],
-
-//   entities: [
-//     TicketEntity,
-//     ServiceEntity,
-//     AuthorizationEntity,
-//     CompanyEntity,
-//     SettingEntity,
-//     TicketLogEntity,
-//     ManagerEntity,
-//     ConnectionLogEntity,
-//     CounterEntity,
-//     InvitationEntity,
-//     WhitelistedIpEntity,
-//   ],
-//   subscribers: [TicketSubscriber, CompanySubscriber, ManagerSubscriber],
-//   synchronize: true,
-// });
-
-
-
-
-
 import { ServiceEntity } from "../entities/Service.entity";
 import TicketEntity from "@/entities/Ticket.entity";
 import CompanyEntity from "@/entities/Company.entity";
@@ -56,7 +9,6 @@ import TicketLogEntity from "@/entities/TicketLog.entity";
 import ManagerEntity from "@/entities/Manager.entity";
 import CounterEntity from "@/entities/Counter.entity";
 
-
 import { TicketSubscriber } from "@/subscribers/ticket.subscriber";
 import CompanySubscriber from "@/subscribers/company.subscriber";
 import InvitationEntity from "@/entities/Invitation.entity";
@@ -65,11 +17,13 @@ import { WhitelistedIpEntity } from "@/entities/WhitelistedIp.entity";
 
 export default new DataSource({
   type: "postgres",
-  // port: 5432,
-  // host: "db",
-  database: "nextone",
-  username: "postgres",
-  password: "secret",
+  host: "db",
+  port: 5432,
+  username: process.env.POSTGRES_USER,
+  password: process.env.POSTGRES_PASSWORD,
+  database: process.env.POSTGRES_DB,
+  logging: ["error"],
+
   entities: [
     TicketEntity,
     ServiceEntity,
@@ -83,9 +37,6 @@ export default new DataSource({
     InvitationEntity,
     WhitelistedIpEntity,
   ],
-  schema: "public",
-  subscribers:[TicketSubscriber, CompanySubscriber, ManagerSubscriber],
-  synchronize: true, // pas à utiliser en prod (faire des migrations pour la prod);
-  // logging: ["error"], // nous permettra de voir les requêtes SQL qui sont jouées dans le terminal*
-    logging: false, // nous permettra de voir les requêtes SQL qui sont jouées dans le terminal
+  subscribers: [TicketSubscriber, CompanySubscriber, ManagerSubscriber],
+  synchronize: true,
 });

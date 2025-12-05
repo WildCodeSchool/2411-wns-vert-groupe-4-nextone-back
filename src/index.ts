@@ -30,7 +30,7 @@ export interface MyContext {
 
 const app = express();
 
-// uploadImage(app)
+uploadImage(app)
 
 const httpServer = http.createServer(app);
 
