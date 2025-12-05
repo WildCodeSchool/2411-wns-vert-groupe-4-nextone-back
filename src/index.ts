@@ -16,6 +16,9 @@ import datasource from "./lib/datasource";
 import ManagerEntity from "./entities/Manager.entity";
 import { authContext } from "./lib/authContext";
 import type { Loaders } from "./lib/dataLoaderContext";
+import nodemailer from "nodemailer";
+import { sendMail } from "./lib/mail";
+import uploadImage from "./routes/uploadImage";
 import { GraphQLResolveInfo } from "graphql";
 import { createApollo4QueryValidationPlugin, constraintDirectiveTypeDefs } from "graphql-constraint-directive/apollo4"
 
@@ -41,6 +44,9 @@ export type ResolverWrapper<TArgs = {}> = (
 
 
 const app = express();
+
+uploadImage(app)
+
 const httpServer = http.createServer(app);
 
 const authorizedCorsUrls = [
@@ -87,7 +93,7 @@ const server = new ApolloServer<MyContext>({
 // END MR
 
 async function main() {
-  await server.start();
+      await server.start();
   console.log("🚀 Apollo Server démarré sur /graphql");
 
   await datasource

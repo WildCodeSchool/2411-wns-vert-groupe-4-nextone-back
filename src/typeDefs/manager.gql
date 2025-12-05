@@ -13,6 +13,7 @@ type CheckToken {
   firstName: String
   lastName: String
   role: ManagerRole
+  profileImage: String
   companyId: String
 }
 
@@ -22,6 +23,7 @@ type Manager {
   lastName: String!
   email: String!
   role: ManagerRole!
+  profileImage: String
   isGloballyActive: Boolean!
   authorizations: [Authorization!]!
   company: Company!
