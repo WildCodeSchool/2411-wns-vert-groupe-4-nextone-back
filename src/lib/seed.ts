@@ -17,8 +17,8 @@ import TicketService from "@/services/ticket.service";
 import datasource from "./datasource";
 import { DeepPartial } from "typeorm";
 
-const MANAGER_COUNT = 100
-const TICKET_COUNT = 500
+const MANAGER_COUNT = 100;
+const TICKET_COUNT = 500;
 
 const createCompanyAndSuperAdmin = async (): Promise<CompanyEntity[]> => {
   console.log("🏚️ --> CREATION DE LA COMPANY...");
@@ -31,7 +31,7 @@ const createCompanyAndSuperAdmin = async (): Promise<CompanyEntity[]> => {
   company.email = "contact@apple.com";
   company.phone = "0581185252";
 
-  const google = new CompanyEntity()
+  const google = new CompanyEntity();
   google.name = "Google France";
   google.address = "89, rue de Londres";
   google.postalCode = "75009";
@@ -40,47 +40,71 @@ const createCompanyAndSuperAdmin = async (): Promise<CompanyEntity[]> => {
   google.email = "support@google.com";
   google.phone = "0142685300";
 
-  const nextOne = new CompanyEntity()
-  nextOne.id = process.env.NEXTONE_COMPANY_ID!
-  nextOne.name = "NextONE"
-  nextOne.address = "52, Avenue de la rigole"
-  nextOne.postalCode = "31000"
-  nextOne.city = "TOULOUSE"
-  nextOne.siret = "362 521 879 00089"
-  nextOne.email = "contact@nextone.com"
-  nextOne.phone = "0134562347"
+  const nextOne = new CompanyEntity();
+  nextOne.id = process.env.NEXTONE_COMPANY_ID!;
+  nextOne.name = "NextONE";
+  nextOne.address = "52, Avenue de la rigole";
+  nextOne.postalCode = "31000";
+  nextOne.city = "TOULOUSE";
+  nextOne.siret = "362 521 879 00089";
+  nextOne.email = "contact@nextone.com";
+  nextOne.phone = "0134562347";
 
   const created = await CompanyService.getService().createOne(company);
   const created2 = await CompanyService.getService().createOne(google);
-  const created3 = await CompanyService.getService().createOne(nextOne)
+  const created3 = await CompanyService.getService().createOne(nextOne);
+
+  const appleAdmin = new ManagerEntity();
+  appleAdmin.firstName = "contact";
+  appleAdmin.lastName = "apple";
+  appleAdmin.companyId= created.id
+  appleAdmin.email = "contact@apple.com";
+  appleAdmin.role = ManagerRole.SuperAdmin;
+  appleAdmin.password = "nextone";
+
+  const managerService = new ManagerService()
+
+  await managerService.create(appleAdmin);
   
-  await createNextOneAdmin(created3)
+  const googleAdmin = new ManagerEntity();
+  googleAdmin.firstName = "support";
+  googleAdmin.lastName = "google";
+  googleAdmin.companyId = created2.id
+  googleAdmin.email = "support@google.com";
+  googleAdmin.role = ManagerRole.SuperAdmin;
+  googleAdmin.password = "nextone";
+
+  await managerService.create(googleAdmin);
+
+  await createNextOneAdmin(created3);
 
   return [created, created2];
 };
 
 const createNextOneAdmin = async (company: CompanyEntity): Promise<void> => {
   const users = [
-    ["Corentin", 'TOURNIER'],
+    ["Corentin", "TOURNIER"],
     ["Oceane", "BERTRAND"],
-    ["Maeva", "RODRIGUEZ"],
-    ["William", "MIBELLI"]
+    ["Maeva", "RODRIGUES"],
+    ["William", "MIBELLI"],
   ] as const;
 
-  await Promise.all(users.map(async (u) => {
-    const [firstname, lastname] = u
-    const user = new ManagerEntity()
-    user.firstName = firstname
-    user.lastName = lastname
-    user.companyId = company.id
-    user.role = ManagerRole.NextoneAdmin
-    user.email = `${firstname.toLowerCase()}.${lastname.toLowerCase()}@nextone.com`
-    user.password = "nextone"
-    user.isGloballyActive = true
+  await Promise.all(
+    users.map(async (u) => {
+      const [firstname, lastname] = u;
+      const user = new ManagerEntity();
+      user.firstName = firstname;
+      user.lastName = lastname;
+      user.companyId = company.id;
+      user.role = ManagerRole.NextoneAdmin;
+      user.email = `${firstname.toLowerCase()}.${lastname.toLowerCase()}@nextone.com`;
+      user.password = "nextone";
+      user.isGloballyActive = true;
 
-    await new ManagerService().create(user)
-  }))
-}
+      await new ManagerService().create(user);
+    })
+  );
+};
 
 const createServices = async (
   companies: CompanyEntity[]
@@ -93,21 +117,21 @@ const createServices = async (
     "Comptoir",
     "Réparation",
     "Pièces détachées",
-    "Atelier"
+    "Atelier",
   ];
   const res = await Promise.all(
     companies.map(async (company) => {
       const services = await Promise.all(
         serviceNames.map(async (name) => {
-        const data: CreateServiceInput = {
-          companyId: company.id,
-          name: `${company.name.split(' ')[0].toUpperCase()}_${name}`
-        }
-        const created = await new ServicesService().createService(data);
-        return created;
-      }) 
-      ) 
-      return services
+          const data: CreateServiceInput = {
+            companyId: company.id,
+            name: `${company.name.split(" ")[0].toUpperCase()}_${name}`,
+          };
+          const created = await new ServicesService().createService(data);
+          return created;
+        })
+      );
+      return services;
     })
   );
 
@@ -130,7 +154,9 @@ const createManagers = async (
     };
   };
 
-  const users = faker.helpers.multiple(createRandomUser, { count: MANAGER_COUNT });
+  const users = faker.helpers.multiple(createRandomUser, {
+    count: MANAGER_COUNT,
+  });
 
   const managers = await Promise.all(
     users.map(async (user) => {
@@ -147,17 +173,18 @@ const assignManagersToService = async (
   services: ServiceEntity[]
 ) => {
   console.log("🤝 --> ASSIGNATION DES MANAGERS DANS LES SERVICES...");
-  
+
   services.map(async (service) => {
     managers.map(async (manager) => {
       const random = Math.random();
       const superAdmin = await new ManagerService().db.findOne({
         where: {
-          companyId: manager.companyId
-        }
-      })
+          companyId: manager.companyId,
+          role: ManagerRole.SuperAdmin,
+        },
+      });
       if (!superAdmin) {
-        throw new Error("Can't find Super Admin.")
+        throw new Error("Can't find Super Admin.");
       }
       if (random > 0.5) {
         await new AuthorizationService().addAuthorization(
@@ -197,9 +224,11 @@ const createTicket = async (
   });
 
   const tickets: TicketEntity[] = [];
-  for (let i = 0; i < randomTickets.length; i++){
-    const ticket = await TicketService.gettInstance().createOne(randomTickets[i])
-    tickets.push(ticket)
+  for (let i = 0; i < randomTickets.length; i++) {
+    const ticket = await TicketService.gettInstance().createOne(
+      randomTickets[i]
+    );
+    tickets.push(ticket);
   }
   // const tickets = await Promise.all(
   //   randomTickets.map(async (ticket) => {
@@ -267,14 +296,14 @@ const updateTicketStatus = async (
     switch (j) {
       case 1:
         status = Status.Inprogress;
-        break
+        break;
       case 2:
         status = Status.Canceled;
-        break
+        break;
       case 3:
         j = 0;
         status = Status.Done;
-        break
+        break;
       default:
         status = Status.Archived;
     }
@@ -298,7 +327,6 @@ const initializeDataSource = async () => {
 };
 
 export const seedDB = async (): Promise<void> => {
-  
   try {
     console.log("-------------------");
     console.log("🚀 DEBUT DU SEEDING ...");
