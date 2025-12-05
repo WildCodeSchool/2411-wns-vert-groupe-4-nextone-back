@@ -79,13 +79,13 @@ type DeleteResponse {
 # }
 
 input CreateTicketLogInput {
-  ticketId: UUID!
-  managerId: UUID
+  ticketId: UUID! @constraint(pattern: "uuid")
+  managerId: UUID @constraint(pattern: "uuid")
   status: Status
 }
 
 input UpdateTicketLogInput {
-  id: UUID!
+  id: UUID! @constraint(pattern: "uuid")
   status: Status!
-  managerId: UUID
+  managerId: UUID @constraint(pattern: "uuid")
 }

@@ -1,6 +1,9 @@
 import CompanyEntity from "@/entities/Company.entity";
+import InvitationEntity from "@/entities/Invitation.entity";
 import ManagerEntity from "@/entities/Manager.entity";
 import { ManagerRole } from "@/generated/graphql";
+import { sendMail } from "@/lib/mail";
+import InvitationService from "@/services/invitation.service";
 import {
   EntitySubscriberInterface,
   EventSubscriber,
@@ -16,18 +19,18 @@ export default class CompanySubscriber
   }
 
   public async afterInsert(event: InsertEvent<CompanyEntity>): Promise<void> {
-    //CREATION D'UN SUPER ADMIN POUR LA COMPANY
-    const { email, name } = event.entity;
 
-    const admin = new ManagerEntity();
-    admin.email = email;
-    admin.role = ManagerRole.SuperAdmin;
-    admin.password = "saucisson";
-    admin.firstName = name;
-    admin.lastName = name;
-    admin.company = event.entity
-    admin.isGloballyActive = true;
+    //CREATION D'UNE INVITATION
+    const { email } = event.entity;
 
-    await event.manager.save(admin);
+    const invitation = new InvitationEntity()
+    invitation.email = email
+    invitation.role = ManagerRole.SuperAdmin
+    invitation.company = event.entity
+
+    const savedInvitation = await event.manager.save(invitation)
+
+    await sendMail(savedInvitation.email, savedInvitation.token, "CREATE_INVITATION")
+
   }
 }

@@ -10,8 +10,12 @@ export default class WhitelistedIpService {
     this.db = new WhitelistedIpRepository();
   }
 
-  async getAllWhitelistedIps(): Promise<WhitelistedIpEntity[]> {
-    const whitelistedIps = await this.db.find();
+  async getAllWhitelistedIps(companyId: string): Promise<WhitelistedIpEntity[]> {
+    const whitelistedIps = await this.db.find({
+      where: {
+        companyId
+      }
+    });
     return whitelistedIps;
   }
 

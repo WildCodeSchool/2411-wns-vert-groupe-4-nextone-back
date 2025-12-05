@@ -28,6 +28,6 @@ type WhitelistedIpResponse {
 
 ### Input
 input CreateWhitelistedIpInput {
-  ipAddress: String!
+  ipAddress: String! @constraint(format: "ipv4")
   companyId: UUID!
 }

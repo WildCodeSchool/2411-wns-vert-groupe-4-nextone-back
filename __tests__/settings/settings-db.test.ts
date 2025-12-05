@@ -28,10 +28,11 @@ import assert from "assert";
 import { validate } from "uuid";
 import CompanyEntity from "../../src/entities/Company.entity";
 import CompanyService from "../../src/services/company.service";
-import { fakeCompanyInput } from "../../src/utils/dataTest";
+import { fakeCompanyInput, fakeManagerContext } from "../../src/utils/dataTest";
+import { constraintDirectiveTypeDefs } from "graphql-constraint-directive";
 
 let server: ApolloServer;
-const schema = makeExecutableSchema({ typeDefs, resolvers });
+const schema = makeExecutableSchema({ typeDefs:[constraintDirectiveTypeDefs, typeDefs], resolvers });
 
 type TresponseALL = {
   settings: Setting[];
@@ -43,10 +44,6 @@ type TresponseDelete = {
   message: DeleteResponse;
 };
 
-
-
-
-
 beforeAll(async () => {
   server = new ApolloServer({
     schema,
@@ -56,7 +53,7 @@ beforeAll(async () => {
     if (!testDataSource.isInitialized) {
       await testDataSource.initialize();
     }
-    await testDataSource.synchronize(true)
+    await testDataSource.synchronize(true);
   } catch (error) {
     console.error("Error initializing test database:", error);
     throw error;
@@ -76,26 +73,31 @@ describe("TEST SETTINGS DANS LA DB", () => {
   let createdSetting: Setting;
 
   it("CREATION D'UN SETTING", async () => {
-
     //CREATION D'UNE COMPANY
     const company: CompanyEntity = await CompanyService.getService().createOne(
       fakeCompanyInput
     );
     companyId = company.id;
-
     const response = await server.executeOperation<
       TResponse,
       MutationCreateSettingArgs
-    >({
-      query: CREATE_SETTING,
-      variables: {
-        data: {
-          name: "Mon zoli setting",
-          companyId,
-          value: "jambon",
+    >(
+      {
+        query: CREATE_SETTING,
+        variables: {
+          data: {
+            name: "Mon zoli setting",
+            companyId,
+            value: "jambon",
+          },
         },
       },
-    });
+      {
+        contextValue: {
+          manager: { ...fakeManagerContext, companyId: companyId },
+        },
+      }
+    );
     assert(response.body.kind === "single");
 
     const { errors, data } = response.body.singleResult;
@@ -110,15 +112,22 @@ describe("TEST SETTINGS DANS LA DB", () => {
     const response = await server.executeOperation<
       TResponse,
       MutationUpdateSettingArgs
-    >({
-      query: UPDATE_SETTING,
-      variables: {
-        data: {
-          id: createdSetting.id,
-          name: "Mon setting degueu",
+    >(
+      {
+        query: UPDATE_SETTING,
+        variables: {
+          data: {
+            id: createdSetting.id,
+            name: "Mon setting degueu",
+          },
         },
       },
-    });
+      {
+        contextValue: {
+          manager: { ...fakeManagerContext, companyId: companyId },
+        },
+      }
+    );
 
     assert(response.body.kind === "single");
     const { errors, data } = response.body.singleResult;
@@ -134,9 +143,16 @@ describe("TEST SETTINGS DANS LA DB", () => {
   });
 
   it("RECUPERATION DE L'ENSEMBLE DES SETTINGS", async () => {
-    const response = await server.executeOperation<TresponseALL>({
-      query: SETTINGS,
-    });
+    const response = await server.executeOperation<TresponseALL>(
+      {
+        query: SETTINGS,
+      },
+      {
+        contextValue: {
+          manager: { ...fakeManagerContext, companyId: companyId },
+        },
+      }
+    );
 
     assert(response.body.kind === "single");
     const { data, errors } = response.body.singleResult;
@@ -150,19 +166,25 @@ describe("TEST SETTINGS DANS LA DB", () => {
     const response = await server.executeOperation<
       TresponseDelete,
       MutationDeleteSettingArgs
-    >({
-      query: DELETE_SETTING,
-      variables: {
-        id: createdSetting.id,
+    >(
+      {
+        query: DELETE_SETTING,
+        variables: {
+          id: createdSetting.id,
+        },
       },
-    });
-
+      {
+        contextValue: {
+          manager: { ...fakeManagerContext, companyId: companyId },
+        },
+      }
+    );
     assert(response.body.kind === "single");
     const { data, errors } = response.body.singleResult;
     expect(errors).toBeUndefined();
     expect(data).toEqual<TresponseDelete>({
       message: {
-        message:  "Le paramètre a été supprimé",
+        message: "Le paramètre a été supprimé",
         success: true,
       },
     });
@@ -175,6 +197,10 @@ describe("TEST SETTINGS DANS LA DB", () => {
         variables: {
           id: createdSetting.id,
         },
+      }, {
+        contextValue: {
+          manager: { ...fakeManagerContext, companyId: companyId },
+        }
       }
     );
 

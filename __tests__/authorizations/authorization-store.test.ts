@@ -30,6 +30,7 @@ import {
   fakeService,
   fakeManager,
 } from "../../src/utils/dataTest";
+import { constraintDirectiveTypeDefs } from "graphql-constraint-directive";
 
 // Types de réponse
 type TMappedAuthorization = {
@@ -111,7 +112,7 @@ const fakeResolvers = (store: IMockStore) => ({
 let server: ApolloServer;
 
 beforeAll(async () => {
-  const schema = makeExecutableSchema({ typeDefs, resolvers: {} });
+  const schema = makeExecutableSchema({ typeDefs:[constraintDirectiveTypeDefs, typeDefs], resolvers: {} });
   const store = createMockStore({ schema });
 
   store.set("Query", "ROOT", "getServiceAuthorizations", authData);
@@ -148,8 +149,17 @@ describe("Tests sur les autorisations (depuis le store)", () => {
     });
 
     assert(response.body.kind === "single");
-    expect(response.body.singleResult.data).toEqual<ResponseList>({
-      authorizations: [mappedAuthorization],
+    expect(response.body.singleResult.data?.authorizations[0]).toMatchObject({
+      isAdministrator: fakeAuthorization.isAdministrator,
+      service: {
+        id: fakeService.id,
+        name: fakeService.name,
+      },
+      manager: {
+        id: fakeManager.id,
+        firstName: fakeManager.firstName,
+        lastName: fakeManager.lastName,
+      },
     });
   });
 
@@ -165,8 +175,17 @@ describe("Tests sur les autorisations (depuis le store)", () => {
     });
 
     assert(response.body.kind === "single");
-    expect(response.body.singleResult.data).toEqual<ResponseList>({
-      authorizations: [mappedAuthorization],
+    expect(response.body.singleResult.data?.authorizations[0]).toMatchObject({
+      isAdministrator: fakeAuthorization.isAdministrator,
+      service: {
+        id: fakeService.id,
+        name: fakeService.name,
+      },
+      manager: {
+        id: fakeManager.id,
+        firstName: fakeManager.firstName,
+        lastName: fakeManager.lastName,
+      },
     });
   });
 

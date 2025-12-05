@@ -36,6 +36,6 @@ input CreateInvitationInput {
 
 input UpdateInvitationInput {
   id: UUID!
-  email: String
+  email: String @constraint(pattern: "email", maxLength: 255)
   role: ManagerRole
 }

@@ -1,7 +1,6 @@
 import { ApolloServer } from "@apollo/server";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import typeDefs from "../../src/typeDefs";
-import resolvers from "../../src/resolvers";
 import testDataSource from "../../src/lib/datasource_test";
 import {
   DeleteResponse,
@@ -35,6 +34,7 @@ import {
   fakeTicketInput,
 } from "../../src/utils/dataTest";
 import loaders, { Loaders } from "../../src/lib/dataLoaderContext";
+import { constraintDirectiveTypeDefs } from "graphql-constraint-directive";
 
 //ON MOCK LA DB AVEC CELLE DE TEST
 jest.mock("../../src/lib/datasource", () => {
@@ -43,6 +43,8 @@ jest.mock("../../src/lib/datasource", () => {
     default: jest.requireActual("../../src/lib/datasource_test").default,
   };
 });
+
+import resolvers from "../../src/resolvers";
 
 type PartialTicketLog = Partial<Omit<TicketLog, "ticket">> & {
   ticket: Pick<Ticket, "id" | "firstName" | "lastName">;
@@ -61,10 +63,11 @@ type TResponseDelete = {
 
 type ContextTest = {
   loaders: Loaders;
+  manager: Partial<ManagerEntity>
 };
 
 let server: ApolloServer<ContextTest>;
-const schema = makeExecutableSchema({ typeDefs, resolvers });
+const schema = makeExecutableSchema({ typeDefs:[constraintDirectiveTypeDefs, typeDefs], resolvers });
 
 beforeAll(async () => {
   server = new ApolloServer({
@@ -137,6 +140,9 @@ describe("TEST TICKETLOG DANS LA DB", () => {
       {
         contextValue: {
           loaders,
+          manager: {
+            companyId: baseCompanyId
+          }
         },
       }
     );
@@ -192,6 +198,9 @@ describe("TEST TICKETLOG DANS LA DB", () => {
       {
         contextValue: {
           loaders,
+          manager: {
+            companyId: baseCompanyId
+          }
         },
       }
     );
@@ -228,6 +237,9 @@ describe("TEST TICKETLOG DANS LA DB", () => {
       {
         contextValue: {
           loaders,
+          manager: {
+            companyId: baseCompanyId
+          }
         },
       }
     );
@@ -253,6 +265,9 @@ describe("TEST TICKETLOG DANS LA DB", () => {
       {
         contextValue: {
           loaders,
+          manager: {
+            companyId: baseCompanyId
+          }
         },
       }
     );

@@ -22,9 +22,9 @@ type DeleteResponseSetting {
 }
 
 input SettingsByPropertiesInput {
-  name: String
-  value: String
-  companyId: UUID
+  name: String 
+  value: String 
+  companyId: UUID 
   pagination: PaginationInput
   createdAt: DateTime
   updatedAt: DateTime
@@ -37,15 +37,15 @@ type Mutation {
 }
 
 input CreateSettingInput {
-  name: String!
-  value: String!
+  name: String! @constraint(pattern: "^[0-9a-zA-Z]*$", maxLength: 50, minLength: 3)
+  value: String! @constraint(pattern: "^[0-9a-zA-Z]*$", maxLength: 50, minLength: 3)
   companyId: UUID!
 }
 
 input UpdateSettingInput {
   id: ID!
-  name: String
-  value: String
+  name: String @constraint(pattern: "^[0-9a-zA-Z]*$", maxLength: 50, minLength: 3)
+  value: String @constraint(pattern: "^[0-9a-zA-Z]*$", maxLength: 50, minLength: 3)
 }
 
 

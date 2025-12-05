@@ -7,16 +7,18 @@ export default class ConnectionLogService {
   private db = new ConnectionLogRepository();
 
   async getAllConnectionLogsPaginated(
-    pagination?: PaginationInput
+    companyId: string,
+    pagination?: PaginationInput,
   ): Promise<{ items: ConnectionLogEntity[]; totalCount: number }> {
-    return this.findPaginated({}, pagination);
+    return this.findPaginated({ manager: {companyId}}, pagination);
   }
 
   async getConnectionLogsByTypePaginated(
+    companyId: string,
     type: ConnectionEnum,
     pagination?: PaginationInput
   ): Promise<{ items: ConnectionLogEntity[]; totalCount: number }> {
-    return this.findPaginated({ type }, pagination);
+    return this.findPaginated({ type, manager: { companyId} }, pagination);
   }
 
   async getConnectionLogsByEmployeePaginated(

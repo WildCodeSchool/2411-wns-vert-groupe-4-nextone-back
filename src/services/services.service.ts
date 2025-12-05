@@ -4,6 +4,8 @@ import { ServiceEntity } from "@/entities/Service.entity";
 import CompanyService from "./company.service";
 import { pubsub } from "@/lib/pubsub";
 import { EVENTS } from "@/subscriptions/events";
+import { GraphQLAccountNumber } from "graphql-scalars";
+import { GraphQLError } from "graphql/error";
 
 export default class ServicesService {
   db: ServiceRepository;
@@ -12,8 +14,12 @@ export default class ServicesService {
     this.db = new ServiceRepository();
   }
 
-  async getAllServices(): Promise<ServiceEntity[]> {
-    const services = await this.db.find();
+  async getAllServices(companyId: string): Promise<ServiceEntity[]> {
+    const services = await this.db.find({
+      where: {
+        companyId,
+      },
+    });
     return services;
   }
 
@@ -56,5 +62,22 @@ export default class ServicesService {
       serviceToggled: savedService,
     });
     return service.isGloballyActive;
+  }
+
+  public async checkService(
+    serviceId: string,
+    companyId: string
+  ): Promise<void> {
+    const service = await this.db.findOne({
+      where: {
+        id: serviceId,
+      },
+    });
+    if (!service) {
+      return;
+    }
+    if (service.companyId !== companyId) {
+      throw new GraphQLError("Forbidden.");
+    }
   }
 }
