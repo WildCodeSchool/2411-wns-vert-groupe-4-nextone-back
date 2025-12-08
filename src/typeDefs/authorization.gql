@@ -32,20 +32,20 @@ type AuthorizationResponse {
 
 ### Input
 input NewAuthInput {
-  serviceId: UUID! @constraint(pattern: "uuid")
-  managerId: UUID! @constraint(pattern: "uuid")
+  serviceId: UUID!
+  managerId: UUID! 
   isAdministrator: Boolean
 }
 
 input UpdateAuthInput {
-  serviceId: UUID! @constraint(pattern: "uuid")
-  managerId: UUID! @constraint(pattern: "uuid")
+  serviceId: UUID! 
+  managerId: UUID! 
   isAdministrator: Boolean
 }
 
 input DeleteAuthInput {
-  serviceId: UUID! @constraint(pattern: "uuid")
-  managerId: UUID! @constraint(pattern: "uuid")
+  serviceId: UUID! 
+  managerId: UUID! 
 }
 
 input AddBulkAuthInput {
