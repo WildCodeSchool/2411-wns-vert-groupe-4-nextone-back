@@ -4,23 +4,32 @@ import path from "path";
 import fs from "fs";
 import { Express, Request, Response } from "express";
 import ManagerService from "@/services/manager.service";
-
+import CompanyService from "@/services/company.service";
 
 const authorizedCorsUrls = ["http://localhost:4000"];
-
 
 export default function uploadImage(app: Express) {
     app.use("/managers/:id/profile-picture", cors({
         origin: function (origin, callback) {
             if (!origin || authorizedCorsUrls.indexOf(origin) !== -1) {
-            callback(null, true);
+                callback(null, true);
             } else {
-            callback(new Error("CORS not allowed"));
+                callback(new Error("CORS not allowed"));
             }
         },
         credentials: true,
     }));
 
+    app.use("/companies/:id/logo", cors({
+        origin: function (origin, callback) {
+            if (!origin || authorizedCorsUrls.indexOf(origin) !== -1) {
+                callback(null, true);
+            } else {
+                callback(new Error("CORS not allowed"));
+            }
+        },
+        credentials: true,
+    }));
 
     const storage = multer.diskStorage({
         destination: function (_, __, cb) {
@@ -47,7 +56,20 @@ export default function uploadImage(app: Express) {
         });
     });
 
-    app.get("/files/:filename", (req, res) => { 
+    app.put("/companies/:id/logo", upload.single("file"), (req: Request, res: Response) => {
+        fs.readFile(`${req.file?.path}`, (err) => {
+            if (err) {
+                res.status(500).json({ error: err });
+            } else {
+                const companyId = req.params.id
+                const companyService = CompanyService.getService();
+                companyService.updateCompany(companyId, { logoCompany: req.file?.filename})
+                res.status(201).json({ status: "success", filename: `/files/${req.file?.filename}` });
+            }
+        });
+    });
+
+    app.get("/files/:filename", (req, res) => {
         const file = path.join(process.cwd(), "src/uploads", req.params.filename);
         fs.readFile(file, (err, data) => {
             if (err) {
