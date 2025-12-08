@@ -63,22 +63,36 @@ const companyResolver = {
         "Company no deleted 😢"
       );
     },
+    // updateCompany: async (
+    //   _: any,
+    //   args: MutationUpdateCompanyArgs,
+    //   { manager }: MyContext
+    // ): Promise<CompanyEntity | null> => {
+    //   if (args.data.id !== manager?.companyId) {
+    //     throw new GraphQLError("Forbidden.");
+    //   }
+    //   checkStrictRole(manager?.role, "SUPER_ADMIN");
+    //   const partialCompany: Partial<CompanyEntity> = { ...args.data };
+    //   const updatedCompany = await companyService.updateOne(
+    //     args.data.id,
+    //     partialCompany
+    //   );
+    //   return updatedCompany;
+    // },
+
     updateCompany: async (
       _: any,
       args: MutationUpdateCompanyArgs,
       { manager }: MyContext
     ): Promise<CompanyEntity | null> => {
-      if (args.data.id !== manager?.companyId) {
-        throw new GraphQLError("Forbidden.");
-      }
-      checkStrictRole(manager?.role, "SUPER_ADMIN");
-      const partialCompany: Partial<CompanyEntity> = { ...args.data };
-      const updatedCompany = await companyService.updateOne(
+      return companyService.updateCompany(
         args.data.id,
-        partialCompany
+        { ...args.data },
+        manager ? { companyId: manager.companyId, role: manager.role } : undefined
       );
-      return updatedCompany;
+
     },
+
   },
   Company: {
     services: async ({ id }: { id: string }) => {
