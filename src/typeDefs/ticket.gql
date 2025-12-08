@@ -72,7 +72,7 @@ input TicketPropertiesInput {
 }
 
 input UpdateStatusTicketInput {
-  id: ID! @constraint(pattern: "uuid")
+  id: ID!
   status: Status!
 }
 
@@ -82,7 +82,7 @@ input GenerateTicketInput {
   email: String! @constraint(format: "email", maxLength: 50)
   phone: String @constraint(pattern: "^[0-9]*$", maxLength: 15, minLength: 10)
   status: Status
-  serviceId: ID! @constraint(pattern: "uuid")
+  serviceId: ID!
 }
 
 input UpdateTicketInput {
@@ -93,7 +93,7 @@ input UpdateTicketInput {
   email: String @constraint(format: "email", maxLength: 50)
   phone: String @constraint(pattern: "^[0-9]*$", maxLength: 15, minLength: 10)
   status: Status
-  serviceId: ID @constraint(pattern: "uuid")
+  serviceId: ID 
 }
 
 type DeletedTicketResponse {

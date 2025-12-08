@@ -105,18 +105,22 @@ const managerResolver = {
           "Veuillez vous déconnecter avant de vous reconnecter avec un autre compte"
         );
       }
-      const loginInfos = plainToInstance(LoginInput, infos);
-      await validateOrThrow(loginInfos);
-      const { manager, token } = await managerService.login(infos);
-      const { password, ...rest } = manager;
-      ctx.res.cookie("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 24 * 60 * 60 * 1000,
-        path: "/",
-      });
-      return { manager: rest, token };
+      try {
+        const loginInfos = plainToInstance(LoginInput, infos);
+        await validateOrThrow(loginInfos);
+        const { manager, token } = await managerService.login(infos);
+        const { password, ...rest } = manager;
+        ctx.res.cookie("token", token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          maxAge: 24 * 60 * 60 * 1000,
+          path: "/",
+        });
+        return { manager: rest, token };
+      } catch (error: any) {
+        throw new GraphQLError(error?.message)
+      }
     },
 
     logout: async (_: any, __: any, ctx: MyContext): Promise<Message> => {
@@ -323,7 +327,7 @@ const isManagerFromCompany =
   };
 
 const composition = {
-  "Query.!login": [isAuthenticated()],
+  "Query.!{login,askResetPassword,resetPassword,checkToken}": [isAuthenticated()],
   "Mutation.{toggleGlobalAccessManager, deleteManager, updateManager}": [
     isAuthenticated(),
     isManagerFromCompany(),
