@@ -9,7 +9,6 @@ import {
   QueryTicketsByPropertiesArgs,
   QueryTicketsForTvDisplayArgs,
   Status,
-  Ticket,
 } from "@/generated/graphql";
 import { MyContext, ResolverWrapper } from "..";
 import ServicesService from "@/services/services.service";
