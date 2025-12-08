@@ -5,12 +5,9 @@ import {
   EntitySubscriberInterface,
   EventSubscriber,
   InsertEvent,
-  UpdateEvent,
+
 } from "typeorm";
-import { MyContext } from "..";
 import { Status } from "@/generated/graphql";
-import TicketService from "@/services/ticket.service";
-import ManagerEntity from "@/entities/Manager.entity";
 import ServicesService from "@/services/services.service";
 
 @EventSubscriber()

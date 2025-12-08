@@ -119,7 +119,7 @@ const managerResolver = {
         });
         return { manager: rest, token };
       } catch (error: any) {
-        throw new GraphQLError(error?.message)
+        throw new GraphQLError(error?.message,{})
       }
     },
 

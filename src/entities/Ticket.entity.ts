@@ -36,7 +36,7 @@ export default class TicketEntity {
   @Column({
     type: "enum",
     enum: Status,
-    default: Status.Created,
+    default: Status.Pending,
   })
   status: Status;
 

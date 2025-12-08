@@ -121,13 +121,30 @@ const createServices = async (
   ];
   const res = await Promise.all(
     companies.map(async (company) => {
+      const admin = await new ManagerService().db.findOne({
+        where: {
+          companyId: company.id
+        }
+      })
+      if (!admin) {
+        throw new Error(`Can't find admin for ${company.name}`)
+      }
+      const serviceService = new ServicesService()
       const services = await Promise.all(
         serviceNames.map(async (name) => {
           const data: CreateServiceInput = {
             companyId: company.id,
             name: `${company.name.split(" ")[0].toUpperCase()}_${name}`,
           };
-          const created = await new ServicesService().createService(data);
+          const created = await serviceService.createService(data);
+          const authorization = await new AuthorizationService().addAuthorization({
+            isAdministrator: true,
+            managerId: admin.id,
+            serviceId: created.id
+          }, admin)
+          if (!authorization) {
+            throw new Error(`Unable to add authorization for user ${admin.email} in service ${created.name}`)
+          }
           return created;
         })
       );
@@ -204,6 +221,8 @@ const createTicket = async (
 ): Promise<TicketEntity[]> => {
   console.log("🎫 --> CREATION DES TICKETS...");
   const { fakerFR: faker } = await import("@faker-js/faker");
+  const dateMin = new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).getTime()
+  const dateMax = Date.now()
   const createRandomTicket = () => {
     const randomIndex = Math.floor(Math.random() * services.length);
     const service = services[randomIndex];
@@ -215,6 +234,7 @@ const createTicket = async (
       email: faker.internet.email(),
       phone: faker.phone.number(),
       service,
+      createdAt: faker.date.between({ from: dateMin, to: dateMax})
     };
     return randomTicket;
   };
@@ -230,58 +250,10 @@ const createTicket = async (
     );
     tickets.push(ticket);
   }
-  // const tickets = await Promise.all(
-  //   randomTickets.map(async (ticket) => {
-  //     return await TicketService.gettInstance().createOne(ticket);
-  //   })
-  // );
 
   return tickets;
 };
 
-// const createCounter = async (
-//   services: ServiceEntity[]
-// ): Promise<CounterEntity[]> => {
-//   console.log("🙈 --> CREATION DES GUICHETS...");
-
-//   const createRandomCounter = async () => {
-//     const service = services[Math.floor(Math.random() * services.length)];
-//     console.log("SERVICE : ", service, service.id);
-//     const authservice = new AuthorizationService();
-//     const managers = await authservice.getByService(service.id);
-//     console.log("MANAGERS : ", managers);
-//     const managerId =
-//       managers[Math.floor(Math.random() * managers.length)].managerId;
-//     console.log("MANAGERID : ", managerId);
-//     const manager = await new ManagerService().getManagerById(managerId);
-//     console.log("MANAGER : ", manager);
-
-//     const randomCounter: DeepPartial<CounterEntity> = {
-//       name: faker.commerce.isbn(),
-//       services: [service],
-//       manager,
-//       isAvailable: Math.random() > 0.5,
-//     };
-
-//     return randomCounter;
-//   };
-
-//   // const randomCounters =  faker.helpers.multiple(createRandomCounter, { count: 50 })
-//   const randomCounters: DeepPartial<CounterEntity>[] = [];
-
-//   for (let i = 0; i < 50; i++) {
-//     const rc = await createRandomCounter();
-//     randomCounters.push(rc);
-//   }
-
-//   const counters = await Promise.all(
-//     randomCounters.map(async (counter) => {
-//       return await CounterService.getService().createOne(counter);
-//     })
-//   );
-
-//   return counters;
-// };
 
 const updateTicketStatus = async (
   managers: ManagerEntity[],
