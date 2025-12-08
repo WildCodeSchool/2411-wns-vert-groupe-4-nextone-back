@@ -43,7 +43,7 @@ export const LOGIN_MANAGER = `#graphql
 `;
 
 export const LOGOUT_MANAGER = `#graphql
-  query Logout {
+  mutation Logout {
     logout {
       message
       success

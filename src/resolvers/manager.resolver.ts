@@ -123,20 +123,6 @@ const managerResolver = {
       }
     },
 
-    logout: async (_: any, __: any, ctx: MyContext): Promise<Message> => {
-      const cookies = new Cookies(ctx.req, ctx.res);
-      if (!ctx.manager) {
-        throw new Error("Vous avez déjà été déconnecté");
-      }
-      cookies.set("token");
-      ctx.manager.isGloballyActive = false;
-      return buildResponse(
-        true,
-        "Vous êtes déconnecté",
-        "Vous n'êtes pas déconnecté"
-      );
-    },
-
     checkToken: async (_: any, __: any, ctx: MyContext) => {
       return ctx.manager
         ? {
@@ -152,6 +138,20 @@ const managerResolver = {
     },
   },
   Mutation: {
+    logout: async (_: any, __: any, ctx: MyContext): Promise<Message> => {
+      const cookies = new Cookies(ctx.req, ctx.res);
+      if (!ctx.manager) {
+        throw new Error("Vous avez déjà été déconnecté");
+      }
+      cookies.set("token");
+      ctx.manager.isGloballyActive = false;
+      return buildResponse(
+        true,
+        "Vous êtes déconnecté",
+        "Vous n'êtes pas déconnecté"
+      );
+    },
+
     createManager: async (
       _: any,
       { infos }: MutationCreateManagerArgs,
@@ -322,7 +322,10 @@ const isManagerFromCompany =
   > =>
   (next) =>
   async (root, args, context, info) => {
-    await new ManagerService().checkManager(args.id, context.manager?.companyId!)
+    await new ManagerService().checkManager(
+      args.id,
+      context.manager?.companyId!
+    );
     next(root, args, context, info);
   };
 
