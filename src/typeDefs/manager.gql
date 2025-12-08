@@ -56,20 +56,19 @@ type SortedManagers {
   disable: [Manager!]!
 }
 
-
 type Query {
   # 👉 VERSION AVEC PAGINATION - décommenter cette ligne et commenter celle du dessous
   # managers(pagination: PaginationInput): ManagersPaginatedResult!
- 
+
   managers: [Manager!]
   manager(id: ID!): Manager!
   login(infos: InputLogin!): Auth
-  logout: Message!
   checkToken: CheckToken
   SortedManagers: SortedManagers!
 }
 
 type Mutation {
+  logout: Message!
   createManager(infos: InputRegister!): Manager!
   deleteManager(id: ID!): Message!
   updateManager(id: ID!, data: UpdateManagerInput!): Manager!
@@ -81,8 +80,18 @@ type Mutation {
 }
 
 input InputRegister {
-  firstName: String! @constraint(pattern: "^[a-zA-Zà-öø-ÿÀ-ÖØ-ß' -]{2,50}$", maxLength: 50, minLength: 2)
-  lastName: String! @constraint(pattern: "^[a-zA-Zà-öø-ÿÀ-ÖØ-ß' -]{2,50}$", maxLength: 50, minLength: 2)
+  firstName: String!
+    @constraint(
+      pattern: "^[a-zA-Zà-öø-ÿÀ-ÖØ-ß' -]{2,50}$"
+      maxLength: 50
+      minLength: 2
+    )
+  lastName: String!
+    @constraint(
+      pattern: "^[a-zA-Zà-öø-ÿÀ-ÖØ-ß' -]{2,50}$"
+      maxLength: 50
+      minLength: 2
+    )
   email: String! @constraint(format: "email", maxLength: 50)
   password: String! @constraint(maxLength: 100, minLength: 6)
   confirmPassword: String! @constraint(maxLength: 100, minLength: 6)
@@ -98,15 +107,24 @@ input InputLogin {
 }
 
 input UpdateManagerInput {
-  firstName: String @constraint(pattern: "^[a-zA-Zà-öø-ÿÀ-ÖØ-ß' -]{2,50}$", maxLength: 50, minLength: 2)
-  lastName: String @constraint(pattern: "^[a-zA-Zà-öø-ÿÀ-ÖØ-ß' -]{2,50}$", maxLength: 50, minLength: 2)
+  firstName: String
+    @constraint(
+      pattern: "^[a-zA-Zà-öø-ÿÀ-ÖØ-ß' -]{2,50}$"
+      maxLength: 50
+      minLength: 2
+    )
+  lastName: String
+    @constraint(
+      pattern: "^[a-zA-Zà-öø-ÿÀ-ÖØ-ß' -]{2,50}$"
+      maxLength: 50
+      minLength: 2
+    )
   role: ManagerRole
 }
 
 input ResetPasswordInput {
-  resetToken : String!
+  resetToken: String!
   newPassword: String! @constraint(maxLength: 100, minLength: 6)
   confirmNewPassword: String! @constraint(maxLength: 100, minLength: 6)
   email: String! @constraint(format: "email", maxLength: 50)
 }
-

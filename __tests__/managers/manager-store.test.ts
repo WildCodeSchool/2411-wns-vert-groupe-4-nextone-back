@@ -96,7 +96,6 @@ let server: ApolloServer;
 
 const schema = makeExecutableSchema({
   typeDefs: [constraintDirectiveTypeDefs, typeDefs],
-
 });
 
 const store = createMockStore({ schema });
@@ -120,6 +119,8 @@ beforeAll(async () => {
           };
         }
       },
+    },
+    Mutation: {
       logout: (_: any, __: any) => {
         const message: Message = {
           message: "Vous êtes déconnecté",
@@ -127,10 +128,8 @@ beforeAll(async () => {
         };
         return message;
       },
-    },
-    Mutation: {
       createManager: (_: any, { infos }: { infos: InputRegister }) => {
-        const { password,confirmPassword,invitationToken, ...rest } = infos;
+        const { password, confirmPassword, invitationToken, ...rest } = infos;
         store.set("Manager", "3", rest);
         const manager = store.get("Manager", "3") as Manager;
         const { company, ...result } = manager;
