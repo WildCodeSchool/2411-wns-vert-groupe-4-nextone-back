@@ -42,6 +42,9 @@ export default class CompanyEntity {
   })
   phone: string;
 
+  @Column({ nullable: true })
+  logoCompany?: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

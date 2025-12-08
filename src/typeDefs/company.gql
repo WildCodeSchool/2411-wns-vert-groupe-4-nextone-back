@@ -7,6 +7,7 @@ type Company {
   postalCode: String!
   city: String!
   siret: String!
+  logoCompany: String
   email: String!
   phone: String!
   services: [Service!]!
