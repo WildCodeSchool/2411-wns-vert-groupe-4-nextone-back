@@ -2,6 +2,7 @@ import { CreateWhitelistedIpInput } from "@/generated/graphql";
 import CompanyService from "./company.service";
 import WhitelistedIpRepository from "@/repositories/whitelistedIp.repository";
 import { WhitelistedIpEntity } from "@/entities/WhitelistedIp.entity";
+import { GraphQLError } from "graphql/error";
 
 export default class WhitelistedIpService {
   db: WhitelistedIpRepository;
@@ -53,5 +54,19 @@ export default class WhitelistedIpService {
 
   async findOne(options: any) {
     return this.db.findOne(options);
+  }
+
+  public async checkIp(ip: string, companyId: string):Promise<void> {
+    const ipEntity = await this.db.findOne({
+      where: {
+        ipAddress: ip
+      }
+    })
+    if (!ipEntity) {
+      return
+    }
+    if (ipEntity.companyId !== companyId) {
+      throw new GraphQLError("Forbidden.")
+    }
   }
 }
