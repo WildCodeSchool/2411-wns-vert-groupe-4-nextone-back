@@ -52,11 +52,10 @@ const wihteListedIpResolver = {
       { manager }: MyContext
     ): Promise<WhitelistedIpEntity> => {
       checkStrictRole(manager?.role, "SUPER_ADMIN");
-      if (data.companyId !== manager?.companyId) {
-        throw new GraphQLError("Forbidden.");
-      }
+
       const newWhitelistedIp = await whitelistedIpService.createWhitelistedIp(
-        data
+        data,
+        manager?.companyId!
       );
       return newWhitelistedIp;
     },
@@ -66,6 +65,7 @@ const wihteListedIpResolver = {
       { id }: MutationDeleteWhitelistedIpArgs,
       ctx: MyContext
     ): Promise<WhitelistedIpResponse> => {
+      console.log("ID DANS RESOLVER : ", id)
       const deleted = await whitelistedIpService.deleteWhitelistedIp(id);
       return buildResponse(
         deleted,
@@ -88,7 +88,11 @@ const isWhiteIpFromCompany =
   (): ResolverWrapper<MutationDeleteWhitelistedIpArgs> =>
   (next) =>
   async (root, args, context, info) => {
-    const whiteIp = await whitelistedIpService.findOne(args.id)
+    const whiteIp = await whitelistedIpService.db.findOne({
+      where: {
+        id: args.id
+      }
+    })
     if (!whiteIp || whiteIp.companyId !== context.manager?.companyId) {
       throw new GraphQLError("Forbidden.")
     }

@@ -35,9 +35,10 @@ export default class WhitelistedIpService {
   }
 
   async createWhitelistedIp(
-    data: CreateWhitelistedIpInput
+    data: CreateWhitelistedIpInput,
+    companyId: string
   ): Promise<WhitelistedIpEntity> {
-    const company = await CompanyService.getService().findById(data.companyId);
+    const company = await CompanyService.getService().findById(companyId);
     if (!company) {
       throw new Error(
         "No Company with this id. Impossible to create whitelisted IP."
@@ -48,7 +49,8 @@ export default class WhitelistedIpService {
   }
 
   async deleteWhitelistedIp(id: string): Promise<boolean> {
-    const result = await this.db.delete(id);
+    console.log("ID DANS DELETE : ", id)
+    const result = await this.db.delete({id: id as any});
     return result.affected === 1;
   }
 
