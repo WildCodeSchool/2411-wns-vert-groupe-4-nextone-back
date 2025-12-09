@@ -2,6 +2,7 @@ import { CreateWhitelistedIpInput } from "@/generated/graphql";
 import CompanyService from "./company.service";
 import WhitelistedIpRepository from "@/repositories/whitelistedIp.repository";
 import { WhitelistedIpEntity } from "@/entities/WhitelistedIp.entity";
+import { GraphQLError } from "graphql/error";
 
 export default class WhitelistedIpService {
   db: WhitelistedIpRepository;
@@ -64,6 +65,8 @@ export default class WhitelistedIpService {
     if (!ipEntity) {
       return
     }
-    if(ipEntity.)
+    if (ipEntity.companyId !== companyId) {
+      throw new GraphQLError("Forbidden.")
+    }
   }
 }

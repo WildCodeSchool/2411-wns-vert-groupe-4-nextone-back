@@ -27,7 +27,7 @@ type Query {
     pagination: PaginationInput
   ): TicketsPaginatedResult!
 
- ticketsForTVDisplay(pagination: PaginationInput, serviceId: ID): [Ticket]
+ ticketsForTVDisplay(serviceId: ID, count: Int): [Ticket]
 }
 
 type Mutation {

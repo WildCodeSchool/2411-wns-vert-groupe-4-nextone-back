@@ -33,7 +33,7 @@ export default new DataSource({
     InvitationEntity,
     WhitelistedIpEntity,
   ],
-  subscribers: ["src/subscribers/*.ts"],
+  subscribers: [process.env.SUBSCRIBERS_PATH!],
 
   synchronize: true, // pas à utiliser en prod (faire des migrations pour la prod);
 
