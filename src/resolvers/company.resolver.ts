@@ -16,12 +16,12 @@ import SettingService from "@/services/setting.service";
 import { composeResolvers } from "@graphql-tools/resolvers-composition";
 import { isAuthenticated } from "./ticket.resolver";
 import { GraphQLError } from "graphql";
-import { getCleanClientIP } from "@/utils/ip.utils";
-import { checkCompanyIdMatch } from "@/utils/resolvers.utils";
-import WhitelistedIpService from "@/services/whitelistedIp.service";
+import { getCleanClientIP } from "@/utils/ip.utils"; 
+import { checkCompanyIdMatch } from "@/utils/resolvers.utils"; 
+import WhitelistedIpService from "@/services/whitelistedIp.service"; 
 
 const companyService = CompanyService.getService();
-const whitelistedIpService = new WhitelistedIpService();
+const whitelistedIpService = new WhitelistedIpService(); 
 
 const companyResolver = {
   Query: {
@@ -43,13 +43,13 @@ const companyResolver = {
       __: any,
       ctx: MyContext
     ): Promise<CompanyEntity> => {
-      const cleanIP = getCleanClientIP(ctx.req);
+   
+      const cleanIP = getCleanClientIP(ctx.req); 
+      console.log("🔍 [companyByIP] Clean IP detected:", cleanIP);
 
       if (!cleanIP) {
         throw new GraphQLError("Unable to determine client IP address");
       }
-
-
       const whitelistedIp = await whitelistedIpService.getWhitelistedIpByIp(
         cleanIP
       );
@@ -156,7 +156,7 @@ const isUserFromNextOne =
 
 const composition = {
   "*.*": [isAuthenticated()],
-  "Query.company": [checkCompanyIdMatch("id")],
+  "Query.company": [checkCompanyIdMatch("id")], 
   "Query.companyByIP": [],
   "Mutation.createCompany": [isUserFromNextOne()],
   "Mutation.deleteCompany": [checkCompanyIdMatch("id")],
