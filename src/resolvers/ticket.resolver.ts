@@ -22,6 +22,7 @@ import { composeResolvers } from "@graphql-tools/resolvers-composition";
 import { withFilter } from "graphql-subscriptions";
 import { pubsub } from "@/lib/pubsub";
 import { EVENTS } from "@/subscriptions/events";
+import { GraphQLError } from "graphql/error";
 
 type TicketDeleted = {
   message: string;
@@ -283,6 +284,24 @@ const ticketResolver = {
   },
 
 };
+
+const isIpAuthorized = (): ResolverWrapper<QueryTicketsForTvDisplayArgs> => (next) => async (root, args, context, info) => {
+  if (!context.ip) {
+    throw new GraphQLError("Unable to retrieve IP address from request.")
+  }
+  const ip = await new WhitelistedIpService().db.findOne({
+    where: {
+      ipAddress: context.ip
+    }
+  })
+  if (context.manager) {
+    await new 
+  }
+  if (args.serviceId) {
+    await new ServicesService().checkService(args.serviceId, ip?.companyId!);
+  }
+}
+
 
 export const isAuthenticated =
   (): ResolverWrapper => (next) => (root, args, context, info) => {

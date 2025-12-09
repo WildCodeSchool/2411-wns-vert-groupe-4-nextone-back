@@ -54,4 +54,16 @@ export default class WhitelistedIpService {
   async findOne(options: any) {
     return this.db.findOne(options);
   }
+
+  public async checkIp(ip: string, companyId: string):Promise<void> {
+    const ipEntity = await this.db.findOne({
+      where: {
+        ipAddress: ip
+      }
+    })
+    if (!ipEntity) {
+      return
+    }
+    if(ipEntity.)
+  }
 }
