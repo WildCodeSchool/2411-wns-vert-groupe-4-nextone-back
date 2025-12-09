@@ -16,10 +16,10 @@ import SettingService from "@/services/setting.service";
 import { composeResolvers } from "@graphql-tools/resolvers-composition";
 import { isAuthenticated } from "./ticket.resolver";
 import { GraphQLError } from "graphql";
-import WhitelistedIpService from "@/services/whitelistedIp.service";
+import { getCleanClientIP } from "@/utils/ip.utils";
+import { checkCompanyIdMatch } from "@/utils/resolvers.utils";
 
 const companyService = CompanyService.getService();
-const whitelistedIpService = new WhitelistedIpService();
 
 const companyResolver = {
   Query: {
@@ -30,12 +30,8 @@ const companyResolver = {
 
     company: async (
       _: any,
-      { id }: QueryCompanyArgs,
-      ctx: MyContext
+      { id }: QueryCompanyArgs
     ): Promise<CompanyEntity | null> => {
-      if (id !== ctx.manager?.companyId) {
-        throw new GraphQLError("Forbidden.");
-      }
       const company = await companyService.findById(id);
       return company;
     },
@@ -45,49 +41,8 @@ const companyResolver = {
       __: any,
       ctx: MyContext
     ): Promise<CompanyEntity> => {
-      const clientIP =
-        (ctx.req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
-        (ctx.req.headers["x-real-ip"] as string) ||
-        ctx.req.socket?.remoteAddress ||
-        ctx.req.socket?.remoteAddress;
-
-      console.log("🔍 [companyByIP] Client IP detected:", clientIP);
-
-      if (!clientIP) {
-        throw new GraphQLError("Unable to determine client IP address");
-      }
-
-      const cleanIP = clientIP.replace(/^::ffff:/, "");
-      console.log("🔍 [companyByIP] Clean IP:", cleanIP);
-
-      const whitelistedIp = await whitelistedIpService.getWhitelistedIpByIp(
-        cleanIP
-      );
-
-      if (!whitelistedIp) {
-        console.error("❌ [companyByIP] IP not whitelisted:", cleanIP);
-        throw new GraphQLError(
-          `IP address ${cleanIP} is not authorized. Please contact an administrator to register this terminal.`
-        );
-      }
-
-      console.log(
-        "✅ [companyByIP] IP whitelisted for company:",
-        whitelistedIp.companyId
-      );
-
-      const company = await companyService.findById(whitelistedIp.companyId);
-
-      if (!company) {
-        console.error(
-          "❌ [companyByIP] Company not found:",
-          whitelistedIp.companyId
-        );
-        throw new GraphQLError("Company not found for this whitelisted IP");
-      }
-
-      console.log("✅ [companyByIP] Company found:", company.name);
-      return company;
+      const cleanIP = getCleanClientIP(ctx.req);
+      return companyService.getCompanyByWhitelistedIp(cleanIP);
     },
   },
 
@@ -97,8 +52,7 @@ const companyResolver = {
       args: MutationCreateCompanyArgs,
       ctx: MyContext
     ): Promise<CompanyEntity> => {
-      const test: Partial<CompanyEntity> = { ...args.data };
-      const newCompany = await companyService.createOne(test);
+      const newCompany = await companyService.createOne(args.data);
       return newCompany;
     },
 
@@ -107,9 +61,6 @@ const companyResolver = {
       args: MutationDeleteCompanyArgs,
       ctx: MyContext
     ): Promise<DeleteResponseCompany> => {
-      if (args.id !== ctx.manager?.companyId) {
-        throw new GraphQLError("Forbidden.");
-      }
       const isDeleted = await companyService.deleteOne(args.id);
       return buildResponse(
         isDeleted,
@@ -170,8 +121,11 @@ const isUserFromNextOne =
 
 const composition = {
   "*.*": [isAuthenticated()],
+  "Query.company": [checkCompanyIdMatch("id")],
   "Query.companyByIP": [],
   "Mutation.createCompany": [isUserFromNextOne()],
+  "Mutation.deleteCompany": [checkCompanyIdMatch("id")],
+  "Mutation.updateCompany": [checkCompanyIdMatch("data.id")],
 };
 
 export default composeResolvers(companyResolver, composition);
