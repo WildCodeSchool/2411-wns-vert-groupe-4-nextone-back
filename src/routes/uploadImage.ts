@@ -6,7 +6,10 @@ import { Express, Request, Response } from "express";
 import ManagerService from "@/services/manager.service";
 import CompanyService from "@/services/company.service";
 
-const authorizedCorsUrls = ["http://localhost:4000"];
+const authorizedCorsUrls = [  
+    "http://localhost:4000",
+  "https://david4.wns.wilders.dev",
+  "https://staging.david4.wns.wilders.dev"];
 
 export default function uploadImage(app: Express) {
     app.use("/managers/:id/profile-picture", cors({
