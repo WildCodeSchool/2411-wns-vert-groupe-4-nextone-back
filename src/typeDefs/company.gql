@@ -17,11 +17,11 @@ type Company {
   updatedAt: DateTime!
 }
 
-
 type Query {
   companies(pagination: PaginationInput): [Company!]!
   company(id: ID!): Company
   companiesByProperties(fields: CompanyByPropertiesInput!): [Company!]!
+  companyByIP: Company!
 }
 
 type Mutation {
@@ -48,9 +48,20 @@ input CompanyByPropertiesInput {
 }
 
 input CreateCompanyInput {
-  name: String! @constraint(pattern: "^[0-9a-zA-Zà-öø-ÿÀ-ÖØ-ß' -]{3,50}$", maxLength: 50, minLength: 3)
-  address: String! @constraint(pattern: "^[0-9a-zA-Zà-öø-ÿÀ-ÖØ-ß' -]{2,255}$", maxLength: 255, minLength: 3)
-  postalCode: String! @constraint(pattern: "^[0-9]*$", maxLength: 5, minLength: 5)
+  name: String!
+    @constraint(
+      pattern: "^[0-9a-zA-Zà-öø-ÿÀ-ÖØ-ß' -]{3,50}$"
+      maxLength: 50
+      minLength: 3
+    )
+  address: String!
+    @constraint(
+      pattern: "^[0-9a-zA-Zà-öø-ÿÀ-ÖØ-ß' -]{2,255}$"
+      maxLength: 255
+      minLength: 3
+    )
+  postalCode: String!
+    @constraint(pattern: "^[0-9]*$", maxLength: 5, minLength: 5)
   city: String! @constraint(pattern: "^[a-zA-Z]*$", maxLength: 50, minLength: 3)
   siret: String! @constraint(pattern: "^[0-9 ]*$", maxLength: 17, minLength: 15)
   email: String! @constraint(format: "email", maxLength: 50)
@@ -59,13 +70,22 @@ input CreateCompanyInput {
 
 input UpdateCompanyInput {
   id: ID! @constraint
-  name: String @constraint(pattern: "^[a-zA-Zà-öø-ÿÀ-ÖØ-ß' -]{3,50}$", maxLength: 50, minLength: 3)
-  address: String @constraint(pattern: "^[a-zA-Zà-öø-ÿÀ-ÖØ-ß' -]{2,255}$", maxLength: 255, minLength: 3)
-  postalCode: String @constraint(pattern: "^[0-9]*$", maxLength: 5, minLength: 5)
+  name: String
+    @constraint(
+      pattern: "^[a-zA-Zà-öø-ÿÀ-ÖØ-ß' -]{3,50}$"
+      maxLength: 50
+      minLength: 3
+    )
+  address: String
+    @constraint(
+      pattern: "^[a-zA-Zà-öø-ÿÀ-ÖØ-ß' -]{2,255}$"
+      maxLength: 255
+      minLength: 3
+    )
+  postalCode: String
+    @constraint(pattern: "^[0-9]*$", maxLength: 5, minLength: 5)
   city: String @constraint(pattern: "^[a-zA-Z]*$", maxLength: 50, minLength: 3)
   siret: String @constraint(pattern: "^[0-9 ]*$", maxLength: 17, minLength: 15)
   email: String @constraint(format: "email", maxLength: 50)
   phone: String @constraint(pattern: "^[0-9]*$", maxLength: 15, minLength: 10)
 }
-
-
