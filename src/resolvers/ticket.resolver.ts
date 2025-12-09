@@ -51,8 +51,8 @@ const ticketResolver = {
       {  serviceId, count  }: QueryTicketsForTvDisplayArgs,
       { ip, manager }: MyContext
     ): Promise<TicketEntity[] | null> => {
-
-      const tickets = await TicketService.gettInstance().findTicketForTv(ip!, count)
+      console.log("IP RESOLVER : ", ip);
+      const tickets = await TicketService.gettInstance().findTicketForTv(ip!, serviceId, count)
       return tickets
       // console.log("IP du client :", ip);
       // const whitelistedIpService = new WhitelistedIpService();

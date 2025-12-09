@@ -136,18 +136,19 @@ export default class TicketService extends BaseService<TicketEntity> {
     return await this.repo.count({ where });
   }
 
-  public async findTicketForTv(ip: string, count: number = 5): Promise<TicketEntity[]> {
+  public async findTicketForTv(ip: string, serviceId?: string,  count: number = 5): Promise<TicketEntity[]> {
     return await this.repo.find({
       where: {
         status: Status.Pending,
         service: {
+          id: serviceId,
           company: {
             whitelistedIps: {
               ipAddress: ip
             }
           }
         }
-      }, order: { createdAt: "ASC" },
+      }, order: { createdAt: "DESC" },
       take: count
       
     })
