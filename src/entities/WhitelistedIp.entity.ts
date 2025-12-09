@@ -15,7 +15,7 @@ export class WhitelistedIpEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ nullable: false, type: "varchar", length: 15})
+  @Column({ unique: false, nullable: false , type: "varchar", length: 15})
   ipAddress: string;
 
   @Column({ type: "uuid" })

@@ -16,6 +16,7 @@ import TicketService from "@/services/ticket.service";
 // import { fakerFR as faker } from "@faker-js/faker";
 import datasource from "./datasource";
 import { DeepPartial } from "typeorm";
+import os from "os"
 
 const MANAGER_COUNT = 100;
 const TICKET_COUNT = 500;

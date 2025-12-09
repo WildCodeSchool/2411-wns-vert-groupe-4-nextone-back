@@ -1,7 +1,7 @@
 import { Request } from "express";
 import os from "os";
 
-function getServerLocalIPv4() {
+export function getServerLocalIPv4() {
   const interfaces: any = os.networkInterfaces();
   let localIP = null;
   for (const name of Object.keys(interfaces)) {
@@ -22,6 +22,6 @@ export const ipContext = async ({ req }: { req: Request }) => {
     (req.socket.remoteAddress as string);
   const regex = /[0-9.]/g;
   const matched = ip.match(regex)?.join("");
-  console.log("MATCHED IP : ", matched)
+
   return { ip: matched.length < 15 ? "127.0.0.1" : matched };
 };
