@@ -1,5 +1,7 @@
 import CompanyEntity from "@/entities/Company.entity";
 import BaseService from "./base.service";
+import { GraphQLError } from "graphql/error";
+import { checkStrictRole } from "@/utils/manager";
 
 
 export default class CompanyService extends BaseService<CompanyEntity> {
@@ -33,4 +35,11 @@ export default class CompanyService extends BaseService<CompanyEntity> {
   //   return company[0]
   // }
 
+  public async updateCompany(companyId: string, data: Partial<CompanyEntity>, manager?: { companyId: string; role: string }) {
+    if (manager && companyId !== manager.companyId) {
+      throw new GraphQLError("Forbidden.");
+    }
+    if (manager) checkStrictRole(manager.role, "SUPER_ADMIN");
+    return this.updateOne(companyId, data);
+  }
 }
