@@ -54,7 +54,7 @@ export default function uploadImage(app: Express) {
                 const managerId = req.params.id
                 const managerService = new ManagerService();
                 managerService.updateManager(managerId, { profileImage: req.file?.filename})
-                res.status(201).json({ status: "success", filename: `/files/${req.file?.filename}` });
+                res.status(201).json({ status: "success", filename: `/images/files/${req.file?.filename}` });
             }
         });
     });
@@ -67,7 +67,7 @@ export default function uploadImage(app: Express) {
                 const companyId = req.params.id
                 const companyService = CompanyService.getService();
                 companyService.updateCompany(companyId, { logoCompany: req.file?.filename})
-                res.status(201).json({ status: "success", filename: `/files/${req.file?.filename}` });
+                res.status(201).json({ status: "success", filename: `/images/files/${req.file?.filename}` });
             }
         });
     });
