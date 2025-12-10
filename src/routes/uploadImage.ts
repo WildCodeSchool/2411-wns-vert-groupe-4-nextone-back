@@ -12,7 +12,7 @@ const authorizedCorsUrls = [
   "https://staging.david4.wns.wilders.dev"];
 
 export default function uploadImage(app: Express) {
-    app.use("/managers/:id/profile-picture", cors({
+    app.use("/images/managers/:id/profile-picture", cors({
         origin: function (origin, callback) {
             if (!origin || authorizedCorsUrls.indexOf(origin) !== -1) {
                 callback(null, true);
@@ -23,7 +23,7 @@ export default function uploadImage(app: Express) {
         credentials: true,
     }));
 
-    app.use("/companies/:id/logo", cors({
+    app.use("/images/companies/:id/logo", cors({
         origin: function (origin, callback) {
             if (!origin || authorizedCorsUrls.indexOf(origin) !== -1) {
                 callback(null, true);
@@ -46,7 +46,7 @@ export default function uploadImage(app: Express) {
 
     const upload = multer({ storage: storage });
 
-    app.put("/managers/:id/profile-picture", upload.single("file"), (req: Request, res: Response) => {
+    app.put("/images/managers/:id/profile-picture", upload.single("file"), (req: Request, res: Response) => {
         fs.readFile(`${req.file?.path}`, (err) => {
             if (err) {
                 res.status(500).json({ error: err });
@@ -59,7 +59,7 @@ export default function uploadImage(app: Express) {
         });
     });
 
-    app.put("/companies/:id/logo", upload.single("file"), (req: Request, res: Response) => {
+    app.put("/images/companies/:id/logo", upload.single("file"), (req: Request, res: Response) => {
         fs.readFile(`${req.file?.path}`, (err) => {
             if (err) {
                 res.status(500).json({ error: err });
@@ -72,7 +72,7 @@ export default function uploadImage(app: Express) {
         });
     });
 
-    app.get("/files/:filename", (req, res) => {
+    app.get("/images/files/:filename", (req, res) => {
         const file = path.join(process.cwd(), "src/uploads", req.params.filename);
         fs.readFile(file, (err, data) => {
             if (err) {
