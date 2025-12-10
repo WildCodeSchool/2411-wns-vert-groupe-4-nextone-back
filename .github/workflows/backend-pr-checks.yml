@@ -1,7 +1,6 @@
 name: Backend PR Checks
 
-on:
-  [workflow_call, pull_request]
+on: [workflow_call, pull_request]
 
 jobs:
   test-backend:

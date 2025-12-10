@@ -9,7 +9,6 @@ import {
 import { MyContext, ResolverWrapper } from "..";
 import CompanyService from "@/services/company.service";
 import CompanyEntity from "@/entities/Company.entity";
-import { checkStrictRole } from "@/utils/manager";
 import { buildResponse } from "@/utils/authorization";
 import ServicesService from "@/services/services.service";
 import ManagerService from "@/services/manager.service";
@@ -17,8 +16,12 @@ import SettingService from "@/services/setting.service";
 import { composeResolvers } from "@graphql-tools/resolvers-composition";
 import { isAuthenticated } from "./ticket.resolver";
 import { GraphQLError } from "graphql";
+import { getCleanClientIP } from "@/utils/ip.utils"; 
+import { checkCompanyIdMatch } from "@/utils/resolvers.utils"; 
+import WhitelistedIpService from "@/services/whitelistedIp.service"; 
 
 const companyService = CompanyService.getService();
+const whitelistedIpService = new WhitelistedIpService(); 
 
 const companyResolver = {
   Query: {
@@ -26,36 +29,73 @@ const companyResolver = {
       const companies = await companyService.findAll();
       return companies;
     },
+
     company: async (
       _: any,
-      { id }: QueryCompanyArgs,
-      ctx: MyContext
+      { id }: QueryCompanyArgs
     ): Promise<CompanyEntity | null> => {
-      if (id !== ctx.manager?.companyId) {
-        throw new GraphQLError("Forbidden.");
-      }
       const company = await companyService.findById(id);
       return company;
     },
+
+    companyByIP: async (
+      _: any,
+      __: any,
+      ctx: MyContext
+    ): Promise<CompanyEntity> => {
+   
+      const cleanIP = getCleanClientIP(ctx.req); 
+      console.log("🔍 [companyByIP] Clean IP detected:", cleanIP);
+
+      if (!cleanIP) {
+        throw new GraphQLError("Unable to determine client IP address");
+      }
+      const whitelistedIp = await whitelistedIpService.getWhitelistedIpByIp(
+        cleanIP
+      );
+
+      if (!whitelistedIp) {
+        console.error("❌ [companyByIP] IP not whitelisted:", cleanIP);
+        throw new GraphQLError(
+          `IP address ${cleanIP} is not authorized. Please contact an administrator to register this terminal.`
+        );
+      }
+
+      console.log(
+        "✅ [companyByIP] IP whitelisted for company:",
+        whitelistedIp.companyId
+      );
+
+      const company = await companyService.findById(whitelistedIp.companyId);
+
+      if (!company) {
+        console.error(
+          "❌ [companyByIP] Company not found:",
+          whitelistedIp.companyId
+        );
+        throw new GraphQLError("Company not found for this whitelisted IP");
+      }
+
+      console.log("✅ [companyByIP] Company found:", company.name);
+      return company;
+    },
   },
+
   Mutation: {
     createCompany: async (
       _: any,
       args: MutationCreateCompanyArgs,
       ctx: MyContext
     ): Promise<CompanyEntity> => {
-      const test: Partial<CompanyEntity> = { ...args.data };
-      const newCompany = await companyService.createOne(test);
+      const newCompany = await companyService.createOne(args.data);
       return newCompany;
     },
+
     deleteCompany: async (
       _: any,
       args: MutationDeleteCompanyArgs,
       ctx: MyContext
     ): Promise<DeleteResponseCompany> => {
-      if (args.id !== ctx.manager?.companyId) {
-        throw new GraphQLError("Forbidden.");
-      }
       const isDeleted = await companyService.deleteOne(args.id);
       return buildResponse(
         isDeleted,
@@ -63,22 +103,6 @@ const companyResolver = {
         "Company no deleted 😢"
       );
     },
-    // updateCompany: async (
-    //   _: any,
-    //   args: MutationUpdateCompanyArgs,
-    //   { manager }: MyContext
-    // ): Promise<CompanyEntity | null> => {
-    //   if (args.data.id !== manager?.companyId) {
-    //     throw new GraphQLError("Forbidden.");
-    //   }
-    //   checkStrictRole(manager?.role, "SUPER_ADMIN");
-    //   const partialCompany: Partial<CompanyEntity> = { ...args.data };
-    //   const updatedCompany = await companyService.updateOne(
-    //     args.data.id,
-    //     partialCompany
-    //   );
-    //   return updatedCompany;
-    // },
 
     updateCompany: async (
       _: any,
@@ -88,12 +112,13 @@ const companyResolver = {
       return companyService.updateCompany(
         args.data.id,
         { ...args.data },
-        manager ? { companyId: manager.companyId, role: manager.role } : undefined
+        manager
+          ? { companyId: manager.companyId, role: manager.role }
+          : undefined
       );
-
     },
-
   },
+
   Company: {
     services: async ({ id }: { id: string }) => {
       return await new ServicesService().db.findOne({
@@ -131,7 +156,11 @@ const isUserFromNextOne =
 
 const composition = {
   "*.*": [isAuthenticated()],
+  "Query.company": [checkCompanyIdMatch("id")], 
+  "Query.companyByIP": [],
   "Mutation.createCompany": [isUserFromNextOne()],
+  "Mutation.deleteCompany": [checkCompanyIdMatch("id")],
+  "Mutation.updateCompany": [checkCompanyIdMatch("data.id")],
 };
 
 export default composeResolvers(companyResolver, composition);
