@@ -16,13 +16,13 @@ import TicketService from "@/services/ticket.service";
 // import { fakerFR as faker } from "@faker-js/faker";
 import datasource from "./datasource";
 import { DeepPartial } from "typeorm";
-import os from "os"
+import os from "os";
 import { getServerLocalIPv4 } from "./ipContext";
 import WhitelistedIpService from "@/services/whitelistedIp.service";
 
 const MANAGER_COUNT = 100;
 const TICKET_COUNT = 500;
-const IP = getServerLocalIPv4()
+const IP = getServerLocalIPv4();
 
 const createCompanyAndSuperAdmin = async (): Promise<CompanyEntity[]> => {
   console.log("🏚️ --> CREATION DE LA COMPANY...");
@@ -58,25 +58,31 @@ const createCompanyAndSuperAdmin = async (): Promise<CompanyEntity[]> => {
   const created2 = await CompanyService.getService().createOne(google);
   const created3 = await CompanyService.getService().createOne(nextOne);
 
-  const ipApple = await new WhitelistedIpService().createWhitelistedIp({ipAddress: IP}, created.id)
-  const ipGoogle = await new WhitelistedIpService().createWhitelistedIp({ipAddress: IP}, created2.id)
+  const ipApple = await new WhitelistedIpService().createWhitelistedIp(
+    { ipAddress: IP, companyId: created.id },
+    created.id
+  );
+  const ipGoogle = await new WhitelistedIpService().createWhitelistedIp(
+    { ipAddress: IP, companyId: created2.id },
+    created2.id
+  );
 
   const appleAdmin = new ManagerEntity();
   appleAdmin.firstName = "contact";
   appleAdmin.lastName = "apple";
-  appleAdmin.companyId= created.id
+  appleAdmin.companyId = created.id;
   appleAdmin.email = "contact@apple.com";
   appleAdmin.role = ManagerRole.SuperAdmin;
   appleAdmin.password = "nextone";
 
-  const managerService = new ManagerService()
+  const managerService = new ManagerService();
 
   await managerService.create(appleAdmin);
-  
+
   const googleAdmin = new ManagerEntity();
   googleAdmin.firstName = "support";
   googleAdmin.lastName = "google";
-  googleAdmin.companyId = created2.id
+  googleAdmin.companyId = created2.id;
   googleAdmin.email = "support@google.com";
   googleAdmin.role = ManagerRole.SuperAdmin;
   googleAdmin.password = "nextone";
@@ -130,13 +136,13 @@ const createServices = async (
     companies.map(async (company) => {
       const admin = await new ManagerService().db.findOne({
         where: {
-          companyId: company.id
-        }
-      })
+          companyId: company.id,
+        },
+      });
       if (!admin) {
-        throw new Error(`Can't find admin for ${company.name}`)
+        throw new Error(`Can't find admin for ${company.name}`);
       }
-      const serviceService = new ServicesService()
+      const serviceService = new ServicesService();
       const services = await Promise.all(
         serviceNames.map(async (name) => {
           const data: CreateServiceInput = {
@@ -144,13 +150,19 @@ const createServices = async (
             name: `${company.name.split(" ")[0].toUpperCase()}_${name}`,
           };
           const created = await serviceService.createService(data);
-          const authorization = await new AuthorizationService().addAuthorization({
-            isAdministrator: true,
-            managerId: admin.id,
-            serviceId: created.id
-          }, admin)
+          const authorization =
+            await new AuthorizationService().addAuthorization(
+              {
+                isAdministrator: true,
+                managerId: admin.id,
+                serviceId: created.id,
+              },
+              admin
+            );
           if (!authorization) {
-            throw new Error(`Unable to add authorization for user ${admin.email} in service ${created.name}`)
+            throw new Error(
+              `Unable to add authorization for user ${admin.email} in service ${created.name}`
+            );
           }
           return created;
         })
@@ -175,7 +187,7 @@ const createManagers = async (
       password: "salami",
       role: Math.random() > 0.7 ? ManagerRole.Admin : ManagerRole.Operator,
       companyId: companies[Math.random() > 0.5 ? 0 : 1].id,
-      isGloballyActive: Math.random() > 0.72 ? false: true
+      isGloballyActive: Math.random() > 0.72 ? false : true,
     };
   };
 
@@ -229,8 +241,8 @@ const createTicket = async (
 ): Promise<TicketEntity[]> => {
   console.log("🎫 --> CREATION DES TICKETS...");
   const { fakerFR: faker } = await import("@faker-js/faker");
-  const dateMin = new Date().setHours(0,0,0,0)
-  const dateMax = Date.now()
+  const dateMin = new Date().setHours(0, 0, 0, 0);
+  const dateMax = Date.now();
   const createRandomTicket = () => {
     const randomIndex = Math.floor(Math.random() * services.length);
     const service = services[randomIndex];
@@ -242,7 +254,7 @@ const createTicket = async (
       email: faker.internet.email(),
       phone: faker.phone.number(),
       service,
-      createdAt: faker.date.between({ from: dateMin, to: dateMax})
+      createdAt: faker.date.between({ from: dateMin, to: dateMax }),
     };
     return randomTicket;
   };
@@ -261,7 +273,6 @@ const createTicket = async (
 
   return tickets;
 };
-
 
 const updateTicketStatus = async (
   managers: ManagerEntity[],
