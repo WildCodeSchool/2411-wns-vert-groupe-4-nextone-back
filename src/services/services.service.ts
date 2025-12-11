@@ -80,4 +80,17 @@ export default class ServicesService {
       throw new GraphQLError("Forbidden.");
     }
   }
+
+  public async findServicesByKey(key: string, ip: string) {
+    return await this.db.find({
+      where: {
+        company: {
+          whitelistedIps: {
+            key,
+            ipAddress: ip
+          }
+        }
+      }
+    })
+  }
 }

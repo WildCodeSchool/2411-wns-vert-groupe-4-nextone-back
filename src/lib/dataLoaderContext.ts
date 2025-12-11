@@ -25,16 +25,16 @@ import DataLoader from "dataloader";
 // const ticketByServiceIdLoader = new DataLoader(batchTicketByServiceId);
 
 //AUTH PAR SERVICE ID
-const batchAuthByServiceId = async (serviceIds: Readonly<string[]>) => {
-  const auths = await Promise.all(
-    serviceIds.map(async (id) => {
-      return await new AuthorizationService().getByService(id);
-    })
-  );
-  return auths;
-};
+// const batchAuthByServiceId = async (serviceIds: Readonly<string[]>) => {
+//   const auths = await Promise.all(
+//     serviceIds.map(async (id) => {
+//       return await new AuthorizationService().getByService(id);
+//     })
+//   );
+//   return auths;
+// };
 
-const authsByServiceIdLoader = new DataLoader(batchAuthByServiceId,{ cache: false, });
+// const authsByServiceIdLoader = new DataLoader(batchAuthByServiceId,{ cache: false, });
 
 //MANAGER
 // const batchManager = async (managerIds: Readonly<(string | null)[]>) => {
@@ -78,7 +78,7 @@ const authsByServiceIdLoader = new DataLoader(batchAuthByServiceId,{ cache: fals
 
 //TICKETLOGS PAR TICKET ID
 const batchTicketLogByTicketId = async (ticketIds: Readonly<string[]>) => {
-  console.log('TGICKETIDS : ',ticketIds)
+  console.log('TICKETIDS DANS DATALOADER : ',ticketIds)
   return await Promise.all(
     ticketIds.map(async (id) => {
       const res = await TicketLogService.getInstance().findByProperties({
@@ -86,6 +86,7 @@ const batchTicketLogByTicketId = async (ticketIds: Readonly<string[]>) => {
           id,
         },
       });
+      console.log("RES DANS DATALOADER : ", res)
       return res.items
     })
   );
@@ -120,9 +121,10 @@ const ticketLogsByManagerIdLoader = new DataLoader(
   async (managerIds: Readonly<string[]>) => {
     return await Promise.all(
       managerIds.map(async (id) => {
-        return await TicketLogService.getInstance().findByProperties({
+        const res =  await TicketLogService.getInstance().findByProperties({
           managerId: id,
         });
+        return res.items
       })
     );
   },{ cache: false}

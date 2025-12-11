@@ -17,6 +17,7 @@ type Service {
 type Query {
   services: [Service!]!
   service(id: UUID!): Service
+  servicesByKey(key: String!): [Service!]!
 }
 
 type Mutation {

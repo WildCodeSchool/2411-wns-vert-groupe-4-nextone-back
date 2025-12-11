@@ -7,6 +7,7 @@ import {
   MutationToggleGlobalAccessServiceArgs,
   ServiceResponse,
   Service,
+  QueryServicesByKeyArgs,
 } from "@/generated/graphql";
 import { MyContext, ResolverWrapper } from "..";
 import { canAccessAuthorization, checkStrictRole } from "@/utils/manager";
@@ -30,7 +31,9 @@ const serviceResolver = {
       __: any,
       ctx: MyContext
     ): Promise<ServiceEntity[]> => {
-      const services = await new ServicesService().getAllServices(ctx.manager?.companyId!);
+      const services = await new ServicesService().getAllServices(
+        ctx.manager?.companyId!
+      );
       return services;
     },
 
@@ -41,6 +44,13 @@ const serviceResolver = {
     ): Promise<ServiceEntity | null> => {
       const service = await servicesService.getServiceById(id);
       return service;
+    },
+    servicesByKey: async (
+      _: any,
+      args: QueryServicesByKeyArgs,
+      ctx: MyContext
+    ): Promise<ServiceEntity[]> => {
+      return servicesService.findServicesByKey(args.key, ctx.ip!);
     },
   },
 
@@ -155,7 +165,7 @@ const isServiceFromCompany =
   (): ResolverWrapper<MutationUpdateServiceArgs> =>
   (next) =>
   async (root, args, context, info) => {
-    await servicesService.checkService(args.id, context.manager?.companyId!)
+    await servicesService.checkService(args.id, context.manager?.companyId!);
     return next(root, args, context, info);
   };
 
