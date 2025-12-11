@@ -42,7 +42,11 @@ export default class TicketService extends BaseService<TicketEntity> {
     if (!updated) {
       throw new Error("Nothing affected.");
     }
-    const found = await this.findById(id);
+    const found = await this.repo.findOne({
+      where: {
+        id
+      }
+    });
 
     if (!found) {
       throw new Error("Entity not found after update");
