@@ -17,9 +17,12 @@ import TicketService from "@/services/ticket.service";
 import datasource from "./datasource";
 import { DeepPartial } from "typeorm";
 import os from "os"
+import { getServerLocalIPv4 } from "./ipContext";
+import WhitelistedIpService from "@/services/whitelistedIp.service";
 
 const MANAGER_COUNT = 100;
 const TICKET_COUNT = 500;
+const IP = getServerLocalIPv4()
 
 const createCompanyAndSuperAdmin = async (): Promise<CompanyEntity[]> => {
   console.log("🏚️ --> CREATION DE LA COMPANY...");
@@ -54,6 +57,9 @@ const createCompanyAndSuperAdmin = async (): Promise<CompanyEntity[]> => {
   const created = await CompanyService.getService().createOne(company);
   const created2 = await CompanyService.getService().createOne(google);
   const created3 = await CompanyService.getService().createOne(nextOne);
+
+  const ipApple = await new WhitelistedIpService().createWhitelistedIp({ipAddress: IP}, created.id)
+  const ipGoogle = await new WhitelistedIpService().createWhitelistedIp({ipAddress: IP}, created2.id)
 
   const appleAdmin = new ManagerEntity();
   appleAdmin.firstName = "contact";
@@ -169,6 +175,7 @@ const createManagers = async (
       password: "salami",
       role: Math.random() > 0.7 ? ManagerRole.Admin : ManagerRole.Operator,
       companyId: companies[Math.random() > 0.5 ? 0 : 1].id,
+      isGloballyActive: Math.random() > 0.72 ? false: true
     };
   };
 
@@ -204,7 +211,7 @@ const assignManagersToService = async (
       if (!superAdmin) {
         throw new Error("Can't find Super Admin.");
       }
-      if (random > 0.5) {
+      if (random > 0.5 && manager.isGloballyActive) {
         await new AuthorizationService().addAuthorization(
           {
             managerId: manager.id,
@@ -222,7 +229,7 @@ const createTicket = async (
 ): Promise<TicketEntity[]> => {
   console.log("🎫 --> CREATION DES TICKETS...");
   const { fakerFR: faker } = await import("@faker-js/faker");
-  const dateMin = new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).getTime()
+  const dateMin = new Date().setHours(0,0,0,0)
   const dateMax = Date.now()
   const createRandomTicket = () => {
     const randomIndex = Math.floor(Math.random() * services.length);

@@ -22,6 +22,5 @@ export const ipContext = async ({ req }: { req: Request }) => {
     (req.socket.remoteAddress as string);
   const regex = /[0-9.]/g;
   const matched = ip.match(regex)?.join("");
-
-  return { ip: matched.length < 15 ? "127.0.0.1" : matched };
+  return { ip: matched };
 };

@@ -8,6 +8,7 @@ enum Status {
   PENDING
   ARCHIVED
   INPROGRESS
+  UPDATED
 }
 
 type TicketLog {
@@ -31,13 +32,15 @@ type Query {
     field: TicketLogPropertyInput!
     pagination: PaginationInput
   ): TicketLogsPaginatedResult!
- 
-    ticketLogsByProperties(
+
+  ticketLogsByProperties(
     fields: TicketLogPropertiesInput!
     pagination: PaginationInput
   ): TicketLogsPaginatedResult!
- 
-   ticketLogsByCreationSlot(data: ByCreationSlotInput!): TicketLogsPaginatedResult!
+
+  ticketLogsByCreationSlot(
+    data: ByCreationSlotInput!
+  ): TicketLogsPaginatedResult!
 }
 
 type Mutation {
@@ -61,7 +64,7 @@ input TicketLogPropertyInput @oneOf {
   updatedAt: DateTime
 }
 
-input TicketLogPropertiesInput  {
+input TicketLogPropertiesInput {
   ticketId: UUID
   managerId: UUID
   status: Status
@@ -79,13 +82,13 @@ type DeleteResponse {
 # }
 
 input CreateTicketLogInput {
-  ticketId: UUID! 
-  managerId: UUID 
+  ticketId: UUID!
+  managerId: UUID
   status: Status
 }
 
 input UpdateTicketLogInput {
-  id: UUID! 
+  id: UUID!
   status: Status!
-  managerId: UUID 
+  managerId: UUID
 }

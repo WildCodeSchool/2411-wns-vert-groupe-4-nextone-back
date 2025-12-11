@@ -1,4 +1,5 @@
 scalar DateTime
+scalar UUID
 
 type Ticket {
   id: ID!
@@ -27,7 +28,7 @@ type Query {
     pagination: PaginationInput
   ): TicketsPaginatedResult!
 
- ticketsForTVDisplay(serviceId: ID, count: Int): [Ticket]
+ ticketsForTVDisplay(data: TicketForTvInput!): [Ticket]
 }
 
 type Mutation {
@@ -50,6 +51,12 @@ type Subscription {
 enum Order {
   ASC
   DESC
+}
+
+input TicketForTvInput {
+  key: String!
+  serviceId: UUID
+  count: Int
 }
 
 input PaginationInput {

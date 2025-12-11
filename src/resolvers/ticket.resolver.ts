@@ -48,7 +48,7 @@ const ticketResolver = {
 
     ticketsForTVDisplay: async (
       _: any,
-      {  serviceId, count  }: QueryTicketsForTvDisplayArgs,
+      {  data: { key, serviceId, count}  }: QueryTicketsForTvDisplayArgs,
       { ip, manager }: MyContext
     ): Promise<TicketEntity[] | null> => {
       console.log("IP RESOLVER : ", ip);
@@ -174,7 +174,7 @@ const ticketResolver = {
       { data }: MutationUpdateTicketArgs,
       ctx: MyContext
     ): Promise<TicketEntity | null> => {
-      const updated = await TicketService.gettInstance().updateOne(data.id, data);
+      const updated = await TicketService.gettInstance().updateTicket(data.id, data, ctx.manager!);
       // MR
       if (updated) {
         await pubsub.publish(EVENTS.TICKET_UPDATED, { ticketUpdated: updated });
@@ -289,7 +289,7 @@ const ticketResolver = {
 };
 
 const isIpAuthorized = (): ResolverWrapper<QueryTicketsForTvDisplayArgs> => (next) => async (root, args, context, info) => {
-
+  console.log("context ip ", context.ip)
   if (!context.ip) {
     throw new GraphQLError("Unable to retrieve IP address from request.")
   }
@@ -304,8 +304,12 @@ const isIpAuthorized = (): ResolverWrapper<QueryTicketsForTvDisplayArgs> => (nex
     throw new GraphQLError("No ip.")
   }
 
-  if (args.serviceId) {
-    await new ServicesService().checkService(args.serviceId, ip?.companyId!);
+  if (ip.key !== args.data.key) {
+    throw new GraphQLError("Forbidden.")
+  }
+
+  if (args.data.serviceId) {
+    await new ServicesService().checkService(args.data.serviceId, ip?.companyId!);
   }
 
   return next(root, args, context, info)
