@@ -23,12 +23,12 @@ import { withFilter } from "graphql-subscriptions";
 import { pubsub } from "@/lib/pubsub";
 import { EVENTS } from "@/subscriptions/events";
 import { GraphQLError } from "graphql/error";
+import TicketLogService from "@/services/ticketLogs.service";
 
 type TicketDeleted = {
   message: string;
   success: boolean;
 };
-
 
 const ticketResolver = {
   Query: {
@@ -48,12 +48,15 @@ const ticketResolver = {
 
     ticketsForTVDisplay: async (
       _: any,
-      {  data  }: QueryTicketsForTvDisplayArgs,
+      { data }: QueryTicketsForTvDisplayArgs,
       { ip, manager }: MyContext
     ): Promise<TicketEntity[] | null> => {
       console.log("IP RESOLVER : ", ip);
-      const tickets = await TicketService.gettInstance().findTicketForTv(ip!, data)
-      return tickets
+      const tickets = await TicketService.gettInstance().findTicketForTv(
+        ip!,
+        data
+      );
+      return tickets;
       // console.log("IP du client :", ip);
       // const whitelistedIpService = new WhitelistedIpService();
 
@@ -80,7 +83,7 @@ const ticketResolver = {
       //   (a, b) => a.updatedAt.getTime() - b.updatedAt.getTime()
       // );
       // return ticketsList;
-  },
+    },
 
     ticket: async (
       _: any,
@@ -136,7 +139,9 @@ const ticketResolver = {
         throw new Error("No service with this id.");
       }
       const creationData = { ...data, service };
-      const newTicket = await TicketService.gettInstance().createOne(creationData);
+      const newTicket = await TicketService.gettInstance().createOne(
+        creationData
+      );
       await localPubsub.publish(TICKET_ADDED, { ticketAdded: newTicket });
       await pubsub.publish(EVENTS.TICKET_CREATED, { ticketCreated: newTicket });
       await pubsub.publish(EVENTS.TICKETS_CHANGED, {
@@ -174,7 +179,11 @@ const ticketResolver = {
       { data }: MutationUpdateTicketArgs,
       ctx: MyContext
     ): Promise<TicketEntity | null> => {
-      const updated = await TicketService.gettInstance().updateTicket(data.id, data, ctx.manager!);
+      const updated = await TicketService.gettInstance().updateTicket(
+        data.id,
+        data,
+        ctx.manager!
+      );
       // MR
       if (updated) {
         await pubsub.publish(EVENTS.TICKET_UPDATED, { ticketUpdated: updated });
@@ -282,39 +291,49 @@ const ticketResolver = {
       return await new ServicesService().getServiceById(ticket.serviceId);
     },
     ticketLogs: async (ticket: TicketEntity, _: any, ctx: MyContext) => {
-      return await ctx.loaders.ticketLogByTicketIdLoader.load(ticket.id);
+      // if (ctx.loaders) {
+      //   return await ctx.loaders.ticketLogByTicketIdLoader.load(ticket.id);
+      // }
+      const ticketLogs = await TicketLogService.getInstance().findByProperties({
+        ticketId: ticket.id,
+      });
+      return ticketLogs.items;
     },
   },
-
 };
 
-const isIpAuthorized = (): ResolverWrapper<QueryTicketsForTvDisplayArgs> => (next) => async (root, args, context, info) => {
-  console.log("context ip ", context.ip)
-  if (!context.ip) {
-    throw new GraphQLError("Unable to retrieve IP address from request.")
-  }
-
-  const ip = await new WhitelistedIpService().db.findOne({
-    where: {
-      ipAddress: context.ip
+const isIpAuthorized =
+  (): ResolverWrapper<QueryTicketsForTvDisplayArgs> =>
+  (next) =>
+  async (root, args, context, info) => {
+    console.log("context ip ", context.ip);
+    if (!context.ip) {
+      throw new GraphQLError("Unable to retrieve IP address from request.");
     }
-  })
 
-  if (!ip) {
-    throw new GraphQLError("No ip.")
-  }
+    const ip = await new WhitelistedIpService().db.findOne({
+      where: {
+        ipAddress: context.ip,
+      },
+    });
 
-  if (ip.key !== args.data.key) {
-    throw new GraphQLError("Forbidden.")
-  }
+    if (!ip) {
+      throw new GraphQLError("No ip.");
+    }
 
-  if (args.data.serviceId) {
-    await new ServicesService().checkService(args.data.serviceId, ip?.companyId!);
-  }
+    if (ip.key !== args.data.key) {
+      throw new GraphQLError("Forbidden.");
+    }
 
-  return next(root, args, context, info)
-}
+    if (args.data.serviceId) {
+      await new ServicesService().checkService(
+        args.data.serviceId,
+        ip?.companyId!
+      );
+    }
 
+    return next(root, args, context, info);
+  };
 
 export const isAuthenticated =
   (): ResolverWrapper => (next) => (root, args, context, info) => {
@@ -329,13 +348,18 @@ const isTicketFromThisCompany =
   (): ResolverWrapper<MutationUpdateTicketArgs> =>
   (next) =>
   async (root, args, context, info) => {
-    await TicketService.gettInstance().checkTicket(args.data.id, context.manager?.companyId!)
+    await TicketService.gettInstance().checkTicket(
+      args.data.id,
+      context.manager?.companyId!
+    );
     if (args.data.serviceId) {
-      await new ServicesService().checkService(args.data.serviceId, context.manager?.companyId!)
+      await new ServicesService().checkService(
+        args.data.serviceId,
+        context.manager?.companyId!
+      );
     }
     return next(root, args, context, info);
   };
-
 
 const composition = {
   "Query.!ticketsForTVDisplay": [isAuthenticated()],
