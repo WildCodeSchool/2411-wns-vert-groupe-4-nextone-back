@@ -41,8 +41,8 @@ type Auth {
 }
 
 type Message {
-  message: String
-  success: Boolean
+  message: String!
+  success: Boolean!
 }
 
 # 👉 PAGINATION : a décommenter pour activer la pagination

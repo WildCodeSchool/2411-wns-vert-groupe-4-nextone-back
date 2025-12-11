@@ -248,12 +248,12 @@ const managerResolver = {
     toggleGlobalAccessManager: async (
       _: any,
       { id }: MutationToggleGlobalAccessManagerArgs,
-      ctx: MyContext
+      { manager }: MyContext
     ): Promise<Message> => {
-      const { manager } = ctx;
-      if (!manager) {
-        throw new Error("Manager non authentifié");
-      }
+      // const { manager } = ctx;
+      // if (!manager) {
+      //   throw new Error("Manager non authentifié");
+      // }
       checkStrictRole(manager?.role, "SUPER_ADMIN");
       const targetManager = await managerService.getManagerById(id);
       if (!targetManager) {
@@ -262,6 +262,7 @@ const managerResolver = {
       const updatedManager = await managerService.toggleGlobalAccess(
         targetManager
       );
+      console.log("UPDATED DANS LE RESOLVER : ", updatedManager)
       return buildResponse(
         updatedManager,
         "Manager is active.",
