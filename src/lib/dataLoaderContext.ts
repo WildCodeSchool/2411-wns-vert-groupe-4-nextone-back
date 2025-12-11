@@ -78,13 +78,15 @@ const serviceLoader = new DataLoader(batchService);
 
 //TICKETLOGS PAR TICKET ID
 const batchTicketLogByTicketId = async (ticketIds: Readonly<string[]>) => {
+  console.log('TGICKETIDS : ',ticketIds)
   return await Promise.all(
     ticketIds.map(async (id) => {
-      return await TicketLogService.getInstance().findByProperties({
+      const res = await TicketLogService.getInstance().findByProperties({
         ticket: {
           id,
         },
       });
+      return res.items
     })
   );
 };

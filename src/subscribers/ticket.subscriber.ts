@@ -5,10 +5,12 @@ import {
   EntitySubscriberInterface,
   EventSubscriber,
   InsertEvent,
+  UpdateEvent,
 
 } from "typeorm";
 import { Status } from "@/generated/graphql";
 import ServicesService from "@/services/services.service";
+import ManagerEntity from "@/entities/Manager.entity";
 
 @EventSubscriber()
 export class TicketSubscriber
@@ -68,18 +70,16 @@ export class TicketSubscriber
     await manager.save(ticketLog);
   }
 
-  // async afterUpdate(event: UpdateEvent<TicketEntity>): Promise<void> {
-  // }
-
   // async afterUpdate(event: UpdateEvent<TicketEntity>) {
+  //   console.log("entityt : ", event.entity)
   //   const isStatusModified = event.updatedColumns.some(
   //     (col) => col.propertyName === "status"
   //   );
 
   //   if (!isStatusModified) return;
 
-  //   event.entity
+  //   if (!event.entity) return
   //   //ON RECUPERE LE MANAGER
-  //   const manager = await event.manager.getRepository(ManagerEntity).findOneBy({id: '"test'})
+  //   // const manager = await event.manager.getRepository(ManagerEntity).findOneBy({id: event.databaseEntity. })
   // }
 }
