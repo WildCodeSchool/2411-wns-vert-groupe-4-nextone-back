@@ -1,6 +1,8 @@
 export function buildResponse(success: boolean, successMsg: string, errorMsg: string) {
-  return {
+  const res =  {
     success,
     message: success ? successMsg : errorMsg,
   };
+  console.log('RES : ', res)
+  return res
 }
