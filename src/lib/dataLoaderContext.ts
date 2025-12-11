@@ -161,7 +161,7 @@ const ticketLogsByManagerIdLoader = new DataLoader(
 //           company: {
 //             id,
 //           },
-//         });
+//         })
 //       })
 //     );
 //   }

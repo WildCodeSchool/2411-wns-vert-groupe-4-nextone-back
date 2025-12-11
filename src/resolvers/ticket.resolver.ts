@@ -48,11 +48,11 @@ const ticketResolver = {
 
     ticketsForTVDisplay: async (
       _: any,
-      {  data: { key, serviceId, count}  }: QueryTicketsForTvDisplayArgs,
+      {  data  }: QueryTicketsForTvDisplayArgs,
       { ip, manager }: MyContext
     ): Promise<TicketEntity[] | null> => {
       console.log("IP RESOLVER : ", ip);
-      const tickets = await TicketService.gettInstance().findTicketForTv(ip!, serviceId, count)
+      const tickets = await TicketService.gettInstance().findTicketForTv(ip!, data)
       return tickets
       // console.log("IP du client :", ip);
       // const whitelistedIpService = new WhitelistedIpService();

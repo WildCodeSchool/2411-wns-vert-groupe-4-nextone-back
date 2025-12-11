@@ -2,6 +2,7 @@ import TicketEntity from "@/entities/Ticket.entity";
 import {
   PaginationInput,
   Status,
+  TicketForTvInput,
   UpdateStatusTicketInput,
   UpdateTicketInput,
 } from "@/generated/graphql";
@@ -163,9 +164,9 @@ export default class TicketService extends BaseService<TicketEntity> {
 
   public async findTicketForTv(
     ip: string,
-    serviceId?: string,
-    count: number = 5
+    data: TicketForTvInput
   ): Promise<TicketEntity[]> {
+    const { key, count, serviceId } = data
     const start = new Date();
     start.setHours(0, 0, 0, 0);
 
@@ -179,6 +180,7 @@ export default class TicketService extends BaseService<TicketEntity> {
           company: {
             whitelistedIps: {
               ipAddress: ip,
+              key
             },
           },
         },
