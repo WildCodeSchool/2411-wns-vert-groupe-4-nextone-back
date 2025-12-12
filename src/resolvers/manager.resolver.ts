@@ -308,7 +308,7 @@ const isManagerFromCompany =
       args.id,
       context.manager?.companyId!
     );
-    next(root, args, context, info);
+    return next(root, args, context, info);
   };
 
 const composition = {
