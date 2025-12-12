@@ -9,7 +9,6 @@ import {
   Auth,
   MutationResetPasswordArgs,
   SortedManagers,
-  Manager,
   MutationDeleteManagerArgs,
   // 👉 PAGINATION : Décommenter cet import pour activer la pagination
   // QueryManagersArgs,
@@ -157,21 +156,7 @@ const managerResolver = {
       { infos }: MutationCreateManagerArgs,
       { manager }: MyContext
     ): Promise<ManagerEntity> => {
-      // if (!manager?.role) {
-      //   throw new Error("Le rôle du manager est manquant.");
-      // }
-      // if (!infos.role) {
-      //   throw new Error("Le rôle est requis.");
-      // }
-      // checkRoleInHierarchy(manager.role, infos.role);
-      // const managerExists = await managerService.findManagerByEmail(
-      //   infos.email
-      // );
-      // if (managerExists) {
-      //   throw new Error("Cet email est déjà pris !");
-      // }
-      // const newManager = plainToInstance(ManagerEntity, infos);
-      // await validateOrThrow(newManager);
+
 
       //LINVITATION EXISTE
       const invitations =
@@ -250,10 +235,7 @@ const managerResolver = {
       { id }: MutationToggleGlobalAccessManagerArgs,
       { manager }: MyContext
     ): Promise<Message> => {
-      // const { manager } = ctx;
-      // if (!manager) {
-      //   throw new Error("Manager non authentifié");
-      // }
+
       checkStrictRole(manager?.role, "SUPER_ADMIN");
       const targetManager = await managerService.getManagerById(id);
       if (!targetManager) {
@@ -262,7 +244,6 @@ const managerResolver = {
       const updatedManager = await managerService.toggleGlobalAccess(
         targetManager
       );
-      console.log("UPDATED DANS LE RESOLVER : ", updatedManager)
       return buildResponse(
         updatedManager,
         "Manager is active.",
@@ -327,7 +308,7 @@ const isManagerFromCompany =
       args.id,
       context.manager?.companyId!
     );
-    next(root, args, context, info);
+    return next(root, args, context, info);
   };
 
 const composition = {

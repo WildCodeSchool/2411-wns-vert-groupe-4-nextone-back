@@ -12,8 +12,7 @@ import ManagerService from "@/services/manager.service";
 import { MyContext, ResolverWrapper } from "..";
 import { composeResolvers } from "@graphql-tools/resolvers-composition";
 import { isAuthenticated } from "./ticket.resolver";
-import ManagerEntity from "@/entities/Manager.entity";
-import { GraphQLError } from "graphql";
+
 
 const connectionLogService = new ConnectionLogService();
 

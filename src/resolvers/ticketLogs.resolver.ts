@@ -56,7 +56,6 @@ const ticketLogResovler = {
         },
       });
       return ticketLogs;
-      // return await ticketLogService.findByProperty(key, value, args.pagination);
     },
 
     async ticketLogsByProperties(

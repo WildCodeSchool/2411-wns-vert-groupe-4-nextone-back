@@ -6,7 +6,6 @@ import {
   MutationUpdateSettingArgs,
   QuerySettingsArgs,
   QuerySettingsByPropertiesArgs,
-  SettingsByPropertiesInput,
 } from "@/generated/graphql";
 import CompanyService from "@/services/company.service";
 import SettingsSystemService from "@/services/setting.service";

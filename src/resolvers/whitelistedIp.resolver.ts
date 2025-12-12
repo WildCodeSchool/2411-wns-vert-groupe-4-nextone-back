@@ -5,7 +5,6 @@ import {
   MutationCreateWhitelistedIpArgs,
   MutationDeleteWhitelistedIpArgs,
   QueryWhitelistedIpArgs,
-  WhitelistedIp,
   WhitelistedIpResponse,
 } from "@/generated/graphql";
 import { checkStrictRole } from "@/utils/manager";

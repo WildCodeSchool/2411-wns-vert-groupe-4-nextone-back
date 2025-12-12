@@ -1,7 +1,6 @@
 import InvitationEntity from "@/entities/Invitation.entity";
 import BaseService from "./base.service";
 import {
-  createInvitationToken,
   createTokenAndExpiration,
 } from "@/utils/tokens.utils";
 import { GraphQLError } from "graphql";
@@ -54,7 +53,6 @@ export default class InvitationService extends BaseService<InvitationEntity> {
     args: CreateInvitationInput,
     companyId: string,
   ) {
-    console.log("CREATONE INVIT : ", args, companyId)
     const created = await super.createOne({...args, companyId})
     await sendMail(created.email, created.token, "CREATE_INVITATION")
     return created

@@ -3,6 +3,5 @@ export function buildResponse(success: boolean, successMsg: string, errorMsg: st
     success,
     message: success ? successMsg : errorMsg,
   };
-  console.log('RES : ', res)
   return res
 }

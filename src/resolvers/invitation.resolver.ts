@@ -1,7 +1,6 @@
 import {
   DeleteResponse,
   Invitation,
-  ManagerRole,
   MutationCreateInvitationArgs,
   MutationDeleteInvitationArgs,
   MutationRenewInvitationArgs,

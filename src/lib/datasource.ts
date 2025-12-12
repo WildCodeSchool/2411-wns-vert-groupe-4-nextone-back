@@ -36,5 +36,4 @@ export default new DataSource({
     WhitelistedIpEntity,
   ],
   subscribers: [process.env.SUBSCRIBERS_PATH!],
-  synchronize: true,
 });
