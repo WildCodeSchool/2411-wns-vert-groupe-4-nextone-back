@@ -4,7 +4,6 @@ import { ServiceEntity } from "@/entities/Service.entity";
 import CompanyService from "./company.service";
 import { pubsub } from "@/lib/pubsub";
 import { EVENTS } from "@/subscriptions/events";
-import { GraphQLAccountNumber } from "graphql-scalars";
 import { GraphQLError } from "graphql/error";
 
 export default class ServicesService {

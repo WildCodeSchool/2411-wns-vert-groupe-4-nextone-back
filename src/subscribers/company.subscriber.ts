@@ -1,9 +1,7 @@
 import CompanyEntity from "@/entities/Company.entity";
 import InvitationEntity from "@/entities/Invitation.entity";
-import ManagerEntity from "@/entities/Manager.entity";
 import { ManagerRole } from "@/generated/graphql";
 import { sendMail } from "@/lib/mail";
-import InvitationService from "@/services/invitation.service";
 import {
   EntitySubscriberInterface,
   EventSubscriber,

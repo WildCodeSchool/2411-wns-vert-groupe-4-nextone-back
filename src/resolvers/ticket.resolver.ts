@@ -37,9 +37,7 @@ const ticketResolver = {
       { pagination }: QueryTicketsArgs,
       ctx: MyContext
     ): Promise<{ items: TicketEntity[]; totalCount: number }> => {
-      // const ticketsList = await ticketService.findAll(pagination);
-      // const totalCount = await ticketService.countAll(pagination);
-      // return { items: ticketsList, totalCount };
+
       return await TicketService.gettInstance().findAllPaginated(
         ctx.manager?.companyId!,
         pagination
@@ -57,32 +55,7 @@ const ticketResolver = {
         data
       );
       return tickets;
-      // console.log("IP du client :", ip);
-      // const whitelistedIpService = new WhitelistedIpService();
 
-      // const whitelistedIPs = await whitelistedIpService.getAllWhitelistedIps(
-      //   manager?.companyId!
-      // );
-
-      // const ipIsWhitelisted = whitelistedIPs.some(
-      //   (ipEntry) => ipEntry.ipAddress === ip
-      // );
-      // if (!ipIsWhitelisted) {
-      //   return null;
-      // }
-      // let ticketsList = await TicketService.gettInstance().findAll(pagination);
-      // ticketsList = ticketsList.filter(
-      //   (ticket) => ticket.status === "PENDING"
-      // );
-      // if (serviceId) {
-      //   ticketsList = ticketsList.filter(
-      //     (ticket) => ticket.serviceId === serviceId
-      //   );
-      // }
-      // ticketsList = ticketsList.sort(
-      //   (a, b) => a.updatedAt.getTime() - b.updatedAt.getTime()
-      // );
-      // return ticketsList;
     },
 
     ticket: async (
@@ -291,9 +264,7 @@ const ticketResolver = {
       return await new ServicesService().getServiceById(ticket.serviceId);
     },
     ticketLogs: async (ticket: TicketEntity, _: any, ctx: MyContext) => {
-      // if (ctx.loaders) {
-      //   return await ctx.loaders.ticketLogByTicketIdLoader.load(ticket.id);
-      // }
+
       const ticketLogs = await TicketLogService.getInstance().findByProperties({
         ticketId: ticket.id,
       });

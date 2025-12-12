@@ -13,10 +13,8 @@ import CompanyService from "@/services/company.service";
 import ManagerService from "@/services/manager.service";
 import ServicesService from "@/services/services.service";
 import TicketService from "@/services/ticket.service";
-// import { fakerFR as faker } from "@faker-js/faker";
 import datasource from "./datasource";
 import { DeepPartial } from "typeorm";
-import os from "os";
 import { getServerLocalIPv4 } from "./ipContext";
 import WhitelistedIpService from "@/services/whitelistedIp.service";
 

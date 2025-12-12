@@ -42,11 +42,9 @@ export const fakeManagerInput: InputRegister = {
   password: "test",
   confirmPassword: "test",
   email: "jeanmichel@gmail.com",
-  // role: ManagerRole.Admin,
   firstName: "jean",
   lastName: "MICHEL",
   invitationToken: "6b35cf2d-5d46-49d3-8d97-f279ed7ddf3d"
-  // companyId: "",
 };
 
 export const fakeCompanyDataUpdateInput: CreateCompanyInput = {

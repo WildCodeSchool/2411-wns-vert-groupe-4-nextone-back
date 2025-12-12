@@ -1,15 +1,12 @@
 import ManagerRepository from "@/repositories/Manager.repository";
 import {
-  MutationCreateManagerArgs,
   QueryLoginArgs,
-  MutationResetPasswordArgs,
   Message,
   ResetPasswordInput,
 } from "@/generated/graphql";
 import { SignJWT } from "jose";
 import ManagerEntity from "@/entities/Manager.entity";
 import CompanyService from "./company.service";
-import crypto from "crypto";
 import * as argon2 from "argon2";
 import { createTokenAndExpiration } from "@/utils/tokens.utils";
 import { DeepPartial } from "typeorm";
@@ -150,8 +147,6 @@ export default class ManagerService {
     const user = await this.findManagerByEmail(email);
     if (!user) return null;
 
-    // const token = crypto.randomBytes(32).toString('hex')
-    // const resetTokenExpiration = new Date(Date.now() + 15 * 60 * 1000)
     const { token, expiration } = createTokenAndExpiration(15);
 
     await this.db.save({

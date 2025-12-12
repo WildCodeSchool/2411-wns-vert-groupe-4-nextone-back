@@ -16,7 +16,6 @@ import SettingService from "@/services/setting.service";
 import { composeResolvers } from "@graphql-tools/resolvers-composition";
 import { isAuthenticated } from "./ticket.resolver";
 import { GraphQLError } from "graphql";
-import { getCleanClientIP } from "@/utils/ip.utils"; 
 import { checkCompanyIdMatch } from "@/utils/resolvers.utils"; 
 import WhitelistedIpService from "@/services/whitelistedIp.service"; 
 
@@ -38,48 +37,6 @@ const companyResolver = {
       return company;
     },
 
-    // companyByIP: async (
-    //   _: any,
-    //   __: any,
-    //   ctx: MyContext
-    // ): Promise<CompanyEntity> => {
-   
-    //   const cleanIP = getCleanClientIP(ctx.req); 
-    //   console.log("🔍 [companyByIP] Clean IP detected:", cleanIP);
-
-    //   if (!cleanIP) {
-    //     throw new GraphQLError("Unable to determine client IP address");
-    //   }
-    //   const whitelistedIp = await whitelistedIpService.getWhitelistedIpByIp(
-    //     cleanIP
-    //   );
-
-    //   if (!whitelistedIp) {
-    //     console.error("❌ [companyByIP] IP not whitelisted:", cleanIP);
-    //     throw new GraphQLError(
-    //       `IP address ${cleanIP} is not authorized. Please contact an administrator to register this terminal.`
-    //     );
-    //   }
-
-    //   console.log(
-    //     "✅ [companyByIP] IP whitelisted for company:",
-    //     whitelistedIp.companyId
-    //   );
-
-    //   const company = await companyService.findById(whitelistedIp.companyId);
-
-    //   if (!company) {
-    //     console.error(
-    //       "❌ [companyByIP] Company not found:",
-    //       whitelistedIp.companyId
-    //     );
-    //     throw new GraphQLError("Company not found for this whitelisted IP");
-    //   }
-
-    //   console.log("✅ [companyByIP] Company found:", company.name);
-    //   return company;
-    // },
-    
     companyByIP: async (_: any, __: any, ctx: MyContext): Promise<CompanyEntity> => {
       const cleanIP = ctx.ip; 
       console.log("🔍 [companyByIP] Clean IP detected:", cleanIP);

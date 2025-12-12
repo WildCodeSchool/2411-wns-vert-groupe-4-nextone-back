@@ -6,7 +6,6 @@ import {
   QueryServiceArgs,
   MutationToggleGlobalAccessServiceArgs,
   ServiceResponse,
-  Service,
   QueryServicesByKeyArgs,
 } from "@/generated/graphql";
 import { MyContext, ResolverWrapper } from "..";
@@ -134,11 +133,6 @@ const serviceResolver = {
     authorizations: async ({ id }: { id: string }) => {
       return await new AuthorizationService().getByService(id);
     },
-    // tickets: async ({ id }: { id: string }) => {
-    //   return await TicketService.gettInstance().findByProperties({
-    //     serviceId: id,
-    //   });
-    // },
 
     tickets: async ({ id }: { id: string }) => {
       const result =

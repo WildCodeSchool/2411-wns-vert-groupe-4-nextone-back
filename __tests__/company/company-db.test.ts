@@ -94,7 +94,6 @@ describe("TEST COMPANY AVEC DB", () => {
     });
 
     assert(response.body.kind === "single");
-    console.log('FAKE MANAGER : ', fakeManagerContext)
     expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data).not.toBeNull();
     const { id, ...rest } = response.body.singleResult.data?.company!;

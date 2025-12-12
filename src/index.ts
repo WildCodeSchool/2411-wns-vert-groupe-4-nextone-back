@@ -16,8 +16,6 @@ import datasource from "./lib/datasource";
 import ManagerEntity from "./entities/Manager.entity";
 import { authContext } from "./lib/authContext";
 import type { Loaders } from "./lib/dataLoaderContext";
-import nodemailer from "nodemailer";
-import { sendMail } from "./lib/mail";
 import uploadImage from "./routes/uploadImage";
 import { GraphQLResolveInfo } from "graphql";
 import { createApollo4QueryValidationPlugin, constraintDirectiveTypeDefs } from "graphql-constraint-directive/apollo4"
@@ -64,13 +62,6 @@ const wsServer = new WebSocketServer({
 });
 
 const serverCleanup = useServer({ schema }, wsServer);
-
-// const server = new ApolloServer<MyContext>({
-//   typeDefs,
-//   resolvers,
-//   validationRules: [depthLimit(5)],
-//   plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
-// });
 
 //New instance ApolloServer with (HTTP + WS)
 const server = new ApolloServer<MyContext>({
