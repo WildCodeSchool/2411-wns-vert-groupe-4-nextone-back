@@ -81,7 +81,9 @@ docker-compose up
 
 # Sans Docker
 npm i
+
 npm start
+
 
 
 
