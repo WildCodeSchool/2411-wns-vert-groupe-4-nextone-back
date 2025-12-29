@@ -79,9 +79,10 @@ POSTGRES_DB=nextone
 # Avec Docker
 docker-compose up
 
-#Sans Docker
+# Sans Docker
 npm i
 npm start
+
 
 
 
