@@ -70,6 +70,7 @@ JWT_SECRET=your_jwt_secret_key
 POSTGRES_USER=your_postgres_user
 POSTGRES_PASSWORD=your_postgres_password
 POSTGRES_DB=nextone
+```
 
 ---
 
@@ -81,5 +82,6 @@ docker-compose up
 #Sans Docker
 npm i
 npm start
+
 
 
