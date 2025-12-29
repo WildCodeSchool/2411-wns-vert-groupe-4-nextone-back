@@ -77,12 +77,13 @@ POSTGRES_DB=nextone
 ## 🎉 Lancement du projet
 
 # Avec Docker
-docker-compose up
+docker-compose up (lancement du back et front en même temps)
 
 # Sans Docker
 npm i
 
 npm start
+
 
 
 
