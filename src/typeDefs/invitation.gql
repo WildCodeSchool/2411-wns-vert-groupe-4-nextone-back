@@ -11,7 +11,7 @@ type Invitation {
   createdAt: DateTime!
   updatedAt: DateTime!
 }
-type SortedInvitations{
+type SortedInvitations {
   pending: [Invitation!]!
   expired: [Invitation!]!
 }
@@ -20,6 +20,7 @@ type Query {
   invitation(id: UUID!): Invitation
   invitations: [Invitation!]!
   sortedInvitations: SortedInvitations!
+  invitationByToken(token: String!): Invitation
 }
 
 type Mutation {
