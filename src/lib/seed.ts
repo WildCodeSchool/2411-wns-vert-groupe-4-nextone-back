@@ -71,7 +71,7 @@ const createCompanyAndSuperAdmin = async (): Promise<CompanyEntity[]> => {
   appleAdmin.companyId = created.id;
   appleAdmin.email = "contact@apple.com";
   appleAdmin.role = ManagerRole.SuperAdmin;
-  appleAdmin.password = "nextone";
+  appleAdmin.password = "Nextone@2625!";
   appleAdmin.isGloballyActive = true;
 
   const managerService = new ManagerService();
@@ -84,7 +84,7 @@ const createCompanyAndSuperAdmin = async (): Promise<CompanyEntity[]> => {
   googleAdmin.companyId = created2.id;
   googleAdmin.email = "support@google.com";
   googleAdmin.role = ManagerRole.SuperAdmin;
-  googleAdmin.password = "nextone";
+  googleAdmin.password = "Nextone@2625!";
   googleAdmin.isGloballyActive = true;
 
   await managerService.create(googleAdmin);
