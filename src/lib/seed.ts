@@ -66,24 +66,26 @@ const createCompanyAndSuperAdmin = async (): Promise<CompanyEntity[]> => {
   );
 
   const appleAdmin = new ManagerEntity();
-  appleAdmin.firstName = "contact";
-  appleAdmin.lastName = "apple";
+  appleAdmin.firstName = "Corentin";
+  appleAdmin.lastName = "TOURNIER";
   appleAdmin.companyId = created.id;
   appleAdmin.email = "contact@apple.com";
   appleAdmin.role = ManagerRole.SuperAdmin;
-  appleAdmin.password = "nextone";
+  appleAdmin.password = "Nextone@2625!";
+  appleAdmin.isGloballyActive = true;
 
   const managerService = new ManagerService();
 
   await managerService.create(appleAdmin);
 
   const googleAdmin = new ManagerEntity();
-  googleAdmin.firstName = "support";
-  googleAdmin.lastName = "google";
+  googleAdmin.firstName = "Corentin";
+  googleAdmin.lastName = "TOURNIER";
   googleAdmin.companyId = created2.id;
   googleAdmin.email = "support@google.com";
   googleAdmin.role = ManagerRole.SuperAdmin;
-  googleAdmin.password = "nextone";
+  googleAdmin.password = "Nextone@2625!";
+  googleAdmin.isGloballyActive = true;
 
   await managerService.create(googleAdmin);
 
@@ -121,15 +123,7 @@ const createServices = async (
   companies: CompanyEntity[]
 ): Promise<ServiceEntity[]> => {
   console.log("🐤 --> CREATION DES SERVICES...");
-  const serviceNames: string[] = [
-    "Accueil",
-    "SAV",
-    "Buvette",
-    "Comptoir",
-    "Réparation",
-    "Pièces détachées",
-    "Atelier",
-  ];
+  const serviceNames: string[] = ["Accueil", "SAV", "Commercial"];
   const res = await Promise.all(
     companies.map(async (company) => {
       const admin = await new ManagerService().db.findOne({
@@ -145,7 +139,7 @@ const createServices = async (
         serviceNames.map(async (name) => {
           const data: CreateServiceInput = {
             companyId: company.id,
-            name: `${company.name.split(" ")[0].toUpperCase()}_${name}`,
+            name: `${name}`,
           };
           const created = await serviceService.createService(data);
           const authorization =
@@ -182,7 +176,7 @@ const createManagers = async (
       email: faker.internet.email(),
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
-      password: "salami",
+      password: "operator",
       role: Math.random() > 0.7 ? ManagerRole.Admin : ManagerRole.Operator,
       companyId: companies[Math.random() > 0.5 ? 0 : 1].id,
       isGloballyActive: Math.random() > 0.72 ? false : true,
@@ -209,8 +203,15 @@ const assignManagersToService = async (
 ) => {
   console.log("🤝 --> ASSIGNATION DES MANAGERS DANS LES SERVICES...");
 
+  // Filtrer les managers actifs
+  const activeManagers = managers.filter((manager) => manager.isGloballyActive);
+
   services.map(async (service) => {
-    managers.map(async (manager) => {
+    const managersOfSameCompany = activeManagers.filter(
+      (manager) => manager.companyId === service.companyId
+    );
+
+    managersOfSameCompany.map(async (manager) => {
       const random = Math.random();
       const superAdmin = await new ManagerService().db.findOne({
         where: {
@@ -221,7 +222,7 @@ const assignManagersToService = async (
       if (!superAdmin) {
         throw new Error("Can't find Super Admin.");
       }
-      if (random > 0.5 && manager.isGloballyActive) {
+      if (random > 0.5) {
         await new AuthorizationService().addAuthorization(
           {
             managerId: manager.id,

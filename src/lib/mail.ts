@@ -17,48 +17,53 @@ const mailPatterns = {
     intro:
       " Une demande de réinitialisation de mot de passe a été effectué avec cette adresse email.",
     endURL: "resetpassword",
-    buttonText: "Renouveller mon mot de passe"
+    buttonText: "Renouveller mon mot de passe",
   },
   CREATE_INVITATION: {
     subject: "Création de compte",
-    intro: "Vous avez reçu une invitation vous permettant de créer un compte NextONE. Celle ci est valable 24h.",
+    intro:
+      "Vous avez reçu une invitation vous permettant de créer un compte NextONE. Celle ci est valable 24h.",
     endURL: "create",
-    buttonText: "Créer mon compte"
+    buttonText: "Créer mon compte",
   },
   RENEW_INVITATION: {
     subject: "Renouvellement de l'invitation",
     intro: "Votre invitation a été renouvellée pour une durée de 24h.",
     endURL: "create",
-    buttonText: "Créer mon compte"
-  }
+    buttonText: "Créer mon compte",
+  },
 };
 
-export type TMail = keyof typeof mailPatterns
+export type TMail = keyof typeof mailPatterns;
 
 export const sendMail = async (
   email: string,
   token: string,
   type: TMail
 ): Promise<boolean> => {
+  // const uri =
+  //   process.env.NODE_ENV !== "dev"
+  //     ? "https://david4.wns.wilders.dev"
+  //     : "https://localhost:3000";
+
+  const uri = "http://localhost:4000";
+
   try {
+    console.log("Sending mail to :", email, " of type ", type);
+    console.log("Link :", `${uri}/join/${token}`);
     const ACCESS_TOKEN = await oauth2Client.getAccessToken();
     const transport = nodeMailer.createTransport({
       host: "smtp.gmail.com",
       port: 465,
       secure: true,
-  
+
       auth: {
         type: "OAuth2",
         user: process.env.EMAIL_ADDRESS!,
         accessToken: ACCESS_TOKEN.token!,
       },
     });
-  
-    const uri =
-      process.env.NODE_ENV !== "dev"
-        ? "https://david4.wns.wilders.dev"
-        : "https://localhost:3000";
-  
+
     const mailOptions = {
       from: "next.one.gr'@gmail.com",
       to: email,

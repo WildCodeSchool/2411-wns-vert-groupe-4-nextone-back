@@ -1,8 +1,6 @@
 import InvitationEntity from "@/entities/Invitation.entity";
 import BaseService from "./base.service";
-import {
-  createTokenAndExpiration,
-} from "@/utils/tokens.utils";
+import { createTokenAndExpiration } from "@/utils/tokens.utils";
 import { GraphQLError } from "graphql";
 import { CreateInvitationInput, ManagerRole } from "@/generated/graphql";
 import { sendMail } from "@/lib/mail";
@@ -51,10 +49,19 @@ export default class InvitationService extends BaseService<InvitationEntity> {
 
   public async createInvitation(
     args: CreateInvitationInput,
-    companyId: string,
+    companyId: string
   ) {
-    const created = await super.createOne({...args, companyId})
-    await sendMail(created.email, created.token, "CREATE_INVITATION")
-    return created
+    const created = await super.createOne({ ...args, companyId });
+    await sendMail(created.email, created.token, "CREATE_INVITATION");
+    return created;
+  }
+
+  public async findByToken(token: string): Promise<InvitationEntity | null> {
+    const invit = await this.repo.findOne({
+      where: {
+        token,
+      },
+    });
+    return invit;
   }
 }

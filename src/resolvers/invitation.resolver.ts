@@ -52,6 +52,10 @@ const invitationResolver = {
 
       return sorted;
     },
+    invitationByToken: async (_: any, { token }: { token: string }) => {
+      const invit = await InvitationService.getInstance().findByToken(token);
+      return invit;
+    },
   },
   Mutation: {
     createInvitation: async (
@@ -73,7 +77,7 @@ const invitationResolver = {
 
       const created = await InvitationService.getInstance().createInvitation(
         args,
-        companyId,
+        companyId
       );
       return created;
     },
@@ -138,7 +142,11 @@ const isInvitationFromCompany =
   };
 
 const composition = {
-  "*.*": [isAuthenticated()],
+  // Auth sur toutes les queries SAUF invitationByToken
+  "Query.!invitationByToken": [isAuthenticated()],
+
+  // (optionnel) pas nécessaire, mais ok si tu veux être explicite
+  "Query.invitationByToken": [],
 
   "Mutation.{deleteInvitation, renewInvitation}": [isInvitationFromCompany()],
 };
